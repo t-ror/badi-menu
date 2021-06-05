@@ -1,7 +1,9 @@
 {% extends 'layout.html.twig' %}
 
 {% block body %}
+    <h1>Registrace</h1>
     {{ form_start(registerForm) }}
     {{ form_widget(registerForm) }}
     {{ form_end(registerForm) }}
+    <div><a href="{{ path('login')}}">Zpět na přihlášení</a></div>
 {% endblock %}
