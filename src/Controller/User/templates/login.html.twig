@@ -1,9 +1,12 @@
 {% extends 'layout.html.twig' %}
 
 {% block body %}
-    <h1>Přihlášení</h1>
-    {{ form_start(loginForm) }}
-    {{ form_widget(loginForm) }}
-    {{ form_end(loginForm) }}
-    <div><a href="{{ path('register')}}">Zaregistrovat</a></div>
+    <div class="container-lg app-container">
+        <h1>Přihlášení</h1>
+        <hr>
+        {{ form_start(loginForm) }}
+        {{ form_widget(loginForm) }}
+        {{ form_end(loginForm) }}
+        <div><a href="{{ path('register')}}">Zaregistrovat</a></div>
+    </div>
 {% endblock %}

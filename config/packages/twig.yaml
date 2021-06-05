@@ -1,5 +1,7 @@
 twig:
     default_path: '%kernel.project_dir%/src/Controller/'
+    form_themes: ['bootstrap_5_layout.html.twig']
     globals:
         bootstrap_css: '/assets/css/bootstrap.css'
         bootstrap_js: '/assets/js/bootstrap.bundle.js'
+        base_css: '/assets/css/custom/app_base.css'

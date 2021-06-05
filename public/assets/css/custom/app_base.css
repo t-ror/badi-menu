@@ -1,0 +1,17 @@
+body {
+    background: #e8e8e8;
+}
+.app-container {
+    max-width: 25em;
+    background-color: #FFFFFF;
+    margin: 2em auto auto;
+    padding: 1.5em;
+    box-shadow: 0 0 1em #767676;
+    border-radius: 1em;
+}
+.app-flash-box-m {
+    max-width: 25em;
+    margin: 1em auto auto;
+    box-shadow: 0 0 1em #767676;
+    border-radius: 0.2em;
+}
