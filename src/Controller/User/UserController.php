@@ -10,7 +10,6 @@ use App\Type\User\RegisterType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Security\Core\Security;
 
 class UserController extends BaseController
 {
@@ -33,6 +32,12 @@ class UserController extends BaseController
 			$user = $this->userManager->authenticateAndGetUser($values['login'], $values['password']);
 			if ($user === null) {
 				$this->addFlash('warning','Nesprávné uživatelské jméno nebo heslo');
+
+				return $this->redirectToRoute('login');
+			}
+
+			if (!$user->isVerified()) {
+				$this->addFlash('warning','Zadaný uživatelský účet ještě nebyl aktivován');
 
 				return $this->redirectToRoute('login');
 			}
