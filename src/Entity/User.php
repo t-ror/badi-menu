@@ -1,13 +1,20 @@
-<?php declare(strict_types=1);
+<?php declare(strict_types = 1);
 
 namespace App\Entity;
 
 use App\Entity\Traits\TId;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\UniqueConstraint;
 
 /**
- * @ORM\Entity
- * @ORM\Table(name="app_user")
+ * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
+ * @ORM\Table(
+ *     name="app_user",
+ *     uniqueConstraints={
+ *          @UniqueConstraint(columns={"name"}),
+ *          @UniqueConstraint(columns={"email"})
+ *     }
+ * )
  */
 class User
 {
@@ -15,7 +22,7 @@ class User
 	use TId;
 
 	/**
-	 * @ORM\Column(type="string", nullable=false)
+	 * @ORM\Column(length=32, type="string", nullable=false)
 	 */
 	private string $name;
 
@@ -25,7 +32,7 @@ class User
 	private string $password;
 
 	/**
-	 * @ORM\Column(type="string", nullable=false)
+	 * @ORM\Column(length=64, type="string", nullable=false)
 	 */
 	private string $email;
 
@@ -33,6 +40,11 @@ class User
 	 * @ORM\Column(type="boolean", nullable=false)
 	 */
 	private bool $verified = false;
+
+	/**
+	 * @ORM\Column(type="string", nullable=true)
+	 */
+	private ?string $token = null;
 
 	public function __construct(string $name, string $password, string $email)
 	{
@@ -59,6 +71,16 @@ class User
 	public function isVerified(): bool
 	{
 		return $this->verified;
+	}
+
+	public function getToken(): ?string
+	{
+		return $this->token;
+	}
+
+	public function setToken(?string $token): void
+	{
+		$this->token = $token;
 	}
 
 }
