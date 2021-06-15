@@ -1,12 +1,26 @@
 {% extends 'layout.html.twig' %}
 
 {% block body %}
-    <div class="container-lg app-container">
+    <div class="container-lg app-container-round">
         <h1>Registrace</h1>
         <hr>
         {{ form_start(registerForm) }}
-        {{ form_widget(registerForm) }}
+        <div class="mb-3">
+            {{ form_label(registerForm.username) }}
+            {{ form_widget(registerForm.username) }}
+        </div>
+        <div class="mb-3">
+            {{ form_label(registerForm.email) }}
+            {{ form_widget(registerForm.email) }}
+        </div>
+        <div class="mb-3">
+            {{ form_label(registerForm.password) }}
+            {{ form_widget(registerForm.password) }}
+        </div>
+        <div class="d-grid gap-2">
+            {{ form_widget(registerForm.submit) }}
+            <a href="{{ path('login')}}" class="btn btn-sm btn-outline-primary">Zpět na přihlášení</a>
+        </div>
         {{ form_end(registerForm) }}
-        <div><a href="{{ path('login')}}">Zpět na přihlášení</a></div>
     </div>
 {% endblock %}
