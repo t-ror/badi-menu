@@ -1,4 +1,3 @@
-{# @var loggedUser App\Entity\User #}
 <nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-primary">
     <div class="container-fluid">
         <a class="navbar-brand" href="{{ path('homepage') }}">BadiMenu</a>
@@ -14,7 +13,7 @@
             </div>
             <hr style="color: #FFFFFF;height: 0.1em;opacity: 0.5;">
             <div class="navbar-nav ms-auto">
-                <a class="btn btn-light" href="#">{{ loggedUser.name }}</a>
+                <a class="btn btn-light" href="#"><i class="bi-person-circle"></i> {{ loggedUser.name }}</a>
                 <a class="btn btn-outline-light" href="{{ path('logout')}}">Odhlásit se</a>
             </div>
         </div>
