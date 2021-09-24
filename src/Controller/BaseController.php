@@ -17,13 +17,25 @@ abstract class BaseController extends AbstractController
 		$this->userManager = $userManager;
 	}
 
+	protected function render(string $view, array $parameters = [], Response $response = null): Response
+	{
+		$loggedUser = $this->userManager->getLoggedUser();
+		$parameters['loggedUser'] = $loggedUser;
+
+		return parent::render(
+			$view,
+			$parameters,
+			$response,
+		);
+	}
+
 	protected function renderByClass(string $view, array $parameters = [], Response $response = null): Response
 	{
 		$classNameParsed = explode('\\', get_class($this));
 		$className = array_pop($classNameParsed);
 		$classNameWithoutController = str_replace('Controller', '', $className);
 
-		return parent::render(
+		return $this->render(
 			$classNameWithoutController . '/templates/' . $view,
 			$parameters,
 			$response,

@@ -18,11 +18,16 @@ body {
 .app-flash-box {
     z-index: 999;
     position:fixed;
-    margin: 1em auto auto;
+    margin: 4.6em auto auto;
     box-shadow: 0 0 1em #767676;
     border-radius: 0.2em;
     width: 90%;
     top: 3%;
     left: 50%;
     transform: translate(-50%, -50%);
+}
+.btn-light {
+    color: #0d6efd;
+    background-color: #f8f9fa;
+    border-color: #f8f9fa;
 }
