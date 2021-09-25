@@ -10,16 +10,16 @@ use Symfony\Component\HttpFoundation\Response;
 abstract class BaseController extends AbstractController
 {
 
-	protected UserManager $userManager;
+	public static function getSubscribedServices() {
+		$services = parent::getSubscribedServices();
+		$services[UserManager::class] = '?' . UserManager::class;
 
-	public function __construct(UserManager $userManager)
-	{
-		$this->userManager = $userManager;
+		return $services;
 	}
 
 	protected function render(string $view, array $parameters = [], Response $response = null): Response
 	{
-		$loggedUser = $this->userManager->getLoggedUser();
+		$loggedUser = $this->getUserManager()->getLoggedUser();
 		$parameters['loggedUser'] = $loggedUser;
 
 		return parent::render(
@@ -44,7 +44,7 @@ abstract class BaseController extends AbstractController
 
 	protected function checkAccessLoggedIn(): void
 	{
-		$user = $this->userManager->getLoggedUser();
+		$user = $this->getUserManager()->getLoggedUser();
 		if ($user === null) {
 			throw new RedirectException($this->redirectToRoute('login'));
 		}
@@ -52,10 +52,15 @@ abstract class BaseController extends AbstractController
 
 	protected function checkAccessNotLoggedIn(): void
 	{
-		$user = $this->userManager->getLoggedUser();
+		$user = $this->getUserManager()->getLoggedUser();
 		if ($user !== null) {
 			throw new RedirectException($this->redirectToRoute('homepage'));
 		}
+	}
+
+	protected function getUserManager(): UserManager
+	{
+		return $this->container->get(UserManager::class);
 	}
 
 }

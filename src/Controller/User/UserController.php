@@ -4,7 +4,6 @@ namespace App\Controller\User;
 
 use App\Controller\BaseController;
 use App\Entity\User;
-use App\Service\Security\UserManager;
 use App\Type\User\LoginType;
 use App\Type\User\RegisterType;
 use Doctrine\ORM\EntityManagerInterface;
@@ -16,9 +15,8 @@ class UserController extends BaseController
 
 	private EntityManagerInterface $entityManager;
 
-	public function __construct(UserManager $userManager, EntityManagerInterface $entityManager)
+	public function __construct(EntityManagerInterface $entityManager)
 	{
-		parent::__construct($userManager);
 		$this->entityManager = $entityManager;
 	}
 
@@ -29,7 +27,7 @@ class UserController extends BaseController
 		$loginForm->handleRequest($request);
 		if ($loginForm->isSubmitted() && $loginForm->isValid()) {
 			$values = $loginForm->getData();
-			$user = $this->userManager->authenticateAndGetUser($values['login'], $values['password']);
+			$user = $this->getUserManager()->authenticateAndGetUser($values['login'], $values['password']);
 			if ($user === null) {
 				$this->addFlash('warning','Nesprávné uživatelské jméno nebo heslo');
 
@@ -43,7 +41,7 @@ class UserController extends BaseController
 			}
 
 			$response = $this->redirectToRoute('homepage');
-			$this->userManager->loginUser($user, $values['remember'], $response);
+			$this->getUserManager()->loginUser($user, $values['remember'], $response);
 			$this->addFlash('success','Přihlášeno!');
 
 			return $response;
@@ -58,7 +56,7 @@ class UserController extends BaseController
 		$this->checkAccessLoggedIn();
 
 		$response = $this->redirectToRoute('login');
-		$this->userManager->logoutUser($response);
+		$this->getUserManager()->logoutUser($response);
 
 		return $response;
 	}
@@ -85,7 +83,7 @@ class UserController extends BaseController
 				return $this->redirectToRoute('register');
 			}
 
-			$this->userManager->createUser($values['username'], $values['email'], $values['password']);
+			$this->getUserManager()->createUser($values['username'], $values['email'], $values['password']);
 			$this->addFlash('success','Uživatelský účet úspěšně vytvořen. Počkejte na aktivování administrátorem.');
 
 			return $this->redirectToRoute('login');
