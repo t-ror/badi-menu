@@ -3,16 +3,16 @@
 namespace App\Entity;
 
 use App\Entity\Traits\TId;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\ORM\Mapping\UniqueConstraint;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
  * @ORM\Table(
  *     name="app_user",
  *     uniqueConstraints={
- *          @UniqueConstraint(columns={"name"}),
- *          @UniqueConstraint(columns={"email"})
+ *          @ORM\UniqueConstraint(columns={"name"}),
+ *          @ORM\UniqueConstraint(columns={"email"})
  *     }
  * )
  */
@@ -37,7 +37,7 @@ class User
 	private string $email;
 
 	/**
-	 * @ORM\Column(type="boolean", nullable=false)
+	 * @ORM\Column(type="boolean", options={"default":0}, nullable=false)
 	 */
 	private bool $verified = false;
 
@@ -45,6 +45,12 @@ class User
 	 * @ORM\Column(type="string", nullable=true)
 	 */
 	private ?string $token = null;
+
+	/**
+	 * @var Collection<UserHousehold>
+	 * @ORM\OneToMany(targetEntity="UserHousehold", mappedBy="user")
+	 */
+	private Collection $userHouseholds;
 
 	public function __construct(string $name, string $password, string $email)
 	{
@@ -81,6 +87,23 @@ class User
 	public function setToken(?string $token): void
 	{
 		$this->token = $token;
+	}
+
+	public function addUserHousehold(UserHousehold $userHousehold): void
+	{
+		if ($this->userHouseholds->contains($userHousehold)) {
+			return;
+		}
+
+		$this->userHouseholds->add($userHousehold);
+	}
+
+	/**
+	 * @return Collection<UserHousehold>
+	 */
+	public function getUserHouseholds(): Collection
+	{
+		return $this->userHouseholds;
 	}
 
 }
