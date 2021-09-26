@@ -2,6 +2,9 @@
 
 namespace App\Entity;
 
+/**
+ * @method getId()
+ */
 abstract class Entity
 {
 

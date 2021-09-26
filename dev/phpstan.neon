@@ -19,3 +19,6 @@ parameters:
 
     # Temp directory
     tmpDir: temp/phpstan
+
+    ignoreErrors:
+        - '#^Property (.)+ \((.)+\) does not accept Doctrine\\ORM\\EntityRepository<(.)+>\.$#'

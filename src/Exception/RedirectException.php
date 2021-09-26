@@ -12,8 +12,8 @@ class RedirectException extends Exception
 
 	public function __construct(
 		RedirectResponse $redirectResponse,
-		?string $message = '',
-		?int $code = 0,
+		string $message = '',
+		int $code = 0,
 		?Exception $previousException = null
 	) {
 		$this->redirectResponse = $redirectResponse;

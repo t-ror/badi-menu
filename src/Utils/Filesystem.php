@@ -12,7 +12,7 @@ class Filesystem
 	{
 		$fileSystem = new SymfonyFilesystem();
 
-		$fileSystem->remove($file);
+		$fileSystem->remove($file->getFilename());
 	}
 
 	public static function removeFiles(iterable $files): void

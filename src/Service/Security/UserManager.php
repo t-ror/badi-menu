@@ -88,17 +88,25 @@ class UserManager
 
 	public function getLoggedUserOrNull(): ?User
 	{
-		$name = $this->request->cookies->get(self::GLOBAL_USER) ?: $this->session->get(self::GLOBAL_USER);
-		$token = $this->request->cookies->get(self::GLOBAL_AUTH_TOKEN) ?: $this->session->get(self::GLOBAL_AUTH_TOKEN);
+		$name = $this->request->cookies->get(self::GLOBAL_USER) !== null
+			? $this->request->cookies->get(self::GLOBAL_USER)
+			: $this->session->get(self::GLOBAL_USER);
+
+		$token = $this->request->cookies->get(self::GLOBAL_AUTH_TOKEN) !== null
+			? $this->request->cookies->get(self::GLOBAL_AUTH_TOKEN)
+			: $this->session->get(self::GLOBAL_AUTH_TOKEN);
 
 		if ($name === null || $token === null) {
 			return null;
 		}
 
-		return $this->userRepository->findOneBy([
+		/** @var User|null $user */
+		$user = $this->userRepository->findOneBy([
 			'name' => $name,
 			'token' => $token,
 		]);
+
+		return $user;
 	}
 
 	public function getLoggedUser(): User

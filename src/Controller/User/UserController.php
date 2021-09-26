@@ -4,6 +4,7 @@ namespace App\Controller\User;
 
 use App\Controller\BaseController;
 use App\Entity\User;
+use App\Repository\UserRepository;
 use App\Type\User\LoginType;
 use App\Type\User\RegisterType;
 use Doctrine\ORM\EntityManagerInterface;
@@ -13,11 +14,11 @@ use Symfony\Component\HttpFoundation\Response;
 class UserController extends BaseController
 {
 
-	private EntityManagerInterface $entityManager;
+	private UserRepository $userRepository;
 
 	public function __construct(EntityManagerInterface $entityManager)
 	{
-		$this->entityManager = $entityManager;
+		$this->userRepository = $entityManager->getRepository(User::class);
 	}
 
 	public function login(Request $request): Response {
@@ -67,16 +68,15 @@ class UserController extends BaseController
 		$registerForm = $this->createForm(RegisterType::class);
 		$registerForm->handleRequest($request);
 		if ($registerForm->isSubmitted() && $registerForm->isValid()) {
-			$userRepository = $this->entityManager->getRepository(User::class);
 			$values = $registerForm->getData();
-			$user = $userRepository->getByName($values['username']);
+			$user = $this->userRepository->getByName($values['username']);
 			if ($user !== null) {
 				$this->addFlash('warning','Uživatelské jméno už je zabrané');
 
 				return $this->redirectToRoute('register');
 			}
 
-			$user = $userRepository->getByEmail($values['email']);
+			$user = $this->userRepository->getByEmail($values['email']);
 			if ($user !== null) {
 				$this->addFlash('warning','Uživatel se zadaným emailem již existuje');
 

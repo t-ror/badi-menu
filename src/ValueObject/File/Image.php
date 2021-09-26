@@ -44,7 +44,7 @@ class Image
 	public function getDirectory(): string
 	{
 		$fullClassName = get_class($this->entity);
-		$className = Arrays::last(explode('\\', $fullClassName));
+		$className = (string) Arrays::last(explode('\\', $fullClassName));
 
 		return implode(DIRECTORY_SEPARATOR, [
 			self::IMAGE_DIR,
@@ -60,9 +60,9 @@ class Image
 
 	private function checkAllowedExtension(string $fileName): void
 	{
-		$extension = Strings::lower(Arrays::last(explode('.', $fileName)));
+		$extension = Strings::lower((string) Arrays::last(explode('.', $fileName)));
 
-		if (!in_array($extension, $this->allowedExtensions)) {
+		if (!in_array($extension, $this->allowedExtensions, true)) {
 			throw new InvalidArgumentException(sprintf('Invalid file extension "%s"', $extension));
 		}
 	}
