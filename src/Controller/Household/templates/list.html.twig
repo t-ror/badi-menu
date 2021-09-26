@@ -1,0 +1,9 @@
+{# @controller Household:list #}
+{% extends 'layout.html.twig' %}
+
+{% block body %}
+    <div class="container app-container-main">
+        <h1>Domácnosti</h1>
+        {{ userHouseholdList|raw }}
+    </div>
+{% endblock %}

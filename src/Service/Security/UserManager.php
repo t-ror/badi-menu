@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Security\Core\Encoder\EncoderFactoryInterface;
 use Symfony\Component\Security\Core\Encoder\PasswordEncoderInterface;
+use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
 
 class UserManager
 {
@@ -85,7 +86,7 @@ class UserManager
 		$this->session->save();
 	}
 
-	public function getLoggedUser(): ?User
+	public function getLoggedUserOrNull(): ?User
 	{
 		$name = $this->request->cookies->get(self::GLOBAL_USER) ?: $this->session->get(self::GLOBAL_USER);
 		$token = $this->request->cookies->get(self::GLOBAL_AUTH_TOKEN) ?: $this->session->get(self::GLOBAL_AUTH_TOKEN);
@@ -98,6 +99,16 @@ class UserManager
 			'name' => $name,
 			'token' => $token,
 		]);
+	}
+
+	public function getLoggedUser(): User
+	{
+		$user = $this->getLoggedUserOrNull();
+		if ($user === null) {
+			throw new UsernameNotFoundException();
+		}
+
+		return $user;
 	}
 
 	public function createUser(string $name, string $email, string $password): void

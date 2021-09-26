@@ -10,6 +10,7 @@ class HomePageController extends BaseController
 
 	public function default(): Response {
 		$this->checkAccessLoggedIn();
+		$this->checkHouseholdSelected();
 
 		return $this->renderByClass('default.html.twig');
 	}

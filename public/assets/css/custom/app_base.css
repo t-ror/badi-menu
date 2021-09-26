@@ -10,6 +10,11 @@ body {
     border-radius: 1em;
     z-index: -1;
 }
+.app-container-main {
+    background-color: #FFFFFF;
+    box-shadow: 0 0 1em #767676;
+    padding-bottom: 1em;
+}
 .app-flash-box-over {
     position:fixed;
     width: 100%;

@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Exception\RedirectException;
+use App\Service\Household\HouseholdManager;
 use App\Service\Security\UserManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -13,14 +14,18 @@ abstract class BaseController extends AbstractController
 	public static function getSubscribedServices() {
 		$services = parent::getSubscribedServices();
 		$services[UserManager::class] = '?' . UserManager::class;
+		$services[HouseholdManager::class] = '?' . HouseholdManager::class;
 
 		return $services;
 	}
 
 	protected function render(string $view, array $parameters = [], Response $response = null): Response
 	{
-		$loggedUser = $this->getUserManager()->getLoggedUser();
+		$loggedUser = $this->getUserManager()->getLoggedUserOrNull();
 		$parameters['loggedUser'] = $loggedUser;
+		$parameters['selectedHousehold'] = $loggedUser !== null
+			? $this->getHouseholdManager()->getSelectedHouseholdForUser($loggedUser)
+			: null;
 
 		return parent::render(
 			$view,
@@ -44,7 +49,7 @@ abstract class BaseController extends AbstractController
 
 	protected function checkAccessLoggedIn(): void
 	{
-		$user = $this->getUserManager()->getLoggedUser();
+		$user = $this->getUserManager()->getLoggedUserOrNull();
 		if ($user === null) {
 			throw new RedirectException($this->redirectToRoute('login'));
 		}
@@ -52,7 +57,7 @@ abstract class BaseController extends AbstractController
 
 	protected function checkAccessNotLoggedIn(): void
 	{
-		$user = $this->getUserManager()->getLoggedUser();
+		$user = $this->getUserManager()->getLoggedUserOrNull();
 		if ($user !== null) {
 			throw new RedirectException($this->redirectToRoute('homepage'));
 		}
@@ -61,6 +66,24 @@ abstract class BaseController extends AbstractController
 	protected function getUserManager(): UserManager
 	{
 		return $this->container->get(UserManager::class);
+	}
+
+	protected function checkHouseholdSelected(): void
+	{
+		$user = $this->getUserManager()->getLoggedUserOrNull();
+		if ($user === null) {
+			throw new RedirectException($this->redirectToRoute('login'));
+		}
+
+		$household = $this->getHouseholdManager()->getSelectedHouseholdForUser($user);
+		if ($household === null) {
+			throw new RedirectException($this->redirectToRoute('householdList'));
+		}
+	}
+
+	protected function getHouseholdManager(): HouseholdManager
+	{
+		return $this->container->get(HouseholdManager::class);
 	}
 
 }

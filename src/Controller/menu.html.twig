@@ -5,12 +5,14 @@
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-            <div class="navbar-nav">
-                <a class="nav-link active" href="{{ path('homepage') }}">Home</a>
-                <a class="nav-link disabled" href="#">Kalendář</a>
-                <a class="nav-link disabled" href="#">Jídelní lístek</a>
-                <a class="nav-link disabled" href="#">Jídla</a>
-            </div>
+            {% if loggedUser is not null and selectedHousehold is not null %}
+                <div class="navbar-nav">
+                    <a class="nav-link active" href="{{ path('homepage') }}">Home</a>
+                    <a class="nav-link disabled" href="#">Kalendář</a>
+                    <a class="nav-link disabled" href="#">Jídelní lístek</a>
+                    <a class="nav-link disabled" href="#">Jídla</a>
+                </div>
+            {% endif %}
             <hr style="color: #FFFFFF;height: 0.1em;opacity: 0.5;">
             <div class="navbar-nav ms-auto">
                 <a class="btn btn-light" href="#"><i class="bi-person-circle"></i> {{ loggedUser.name }}</a>
