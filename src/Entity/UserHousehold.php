@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity()
  * @ORM\Table(name="app_user_household")
  */
-class UserHousehold
+class UserHousehold extends Entity
 {
 
 	use TId;
@@ -27,24 +27,16 @@ class UserHousehold
 	 */
 	private Household $household;
 
-	/**
-	 * @ORM\Column(type="datetime_immutable", nullable=false)
-	 */
+	/** @ORM\Column(type="datetime_immutable", nullable=false) */
 	private DateTimeImmutable $dateJoined;
 
-	/**
-	 * @ORM\Column(type="boolean", options={"default":0}, nullable=false)
-	 */
+	/** @ORM\Column(type="boolean", options={"default":0}, nullable=false) */
 	private bool $allowed = false;
 
-	/**
-	 * @ORM\Column(type="boolean", options={"default":0}, nullable=false)
-	 */
+	/** @ORM\Column(type="boolean", options={"default":0}, nullable=false) */
 	private bool $allowedToCook = false;
 
-	/**
-	 * @ORM\Column(type="integer", options={"default":0}, nullable=false)
-	 */
+	/** @ORM\Column(type="integer", options={"default":0}, nullable=false) */
 	private int $ordering = 0;
 
 	public function __construct(User $user, Household $household)

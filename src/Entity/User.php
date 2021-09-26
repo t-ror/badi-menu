@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Entity\Traits\TId;
+use App\ValueObject\File\Image;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -16,35 +18,28 @@ use Doctrine\ORM\Mapping as ORM;
  *     }
  * )
  */
-class User
+class User extends Entity
 {
 
 	use TId;
 
-	/**
-	 * @ORM\Column(length=32, type="string", nullable=false)
-	 */
+	/** @ORM\Column(length=32, type="string", nullable=false) */
 	private string $name;
 
-	/**
-	 * @ORM\Column(type="string", nullable=false)
-	 */
+	/** @ORM\Column(type="string", nullable=false) */
 	private string $password;
 
-	/**
-	 * @ORM\Column(length=64, type="string", nullable=false)
-	 */
+	/** @ORM\Column(length=64, type="string", nullable=false) */
 	private string $email;
 
-	/**
-	 * @ORM\Column(type="boolean", options={"default":0}, nullable=false)
-	 */
+	/** @ORM\Column(type="boolean", options={"default":0}, nullable=false) */
 	private bool $verified = false;
 
-	/**
-	 * @ORM\Column(type="string", nullable=true)
-	 */
+	/** @ORM\Column(type="string", nullable=true) */
 	private ?string $token = null;
+
+	/** @ORM\Column(type="string", nullable=true) */
+	private ?string $image = null;
 
 	/**
 	 * @var Collection<UserHousehold>
@@ -104,6 +99,38 @@ class User
 	public function getUserHouseholds(): Collection
 	{
 		return $this->userHouseholds;
+	}
+
+	public function getImage(): ?Image
+	{
+		if ($this->image === null) {
+			return null;
+		}
+
+		return new Image($this, $this->image);
+	}
+
+	public function setImage(?Image $image): void
+	{
+		$this->image = $image !== null ? $image->getFileName() : null;
+	}
+
+	/**
+	 * @return Collection<UserHousehold>
+	 */
+	public function getUserHouseholdsOrdered(): Collection
+	{
+		$userHouseholdsArray = $this->userHouseholds->toArray();
+		usort($userHouseholdsArray, function (UserHousehold $userHouseholdA, UserHousehold $userHouseholdB): int {
+			$orderingA = $userHouseholdA->getOrdering();
+			$orderingB = $userHouseholdB->getOrdering();
+			if ($orderingA === $orderingB) {
+				return 0;
+			}
+			return ($orderingA < $orderingB) ? -1 : 1;
+		});
+
+		return new ArrayCollection($userHouseholdsArray);
 	}
 
 }

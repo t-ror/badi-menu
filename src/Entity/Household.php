@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Entity\Traits\TId;
+use App\ValueObject\File\Image;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -16,15 +17,16 @@ use Doctrine\ORM\Mapping as ORM;
  *     }
  * )
  */
-class Household
+class Household extends Entity
 {
 
 	use TId;
 
-	/**
-	 * @ORM\Column(length=32, type="string", nullable=false)
-	 */
+	/** @ORM\Column(length=32, type="string", nullable=false) */
 	private string $name;
+
+	/** @ORM\Column(type="string", nullable=true) */
+	private ?string $image = null;
 
 	/**
 	 * @var Collection<UserHousehold>
@@ -46,6 +48,20 @@ class Household
 	public function setName(string $name): void
 	{
 		$this->name = $name;
+	}
+
+	public function getImage(): ?Image
+	{
+		if ($this->image === null) {
+			return null;
+		}
+
+		return new Image($this, $this->image);
+	}
+
+	public function setImage(?Image $image): void
+	{
+		$this->image = $image !== null ? $image->getFileName() : null;
 	}
 
 	public function addUserHousehold(UserHousehold $userHousehold): void
