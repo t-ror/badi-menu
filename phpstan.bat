@@ -1,0 +1,1 @@
+vendor\bin\phpstan analyse -c dev\phpstan.neon --memory-limit=-1
