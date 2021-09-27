@@ -1,5 +1,25 @@
-<ul>
+<div class="container">
 {% for userHousehold in userHouseholds %}
-    <li>{{ userHousehold.household.name }}</li>
+    <a href="#" class="
+        app-household-row
+        {% if not userHousehold.allowed %} disabled {% elseif selectedHousehold is same as(userHousehold.household) %} selected {% endif %}
+    ">
+        <div class="row">
+            <div class="col-3" style="text-align: center">
+                <img
+                        src="{{ userHousehold.household.image|checkNoImg(userHousehold.household) }}"
+                        alt="{{ userHousehold.household.name }}"
+                        class="app-household-icon-sm"
+                >
+            </div>
+            <div class="col">
+                <h4>{{ userHousehold.household.name }}</h4>
+                {% if userHousehold.allowed and userHousehold.allowedToCook %}
+                    <div class="app-household-permission">
+                        {{ source('@public_path'~icon_chef) }}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </a>
 {% endfor %}
-</ul>
