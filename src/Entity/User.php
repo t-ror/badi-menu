@@ -107,7 +107,7 @@ class User extends Entity
 			return null;
 		}
 
-		return new Image($this, $this->image);
+		return new Image(self::class, $this->id, $this->image);
 	}
 
 	public function setImage(?Image $image): void
@@ -122,11 +122,21 @@ class User extends Entity
 	{
 		$userHouseholdsArray = $this->userHouseholds->toArray();
 		usort($userHouseholdsArray, function (UserHousehold $userHouseholdA, UserHousehold $userHouseholdB): int {
-			$orderingA = $userHouseholdA->getOrdering();
-			$orderingB = $userHouseholdB->getOrdering();
+			$orderingA = $userHouseholdA->getDateLastSelected();
+			$orderingB = $userHouseholdB->getDateLastSelected();
+
 			if ($orderingA === $orderingB) {
 				return 0;
 			}
+
+			if ($orderingA === null) {
+				return 1;
+			}
+
+			if ($orderingB === null) {
+				return -1;
+			}
+
 			return $orderingA < $orderingB ? -1 : 1;
 		});
 

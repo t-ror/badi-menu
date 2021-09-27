@@ -2,7 +2,6 @@
 
 namespace App\ValueObject\File;
 
-use App\Entity\Entity;
 use InvalidArgumentException;
 use Nette\Utils\Arrays;
 use Nette\Utils\Strings;
@@ -10,9 +9,10 @@ use Nette\Utils\Strings;
 class Image
 {
 
-	public const IMAGE_DIR = DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'img' . DIRECTORY_SEPARATOR . 'db';
+	public const IMAGE_DIR = 'assets/img/db';
 
-	private Entity $entity;
+	private string $className;
+	private int $id;
 	private string $fileName;
 
 	/** @var array<int, string> */
@@ -23,12 +23,13 @@ class Image
 		'svg',
 	];
 
-	public function __construct(Entity $entity, string $fileName)
+	public function __construct(string $className, int $id, string $fileName)
 	{
 		$this->checkAllowedExtension($fileName);
 
-		$this->entity = $entity;
 		$this->fileName = $fileName;
+		$this->className = $className;
+		$this->id = $id;
 	}
 
 	public function getFileName(): string
@@ -38,18 +39,17 @@ class Image
 
 	public function getFullFilename(): string
 	{
-		return $this->getDirectory() . DIRECTORY_SEPARATOR . $this->fileName;
+		return $this->getDirectory() . '/' . $this->fileName;
 	}
 
 	public function getDirectory(): string
 	{
-		$fullClassName = get_class($this->entity);
-		$className = (string) Arrays::last(explode('\\', $fullClassName));
+		$className = (string) Arrays::last(explode('\\', $this->className));
 
-		return implode(DIRECTORY_SEPARATOR, [
+		return implode('/', [
 			self::IMAGE_DIR,
 			Strings::webalize($className),
-			$this->entity->getId(),
+			$this->id,
 		]);
 	}
 

@@ -30,14 +30,14 @@ class UserHousehold extends Entity
 	/** @ORM\Column(type="datetime_immutable", nullable=false) */
 	private DateTimeImmutable $dateJoined;
 
+	/** @ORM\Column(type="datetime_immutable", nullable=true) */
+	private ?DateTimeImmutable $dateLastSelected = null;
+
 	/** @ORM\Column(type="boolean", options={"default":0}, nullable=false) */
 	private bool $allowed = false;
 
 	/** @ORM\Column(type="boolean", options={"default":0}, nullable=false) */
 	private bool $allowedToCook = false;
-
-	/** @ORM\Column(type="integer", options={"default":0}, nullable=false) */
-	private int $ordering = 0;
 
 	public function __construct(User $user, Household $household)
 	{
@@ -86,14 +86,14 @@ class UserHousehold extends Entity
 		$this->allowedToCook = $allowedToCook;
 	}
 
-	public function getOrdering(): int
+	public function getDateLastSelected(): ?DateTimeImmutable
 	{
-		return $this->ordering;
+		return $this->dateLastSelected;
 	}
 
-	public function setOrdering(int $ordering): void
+	public function setDateLastSelected(?DateTimeImmutable $dateLastSelected): void
 	{
-		$this->ordering = $ordering;
+		$this->dateLastSelected = $dateLastSelected;
 	}
 
 }

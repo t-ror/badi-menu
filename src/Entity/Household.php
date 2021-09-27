@@ -56,7 +56,7 @@ class Household extends Entity
 			return null;
 		}
 
-		return new Image($this, $this->image);
+		return new Image(self::class, $this->id, $this->image);
 	}
 
 	public function setImage(?Image $image): void

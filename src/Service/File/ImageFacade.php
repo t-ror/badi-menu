@@ -2,7 +2,6 @@
 
 namespace App\Service\File;
 
-use App\Entity\Entity;
 use App\Utils\Filesystem;
 use App\ValueObject\File\Image;
 use Symfony\Component\Finder\Finder;
@@ -11,9 +10,9 @@ use Symfony\Component\HttpFoundation\File\File;
 class ImageFacade
 {
 
-	public function saveAndOverwrite(File $file, Entity $entity, string $fileName): void
+	public function saveAndOverwrite(File $file, string $className, int $id, string $fileName): void
 	{
-		$image = new Image($entity, $fileName);
+		$image = new Image($className, $id, $fileName);
 		$this->removeFilesInDirectory($image->getDirectory());
 
 		$file->move($image->getDirectory(), $fileName);
