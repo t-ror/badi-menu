@@ -13,3 +13,6 @@ register:
 householdList:
     path: /domacnost
     controller: App\Controller\Household\HouseholdController::list
+householdSelect:
+    path: /domacnost/vyber/{id}
+    controller: App\Controller\Household\HouseholdController::select

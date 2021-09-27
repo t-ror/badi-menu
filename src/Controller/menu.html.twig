@@ -1,13 +1,19 @@
 <nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-primary">
     <div class="container-fluid">
-        <a class="navbar-brand" href="{{ path('homepage') }}">BadiMenu</a>
+        <a class="navbar-brand" href="{{ path('homepage') }}">
+            {% if loggedUser is not null and selectedHousehold is not null %}
+                <i class="bi-house-door"></i> {{ selectedHousehold.name }}
+            {% else %}
+                BadiMenu
+            {% endif %}
+        </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
             {% if loggedUser is not null and selectedHousehold is not null %}
                 <div class="navbar-nav">
-                    <a class="nav-link active" href="{{ path('homepage') }}">Home</a>
+                    <a class="nav-link active" href="{{ path('householdList')}}">Změnit domácnost</a>
                     <a class="nav-link disabled" href="#">Kalendář</a>
                     <a class="nav-link disabled" href="#">Jídelní lístek</a>
                     <a class="nav-link disabled" href="#">Jídla</a>

@@ -129,18 +129,17 @@ class User extends Entity
 				return 0;
 			}
 
-			if ($orderingA === null) {
-				return 1;
-			}
-
-			if ($orderingB === null) {
-				return -1;
-			}
-
-			return $orderingA < $orderingB ? -1 : 1;
+			return $orderingA > $orderingB ? -1 : 1;
 		});
 
 		return new ArrayCollection($userHouseholdsArray);
+	}
+
+	public function getUserHouseholdWithHouseholdId(int $householdId): ?UserHousehold
+	{
+		return $this->userHouseholds->filter(function (UserHousehold $userHousehold) use ($householdId): bool {
+			return $userHousehold->getHousehold()->getId() === $householdId;
+		})->first();
 	}
 
 }

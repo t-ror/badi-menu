@@ -44,7 +44,6 @@ class UserController extends BaseController
 
 			$response = $this->redirectToRoute('homepage');
 			$this->getUserManager()->loginUser($user, $values['remember'], $response);
-			$this->addFlash('success', 'Přihlášeno!');
 
 			return $response;
 		}

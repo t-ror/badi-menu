@@ -61,7 +61,7 @@ abstract class BaseController extends AbstractController
 	{
 		$user = $this->getUserManager()->getLoggedUserOrNull();
 		if ($user === null) {
-			throw new RedirectException($this->redirectToRoute('login'));
+			$this->redirectClean('login');
 		}
 	}
 
@@ -69,8 +69,16 @@ abstract class BaseController extends AbstractController
 	{
 		$user = $this->getUserManager()->getLoggedUserOrNull();
 		if ($user !== null) {
-			throw new RedirectException($this->redirectToRoute('homepage'));
+			$this->redirectClean('homepage');
 		}
+	}
+
+	/**
+	 * @param array<string, mixed> $parameters
+	 */
+	protected function redirectClean(string $route, array $parameters = []): void
+	{
+		throw new RedirectException($this->redirectToRoute($route, $parameters));
 	}
 
 	protected function getUserManager(): UserManager
@@ -82,12 +90,13 @@ abstract class BaseController extends AbstractController
 	{
 		$user = $this->getUserManager()->getLoggedUserOrNull();
 		if ($user === null) {
-			throw new RedirectException($this->redirectToRoute('login'));
+			$this->redirectClean('login');
+			return;
 		}
 
 		$household = $this->getHouseholdManager()->getSelectedHouseholdForUser($user);
 		if ($household === null) {
-			throw new RedirectException($this->redirectToRoute('householdList'));
+			$this->redirectClean('householdList');
 		}
 	}
 
