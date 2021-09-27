@@ -1,0 +1,1 @@
+vendor\bin\phpcs --cache=dev\temp\phpcs.cache --standard=dev\ruleset.xml --extensions=php --encoding=utf-8 --colors --tab-width=4 src -s
