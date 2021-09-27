@@ -127,7 +127,7 @@ class User extends Entity
 			if ($orderingA === $orderingB) {
 				return 0;
 			}
-			return ($orderingA < $orderingB) ? -1 : 1;
+			return $orderingA < $orderingB ? -1 : 1;
 		});
 
 		return new ArrayCollection($userHouseholdsArray);

@@ -1,8 +1,9 @@
-<?php declare(strict_types=1);
+<?php declare(strict_types = 1);
 
 namespace App\Utils;
 
 use Symfony\Component\Filesystem\Filesystem as SymfonyFilesystem;
+use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\File\File;
 
 class Filesystem
@@ -15,7 +16,7 @@ class Filesystem
 		$fileSystem->remove($file->getFilename());
 	}
 
-	public static function removeFiles(iterable $files): void
+	public static function removeFiles(Finder $files): void
 	{
 		$fileSystem = new SymfonyFilesystem();
 

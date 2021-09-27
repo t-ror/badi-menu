@@ -11,7 +11,11 @@ use Symfony\Component\HttpFoundation\Response;
 abstract class BaseController extends AbstractController
 {
 
-	public static function getSubscribedServices() {
+	/**
+	 * @return array<string, string>
+	 */
+	public static function getSubscribedServices(): array
+	{
 		$services = parent::getSubscribedServices();
 		$services[UserManager::class] = '?' . UserManager::class;
 		$services[HouseholdManager::class] = '?' . HouseholdManager::class;
@@ -19,7 +23,10 @@ abstract class BaseController extends AbstractController
 		return $services;
 	}
 
-	protected function render(string $view, array $parameters = [], Response $response = null): Response
+	/**
+	 * @param mixed[] $parameters
+	 */
+	protected function render(string $view, array $parameters = [], ?Response $response = null): Response
 	{
 		$loggedUser = $this->getUserManager()->getLoggedUserOrNull();
 		$parameters['loggedUser'] = $loggedUser;
@@ -34,7 +41,10 @@ abstract class BaseController extends AbstractController
 		);
 	}
 
-	protected function renderByClass(string $view, array $parameters = [], Response $response = null): Response
+	/**
+	 * @param array<string, mixed> $parameters
+	 */
+	protected function renderByClass(string $view, array $parameters = [], ?Response $response = null): Response
 	{
 		$classNameParsed = explode('\\', get_class($this));
 		$className = array_pop($classNameParsed);

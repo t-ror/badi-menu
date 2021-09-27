@@ -8,7 +8,8 @@ use Symfony\Component\HttpFoundation\Response;
 class HomePageController extends BaseController
 {
 
-	public function default(): Response {
+	public function default(): Response
+	{
 		$this->checkAccessLoggedIn();
 		$this->checkHouseholdSelected();
 

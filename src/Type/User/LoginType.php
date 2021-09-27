@@ -32,13 +32,13 @@ class LoginType extends AbstractType
 					'max' => UserManager::USERNAME_EMAIL_MAX_LENGTH,
 					'maxMessage' => 'Uživatelské jméno nebo email může obsahovat maximálně {{ limit }} znaků',
 				]),
-			]
+			],
 		])->add('password', PasswordType::class, [
 			'label' => 'Heslo',
 			'required' => true,
 		])->add('remember', CheckboxType::class, [
 			'label' => 'Zapamatovat',
-			'required' => false
+			'required' => false,
 		])->add('submit', SubmitType::class, [
 			'label' => 'Přihlásit se',
 		]);

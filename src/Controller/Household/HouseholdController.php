@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php declare(strict_types = 1);
 
 namespace App\Controller\Household;
 
@@ -25,4 +25,5 @@ class HouseholdController extends BaseController
 			'userHouseholdList' => $this->householdListFactory->create($user)->render(),
 		]);
 	}
+
 }

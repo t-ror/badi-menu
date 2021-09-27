@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php declare(strict_types = 1);
 
 namespace App\Entity;
 
@@ -80,6 +80,5 @@ class Household extends Entity
 	{
 		return $this->userHouseholds;
 	}
-
 
 }

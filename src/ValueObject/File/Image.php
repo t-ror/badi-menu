@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php declare(strict_types = 1);
 
 namespace App\ValueObject\File;
 
@@ -49,7 +49,7 @@ class Image
 		return implode(DIRECTORY_SEPARATOR, [
 			self::IMAGE_DIR,
 			Strings::webalize($className),
-			$this->entity->getId()
+			$this->entity->getId(),
 		]);
 	}
 

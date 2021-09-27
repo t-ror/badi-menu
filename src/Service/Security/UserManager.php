@@ -62,7 +62,7 @@ class UserManager
 
 	public function loginUser(User $user, bool $remember, Response $response): void
 	{
-		$token = bin2hex(random_bytes(16));;
+		$token = bin2hex(random_bytes(16));
 		$user->setToken($token);
 		if ($remember) {
 			$expire = time() + (86400 * 30);

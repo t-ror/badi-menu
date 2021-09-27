@@ -1,9 +1,10 @@
-<?php declare(strict_types=1);
+<?php declare(strict_types = 1);
 
 namespace App\Exception;
 
 use Exception;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Throwable;
 
 class RedirectException extends Exception
 {
@@ -14,8 +15,9 @@ class RedirectException extends Exception
 		RedirectResponse $redirectResponse,
 		string $message = '',
 		int $code = 0,
-		?Exception $previousException = null
-	) {
+		?Throwable $previousException = null
+	)
+	{
 		$this->redirectResponse = $redirectResponse;
 		parent::__construct($message, $code, $previousException);
 	}

@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php declare(strict_types = 1);
 
 namespace App\Type\User;
 
@@ -15,6 +15,9 @@ use Symfony\Component\Validator\Constraints\NotBlank;
 class RegisterType extends AbstractType
 {
 
+	/**
+	 * @param array<string, mixed> $options
+	 */
 	public function buildForm(FormBuilderInterface $builder, array $options): void
 	{
 		$builder->add('username', TextType::class, [
@@ -31,7 +34,7 @@ class RegisterType extends AbstractType
 					'minMessage' => 'Uživatelské jméno musí obsahovat minimálně {{ limit }} znaků',
 					'maxMessage' => 'Uživatelské jméno může obsahovat maximálně {{ limit }} znaků',
 				]),
-			]
+			],
 		])->add('email', TextType::class, [
 			'label' => 'Email',
 			'required' => true,
@@ -64,4 +67,5 @@ class RegisterType extends AbstractType
 			'label' => 'Zaregistrovat',
 		]);
 	}
+
 }

@@ -21,7 +21,8 @@ class UserController extends BaseController
 		$this->userRepository = $entityManager->getRepository(User::class);
 	}
 
-	public function login(Request $request): Response {
+	public function login(Request $request): Response
+	{
 		$this->checkAccessNotLoggedIn();
 
 		$loginForm = $this->createForm(LoginType::class);
@@ -30,20 +31,20 @@ class UserController extends BaseController
 			$values = $loginForm->getData();
 			$user = $this->getUserManager()->authenticateAndGetUser($values['login'], $values['password']);
 			if ($user === null) {
-				$this->addFlash('warning','Nesprávné uživatelské jméno nebo heslo');
+				$this->addFlash('warning', 'Nesprávné uživatelské jméno nebo heslo');
 
 				return $this->redirectToRoute('login');
 			}
 
 			if (!$user->isVerified()) {
-				$this->addFlash('warning','Zadaný uživatelský účet ještě nebyl aktivován');
+				$this->addFlash('warning', 'Zadaný uživatelský účet ještě nebyl aktivován');
 
 				return $this->redirectToRoute('login');
 			}
 
 			$response = $this->redirectToRoute('homepage');
 			$this->getUserManager()->loginUser($user, $values['remember'], $response);
-			$this->addFlash('success','Přihlášeno!');
+			$this->addFlash('success', 'Přihlášeno!');
 
 			return $response;
 		}
@@ -53,7 +54,8 @@ class UserController extends BaseController
 		]);
 	}
 
-	public function logout(): Response {
+	public function logout(): Response
+	{
 		$this->checkAccessLoggedIn();
 
 		$response = $this->redirectToRoute('login');
@@ -62,7 +64,8 @@ class UserController extends BaseController
 		return $response;
 	}
 
-	public function register(Request $request): Response {
+	public function register(Request $request): Response
+	{
 		$this->checkAccessNotLoggedIn();
 
 		$registerForm = $this->createForm(RegisterType::class);
@@ -71,20 +74,20 @@ class UserController extends BaseController
 			$values = $registerForm->getData();
 			$user = $this->userRepository->getByName($values['username']);
 			if ($user !== null) {
-				$this->addFlash('warning','Uživatelské jméno už je zabrané');
+				$this->addFlash('warning', 'Uživatelské jméno už je zabrané');
 
 				return $this->redirectToRoute('register');
 			}
 
 			$user = $this->userRepository->getByEmail($values['email']);
 			if ($user !== null) {
-				$this->addFlash('warning','Uživatel se zadaným emailem již existuje');
+				$this->addFlash('warning', 'Uživatel se zadaným emailem již existuje');
 
 				return $this->redirectToRoute('register');
 			}
 
 			$this->getUserManager()->createUser($values['username'], $values['email'], $values['password']);
-			$this->addFlash('success','Uživatelský účet úspěšně vytvořen. Počkejte na aktivování administrátorem.');
+			$this->addFlash('success', 'Uživatelský účet úspěšně vytvořen. Počkejte na aktivování administrátorem.');
 
 			return $this->redirectToRoute('login');
 		}
