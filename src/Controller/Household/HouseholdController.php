@@ -2,8 +2,11 @@
 
 namespace App\Controller\Household;
 
+use App\Component\Household\HouseholdList\HouseholdListFactory;
 use App\Component\Household\UserHouseholdList\UserHouseholdListFactory;
 use App\Controller\BaseController;
+use App\Entity\Household;
+use App\Repository\HouseholdRepository;
 use App\Service\Household\HouseholdManager;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
@@ -12,19 +15,24 @@ use Symfony\Component\HttpFoundation\Response;
 class HouseholdController extends BaseController
 {
 
-	private UserHouseholdListFactory $householdListFactory;
+	private UserHouseholdListFactory $userHouseholdListFactory;
 	private HouseholdManager $householdManager;
 	private EntityManagerInterface $entityManager;
+	private HouseholdListFactory $householdListFactory;
+	private HouseholdRepository $householdRepository;
 
 	public function __construct(
-		UserHouseholdListFactory $householdListFactory,
+		UserHouseholdListFactory $userHouseholdListFactory,
 		HouseholdManager $householdManager,
-		EntityManagerInterface $entityManager
+		EntityManagerInterface $entityManager,
+		HouseholdListFactory $householdListFactory
 	)
 	{
-		$this->householdListFactory = $householdListFactory;
+		$this->userHouseholdListFactory = $userHouseholdListFactory;
 		$this->householdManager = $householdManager;
 		$this->entityManager = $entityManager;
+		$this->householdListFactory = $householdListFactory;
+		$this->householdRepository = $entityManager->getRepository(Household::class);
 	}
 
 	public function list(): Response
@@ -33,7 +41,7 @@ class HouseholdController extends BaseController
 		$user = $this->getUserManager()->getLoggedUser();
 
 		return $this->renderByClass('list.html.twig', [
-			'userHouseholdList' => $this->householdListFactory->create($user)->render(),
+			'userHouseholdList' => $this->userHouseholdListFactory->create($user)->render(),
 		]);
 	}
 
@@ -58,6 +66,18 @@ class HouseholdController extends BaseController
 		$this->entityManager->flush();
 
 		return $this->redirectToRoute('homepage');
+	}
+
+	public function listAdd(): Response
+	{
+		$this->checkAccessLoggedIn();
+
+		$user = $this->getUserManager()->getLoggedUser();
+		$availableHouseholds = $this->householdRepository->findUnassignedForUser($user);
+
+		return $this->renderByClass('listAdd.html.twig', [
+			'householdList' => $this->householdListFactory->create($availableHouseholds)->render(),
+		]);
 	}
 
 }

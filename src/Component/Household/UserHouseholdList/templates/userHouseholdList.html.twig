@@ -1,23 +1,28 @@
 <div class="container">
     {% for userHousehold in userHouseholds %}
-        <a href="{{ path('householdSelect', {id: userHousehold.household.id})}}" class="app-household-row{% if not userHousehold.allowed %} disabled {% elseif selectedHousehold is same as(userHousehold.household) %} selected {% endif %}">
-            <div class="row">
-                <div class="col-3" style="text-align: center">
-                    <img
-                            src="{{ userHousehold.household.image|checkNoImg(userHousehold.household) }}"
-                            alt="{{ userHousehold.household.name }}"
-                            class="app-household-icon-sm"
-                    >
-                </div>
-                <div class="col">
-                    <h4>{{ userHousehold.household.name }}</h4>
-                    {% if userHousehold.allowed and userHousehold.allowedToCook %}
-                        <div class="app-household-permission">
-                            {{ source('@public_path'~icon_chef) }}
+            <div class="row app-household-row{% if not userHousehold.allowed %} disabled {% elseif selectedHousehold is same as(userHousehold.household) %} selected {% endif %}">
+                <a href="{{ path('householdSelect', {id: userHousehold.household.id})}}" class="col">
+                    <div class="row">
+                        <div class="col-3" style="text-align: center">
+                            <img
+                                    src="{{ userHousehold.household.image|checkNoImg(userHousehold.household) }}"
+                                    alt="{{ userHousehold.household.name }}"
+                                    class="app-household-icon-sm"
+                            >
                         </div>
-                    {% endif %}
-                </div>
+                        <div class="col">
+                            <h4>{{ userHousehold.household.name }}</h4>
+                            {% if userHousehold.allowed and userHousehold.allowedToCook %}
+                                <div class="app-household-permission">
+                                    {{ source('@public_path'~icon_chef) }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </a>
             </div>
-        </a>
     {% endfor %}
+    <div class="d-grid mt-2">
+        <a href="{{ path('householdListAdd') }}" class="btn btn-lg btn- btn-primary align-middle"><i class="bi-plus-lg"></i> Přidat</a>
+    </div>
 </div>

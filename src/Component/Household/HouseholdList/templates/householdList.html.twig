@@ -1,0 +1,26 @@
+<div class="container">
+    {% for household in households %}
+        <div class="row app-household-row">
+            <a href="#" class="col">
+                <div class="row">
+                    <div class="col-2 pt-2 link-info">
+                        <i class="bi-plus-lg" style="font-size: 2em;"></i>
+                    </div>
+                    <div class="col-3" style="text-align: center">
+                        <img
+                                src="{{ household.image|checkNoImg(household) }}"
+                                alt="{{ household.name }}"
+                                class="app-household-icon-sm"
+                        >
+                    </div>
+                    <div class="col">
+                        <h4>{{ household.name }}</h4>
+                    </div>
+                </div>
+            </a>
+        </div>
+    {% endfor %}
+    <div class="d-grid mt-2">
+        <a href="#" class="btn btn-lg btn- btn-primary align-middle"><i class="bi-plus-lg"></i> Vytvořit novou</a>
+    </div>
+</div>

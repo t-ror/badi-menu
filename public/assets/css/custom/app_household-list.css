@@ -1,7 +1,8 @@
 .app-household-row, .app-household-row:focus, .app-household-row:active {
-    display: block;
     border: 0.08em solid #dee1ea;
     padding: 1.2em 0.6em;
+}
+.app-household-row a {
     text-decoration: none;
     color: inherit;
 }

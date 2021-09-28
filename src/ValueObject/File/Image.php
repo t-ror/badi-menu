@@ -9,7 +9,7 @@ use Nette\Utils\Strings;
 class Image
 {
 
-	public const IMAGE_DIR = 'assets/img/db';
+	public const IMAGE_DIR = '/assets/img/db';
 
 	private string $className;
 	private int $id;

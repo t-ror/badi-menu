@@ -16,3 +16,6 @@ householdList:
 householdSelect:
     path: /domacnost/vyber/{id}
     controller: App\Controller\Household\HouseholdController::select
+householdListAdd:
+    path: /domacnost/pridat
+    controller: App\Controller\Household\HouseholdController::listAdd
