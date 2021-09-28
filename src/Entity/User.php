@@ -125,6 +125,14 @@ class User extends Entity
 			$orderingA = $userHouseholdA->getDateLastSelected();
 			$orderingB = $userHouseholdB->getDateLastSelected();
 
+			if ($orderingA === null && !$userHouseholdA->isAllowed()) {
+				return 1;
+			}
+
+			if ($orderingB === null && !$userHouseholdB->isAllowed()) {
+				return -1;
+			}
+
 			if ($orderingA === $orderingB) {
 				return 0;
 			}
@@ -137,9 +145,11 @@ class User extends Entity
 
 	public function getUserHouseholdWithHouseholdId(int $householdId): ?UserHousehold
 	{
-		return $this->userHouseholds->filter(function (UserHousehold $userHousehold) use ($householdId): bool {
+		$userHouseHold = $this->userHouseholds->filter(function (UserHousehold $userHousehold) use ($householdId): bool {
 			return $userHousehold->getHousehold()->getId() === $householdId;
 		})->first();
+
+		return $userHouseHold !== false ? $userHouseHold : null;
 	}
 
 }

@@ -44,6 +44,9 @@ class UserHousehold extends Entity
 		$this->user = $user;
 		$this->household = $household;
 		$this->dateJoined = new DateTimeImmutable();
+
+		$user->addUserHousehold($this);
+		$household->addUserHousehold($this);
 	}
 
 	public function getUser(): User

@@ -81,4 +81,9 @@ class Household extends Entity
 		return $this->userHouseholds;
 	}
 
+	public function hasAnyMember(): bool
+	{
+		return $this->userHouseholds->count() > 0;
+	}
+
 }

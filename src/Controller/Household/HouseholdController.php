@@ -80,4 +80,27 @@ class HouseholdController extends BaseController
 		]);
 	}
 
+	public function add(int $id): Response
+	{
+		$this->checkAccessLoggedIn();
+		$user = $this->getUserManager()->getLoggedUser();
+
+		$userHousehold = $user->getUserHouseholdWithHouseholdId($id);
+		if ($userHousehold !== null) {
+			return $this->redirectToRoute('householdList');
+		}
+
+		/** @var Household|null $houseHold */
+		$houseHold = $this->householdRepository->find($id);
+		if ($houseHold === null) {
+			return $this->redirectToRoute('householdListAdd');
+		}
+
+		$this->householdManager->addHouseholdToUser($houseHold, $user);
+
+		$this->entityManager->flush();
+
+		return $this->redirectToRoute('householdList');
+	}
+
 }

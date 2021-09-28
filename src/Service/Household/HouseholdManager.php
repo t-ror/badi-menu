@@ -4,6 +4,7 @@ namespace App\Service\Household;
 
 use App\Entity\Household;
 use App\Entity\User;
+use App\Entity\UserHousehold;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
@@ -57,6 +58,16 @@ class HouseholdManager
 		}
 
 		return $this->entityManager->find(Household::class, $householdId);
+	}
+
+	public function addHouseholdToUser(Household $household, User $user): void
+	{
+		$allowed = !$household->hasAnyMember();
+
+		$userHousehold = new UserHousehold($user, $household);
+		$userHousehold->setAllowed($allowed);
+
+		$this->entityManager->persist($userHousehold);
 	}
 
 }

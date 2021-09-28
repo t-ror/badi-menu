@@ -19,3 +19,6 @@ householdSelect:
 householdListAdd:
     path: /domacnost/pridat
     controller: App\Controller\Household\HouseholdController::listAdd
+householdAdd:
+    path: /domacnost/pridat/{id}
+    controller: App\Controller\Household\HouseholdController::add
