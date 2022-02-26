@@ -18,6 +18,8 @@
 ###< symfony/phpunit-bridge ###
 
 diff.sql
+/node_modules/
+/public/build/
 
 ###> squizlabs/php_codesniffer ###
 /.phpcs-cache

@@ -1,0 +1,30 @@
+{
+  "name": "badi-menu",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "encore": "encore"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/t-ror/badi-menu.git"
+  },
+  "author": "Michael Tichý",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/t-ror/badi-menu/issues"
+  },
+  "homepage": "https://github.com/t-ror/badi-menu#readme",
+  "devDependencies": {
+    "@symfony/webpack-encore": "^1.8.1",
+    "webpack-notifier": "^1.6.0"
+  },
+  "dependencies": {
+    "@symfony/stimulus-bridge": "github:symfony/stimulus-bridge"
+  }
+}
