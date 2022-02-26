@@ -8,15 +8,12 @@
            and uncomment the following Encore helpers to start using Symfony UX #}
         {% block stylesheets %}
             {{ encore_entry_link_tags('app') }}
-            <link rel="stylesheet" href="{{ bootstrap_css }}">
             <link rel="stylesheet" href="{{ boostrap_icons_css }}">
             <link rel="stylesheet" href="{{ font_awesome_css }}">
         {% endblock %}
 
         {% block javascripts %}
             {{ encore_entry_script_tags('app') }}
-            <script src="{{ jquery_js }}"></script>
-            <script src="{{ bootstrap_js }}"></script>
             <script src="{{ flashes_js }}"></script>
         {% endblock %}
     </head>
