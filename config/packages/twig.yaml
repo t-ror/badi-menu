@@ -5,6 +5,4 @@ twig:
         '%kernel.project_dir%/src/Component/' : ~
         '%kernel.project_dir%/public' : public_path
     globals:
-        font_awesome_css: '/assets/css/font-awesome/css/all.css'
-        flashes_js: '/assets/js/custom/app_flashes.js'
         icon_chef: '/assets/img/icons/chef.svg'
