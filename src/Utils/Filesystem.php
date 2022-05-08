@@ -30,4 +30,11 @@ class Filesystem
 		return $fileSystem->exists($fileOrDirectory);
 	}
 
+	public static function creatDirectory(string $directory): void
+	{
+		$fileSystem = new SymfonyFilesystem();
+
+		$fileSystem->mkdir($directory);
+	}
+
 }

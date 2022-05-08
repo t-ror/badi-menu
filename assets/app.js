@@ -16,8 +16,12 @@ import '@fortawesome/fontawesome-free/css/all.css';
 //custom JS
 import Flashes from './js/Flashes.js';
 import QuillEditor from './js/QuillEditor.js';
+import EmbedForm from './js/EmbedForm';
+import Select2 from './js/Select2';
 
 $(document).ready(function() {
     Flashes.init();
     QuillEditor.init();
+    EmbedForm.init();
+    Select2.init();
 });

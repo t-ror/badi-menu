@@ -10,22 +10,30 @@ use Symfony\Component\HttpFoundation\File\File;
 class ImageFacade
 {
 
-	public function saveAndOverwrite(File $file, string $className, int $id, string $fileName): void
+	private string $projectRootDir;
+
+	public function __construct(string $projectRootDir)
+	{
+		$this->projectRootDir = $projectRootDir;
+	}
+
+	public function saveAndOverwrite(File $file, string $className, int $id, string $fileName): Image
 	{
 		$image = new Image($className, $id, $fileName);
 		$this->removeFilesInDirectory($image->getDirectory());
+		$file->move($this->projectRootDir . '/' . $image->getDirectory(), $fileName);
 
-		$file->move($image->getDirectory(), $fileName);
+		return $image;
 	}
 
 	private function removeFilesInDirectory(string $directory): void
 	{
-		if (Filesystem::exists($directory)) {
+		if (!Filesystem::exists($this->projectRootDir . '/' . $directory)) {
 			return;
 		}
 
 		$fileFinder = new Finder();
-		$fileFinder->files()->in($directory);
+		$fileFinder->files()->in($this->projectRootDir . '/' . $directory);
 
 		Filesystem::removeFiles($fileFinder);
 	}

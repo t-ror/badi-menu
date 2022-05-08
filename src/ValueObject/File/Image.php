@@ -10,6 +10,8 @@ class Image
 {
 
 	public const IMAGE_DIR = '/assets/img/db';
+	public const MIME_TYPE_JPEG = 'image/jpeg';
+	public const MIME_TYPE_PNG = 'image/png';
 
 	private string $className;
 	private int $id;

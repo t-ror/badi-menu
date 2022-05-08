@@ -12,4 +12,9 @@ class Strings extends NetteStrings
 		return parent::length($string) === 0;
 	}
 
+	public static function filledOrNull(string $string): ?string
+	{
+		return self::isEmpty($string) ? null : $string;
+	}
+
 }

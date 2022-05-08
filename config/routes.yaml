@@ -22,3 +22,9 @@ householdListAdd:
 householdAdd:
     path: /domacnost/pridat/{id}
     controller: App\Controller\Household\HouseholdController::add
+mealList:
+    path: /jidla
+    controller: App\Controller\Meal\MealController::list
+mealCreate:
+    path: /jidlo/vytvorit
+    controller: App\Controller\Meal\MealController::create

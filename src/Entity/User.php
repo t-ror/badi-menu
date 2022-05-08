@@ -47,11 +47,20 @@ class User extends Entity
 	 */
 	private Collection $userHouseholds;
 
+	/**
+	 * @var Collection<UserMeal>
+	 * @ORM\OneToMany(targetEntity="UserMeal", mappedBy="user")
+	 */
+	private Collection $userMeals;
+
 	public function __construct(string $name, string $password, string $email)
 	{
 		$this->name = $name;
 		$this->password = $password;
 		$this->email = $email;
+
+		$this->userHouseholds = new ArrayCollection();
+		$this->userMeals = new ArrayCollection();
 	}
 
 	public function getName(): string
@@ -150,6 +159,29 @@ class User extends Entity
 		})->first();
 
 		return $userHouseHold !== false ? $userHouseHold : null;
+	}
+
+	public function addUserMeal(UserMeal $userMeal): void
+	{
+		if ($this->userMeals->contains($userMeal)) {
+			return;
+		}
+
+		$this->userMeals->add($userMeal);
+	}
+
+	public function getUserMeals(): Collection
+	{
+		return $this->userMeals;
+	}
+
+	public function getUserMealByMeal(Meal $meal): ?UserMeal
+	{
+		$userMeal = $this->userMeals->filter(function (UserMeal $userMeal) use ($meal): bool {
+			return $userMeal->getMeal()->getId() === $meal->getId();
+		})->first();
+
+		return $userMeal === false ? null : $userMeal;
 	}
 
 }

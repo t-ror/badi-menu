@@ -1,0 +1,11 @@
+{# @controller Meal:list #}
+{% extends 'layout.html.twig' %}
+
+{% block body %}
+    <div class="container app-container-main">
+        <h1>Jídla</h1>
+        <div class="d-grid mt-2">
+            <a href="{{ path('mealCreate') }}" class="btn btn-lg btn- btn-primary align-middle"><i class="bi-plus-lg"></i> Vytvořit</a>
+        </div>
+    </div>
+{% endblock %}
