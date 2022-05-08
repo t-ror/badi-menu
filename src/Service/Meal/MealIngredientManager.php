@@ -23,7 +23,10 @@ class MealIngredientManager
 			'name' => $ingredientName,
 		]);
 
-		if ($ingredient !== null && $meal->containsIngredient($ingredient)) {
+		if (
+            ($ingredient !== null && $meal->containsIngredient($ingredient))
+            || $meal->containsIngredientWithName($ingredientName)
+        ) {
 			return;
 		}
 

@@ -123,6 +123,13 @@ class Meal extends Entity
 		});
 	}
 
+    public function containsIngredientWithName(string $ingredientName): bool
+    {
+        return $this->mealIngredients->exists(function (int $key, MealIngredient $mealIngredient) use ($ingredientName): bool {
+            return $mealIngredient->getIngredient()->getName() === $ingredientName;
+        });
+    }
+
 	/**
 	 * @return Collection<MealTag>
 	 */
