@@ -1,6 +1,6 @@
 <div class="container">
     {% for household in households %}
-        <div class="row app-household-row">
+        <div class="row app-list-row">
             <a href="{{ path('householdAdd', {id: household.id}) }}" class="col">
                 <div class="row">
                     <div class="col-2 pt-2 link-info">
@@ -10,7 +10,7 @@
                         <img
                                 src="{{ household.image|checkNoImg(household) }}"
                                 alt="{{ household.name }}"
-                                class="app-household-icon-sm"
+                                class="app-list-icon-sm"
                         >
                     </div>
                     <div class="col">

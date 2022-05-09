@@ -1,19 +1,19 @@
 <div class="container">
     {% for userHousehold in userHouseholds %}
-            <div class="row app-household-row{% if not userHousehold.allowed %} disabled {% elseif selectedHousehold is same as(userHousehold.household) %} selected {% endif %}">
+            <div class="row app-list-row{% if not userHousehold.allowed %} disabled {% elseif selectedHousehold is same as(userHousehold.household) %} selected {% endif %}">
                 <a href="{{ path('householdSelect', {id: userHousehold.household.id})}}" class="col">
                     <div class="row">
                         <div class="col-3" style="text-align: center">
                             <img
                                     src="{{ userHousehold.household.image|checkNoImg(userHousehold.household) }}"
                                     alt="{{ userHousehold.household.name }}"
-                                    class="app-household-icon-sm"
+                                    class="app-list-icon-sm"
                             >
                         </div>
                         <div class="col">
                             <h4>{{ userHousehold.household.name }}</h4>
                             {% if userHousehold.allowed and userHousehold.allowedToCook %}
-                                <div class="app-household-permission">
+                                <div class="app-list-icon-xs">
                                     {{ source('@public_path'~icon_chef) }}
                                 </div>
                             {% endif %}
