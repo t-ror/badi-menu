@@ -1,9 +1,10 @@
 {# @controller Household:list #}
 {% extends 'layout.html.twig' %}
+{% block title %}BadiMenu | Domácnosti - vybrat{% endblock %}
 
 {% block body %}
-    <div class="container app-container-main">
-        <h1>Domácnosti</h1>
-        {{ userHouseholdList|raw }}
-    </div>
+	<div class="container app-container-main">
+		<h1>Domácnosti</h1>
+		{{ userHouseholdList|raw }}
+	</div>
 {% endblock %}

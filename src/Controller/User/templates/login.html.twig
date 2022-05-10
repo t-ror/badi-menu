@@ -1,25 +1,26 @@
 {% extends 'layout.html.twig' %}
+{% block title %}BadiMenu | Přihlášení{% endblock %}
 
 {% block body %}
-    <div class="app-container-round">
-        <h1>Přihlášení</h1>
-        <hr>
-        {{ form_start(loginForm) }}
-        <div class="mb-3">
-            {{ form_label(loginForm.login) }}
-            {{ form_widget(loginForm.login) }}
-        </div>
-        <div class="mb-3">
-            {{ form_label(loginForm.password) }}
-            {{ form_widget(loginForm.password) }}
-        </div>
-        <div class="mb-3">
-            {{ form_widget(loginForm.remember) }}
-        </div>
-        <div class="d-grid gap-2">
-            {{ form_widget(loginForm.submit) }}
-            <a href="{{ path('register')}}" class="btn btn-sm btn-outline-primary">Zaregistrovat</a>
-        </div>
-        {{ form_end(loginForm) }}
-    </div>
+	<div class="app-container-round">
+		<h1>Přihlášení</h1>
+		<hr>
+		{{ form_start(loginForm) }}
+		<div class="mb-3">
+			{{ form_label(loginForm.login) }}
+			{{ form_widget(loginForm.login) }}
+		</div>
+		<div class="mb-3">
+			{{ form_label(loginForm.password) }}
+			{{ form_widget(loginForm.password) }}
+		</div>
+		<div class="mb-3">
+			{{ form_widget(loginForm.remember) }}
+		</div>
+		<div class="d-grid gap-2">
+			{{ form_widget(loginForm.submit) }}
+			<a href="{{ path('register')}}" class="btn btn-sm btn-outline-primary">Zaregistrovat</a>
+		</div>
+		{{ form_end(loginForm) }}
+	</div>
 {% endblock %}

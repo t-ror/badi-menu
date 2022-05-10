@@ -1,29 +1,29 @@
 <nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-primary">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="{{ path('homepage') }}">
-            {% if loggedUser is not null and selectedHousehold is not null %}
-                <i class="bi-house-door"></i> {{ selectedHousehold.name }}
-            {% else %}
-                BadiMenu
-            {% endif %}
-        </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-            {% if loggedUser is not null and selectedHousehold is not null %}
-                <div class="navbar-nav">
-                    <a class="nav-link active" href="{{ path('householdList')}}"><i class="bi-house"></i> Změnit domácnost</a>
-                    <a class="nav-link disabled" href="#"><i class="bi-calendar-week"></i> Kalendář</a>
-                    <a class="nav-link disabled" href="#"><i class="bi-list-ol"></i> Jídelní lístek</a>
-                    <a class="nav-link" href="{{ path('mealList')}}"><i class="fa fa-pizza-slice"></i> Jídla</a>
-                </div>
-            {% endif %}
-            <hr style="color: #FFFFFF;height: 0.1em;opacity: 0.5;">
-            <div class="navbar-nav ms-auto">
-                <a class="btn btn-light" href="#"><i class="bi-person-circle"></i> {{ loggedUser.name }}</a>
-                <a class="btn btn-outline-light" href="{{ path('logout')}}"><i class="bi-power"></i> Odhlásit se</a>
-            </div>
-        </div>
-    </div>
+	<div class="container-fluid">
+		<a class="navbar-brand" href="{{ path('homepage') }}">
+			{% if loggedUser is not null and selectedHousehold is not null %}
+				<i class="bi-house-door"></i> {{ selectedHousehold.name }}
+			{% else %}
+				BadiMenu
+			{% endif %}
+		</a>
+		<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+		<div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+			{% if loggedUser is not null and selectedHousehold is not null %}
+				<div class="navbar-nav">
+					<a class="nav-link active" href="{{ path('householdList')}}"><i class="bi-house"></i> Změnit domácnost</a>
+					<a class="nav-link disabled" href="#"><i class="bi-calendar-week"></i> Kalendář</a>
+					<a class="nav-link disabled" href="#"><i class="bi-list-ol"></i> Jídelní lístek</a>
+					<a class="nav-link" href="{{ path('mealList')}}"><i class="fa fa-pizza-slice"></i> Jídla</a>
+				</div>
+			{% endif %}
+			<hr style="color: #FFFFFF;height: 0.1em;opacity: 0.5;">
+			<div class="navbar-nav ms-auto">
+				<a class="btn btn-light" href="#"><i class="bi-person-circle"></i> {{ loggedUser.name }}</a>
+				<a class="btn btn-outline-light" href="{{ path('logout')}}"><i class="bi-power"></i> Odhlásit se</a>
+			</div>
+		</div>
+	</div>
 </nav>
