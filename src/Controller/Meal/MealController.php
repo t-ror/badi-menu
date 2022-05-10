@@ -2,6 +2,7 @@
 
 namespace App\Controller\Meal;
 
+use App\Component\Meal\MealList\MealListFactory;
 use App\Controller\BaseController;
 use App\Entity\Meal;
 use App\Service\File\ImageFacade;
@@ -22,25 +23,44 @@ class MealController extends BaseController
 	private MealIngredientManager $mealIngredientManager;
 	private ImageFacade $imageFacade;
 	private UserMealManager $userMealManager;
+    private MealListFactory $mealListFactory;
 
-	public function __construct(
+    public function __construct(
 		EntityManagerInterface $entityManager,
 		MealIngredientManager $mealIngredientManager,
 		ImageFacade $imageFacade,
-		UserMealManager $userMealManager
+		UserMealManager $userMealManager,
+        MealListFactory $mealListFactory
 	)
 	{
 		$this->entityManager = $entityManager;
 		$this->mealIngredientManager = $mealIngredientManager;
 		$this->imageFacade = $imageFacade;
 		$this->userMealManager = $userMealManager;
-	}
+        $this->mealListFactory = $mealListFactory;
+    }
 
 	public function list(): Response
 	{
 		$this->checkAccessLoggedIn();
 
-		return $this->renderByClass('list.html.twig');
+		$meals = $this->entityManager->createQueryBuilder()
+            ->select('meal')
+            ->addSelect('createdByUser')
+            ->addSelect('mealIngredients')
+            ->addSelect('ingredient')
+            ->addSelect('mealTags')
+            ->from(Meal::class, 'meal')
+            ->leftJoin('meal.createdByUser', 'createdByUser')
+            ->leftJoin('meal.mealIngredients', 'mealIngredients')
+            ->leftJoin('mealIngredients.ingredient', 'ingredient')
+            ->leftJoin('meal.mealTags', 'mealTags')
+            ->getQuery()
+            ->getResult();
+
+		return $this->renderByClass('list.html.twig', [
+            'mealList' => $this->mealListFactory->create($meals)->render(),
+        ]);
 	}
 
 	public function create(Request $request): Response

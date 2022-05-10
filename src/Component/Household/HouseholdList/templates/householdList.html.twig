@@ -1,7 +1,7 @@
 <div class="container">
     {% for household in households %}
         <div class="row app-list-row">
-            <a href="{{ path('householdAdd', {id: household.id}) }}" class="col">
+            <a href="{{ path('householdAdd', {id: household.id}) }}" class="col app-list-row-header">
                 <div class="row">
                     <div class="col-2 pt-2 link-info">
                         <i class="bi-plus-lg" style="font-size: 2em;"></i>
