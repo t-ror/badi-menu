@@ -1,31 +1,31 @@
 <div class="container">
-    {% for meal in meals %}
-        <div class="row app-list-row app-list-row-sm">
-            <div class="app-list-row-header col" data-bs-toggle="collapse" data-bs-target="#mealDescription-{{ meal.id }}" aria-expanded="false" aria-controls="mealDescription-{{ meal.id }}">
-                <div class="row">
-                    <span class="col" style="max-width: 5.4em">
-                        <img
-                                src="{{ meal.image|checkNoImg(meal) }}"
-                                alt="{{ meal.name }}"
-                                class="app-list-icon-sm"
-                        >
-                    </span>
-                    <span class="col">
-                        <h4>{{ meal.name }}</h4>
-                    </span>
-                </div>
-            </div>
-            {% if meal.mealTags is not empty %}
-                <div class="mt-2">
-                    {% for mealTag in meal.mealTags %}
-                        <span class="badge bg-primary">{{ mealTag.name }}</span>
-                    {% endfor %}
-                </div>
-            {% endif %}
-            <div class="collapse app-list-row-detail" id="mealDescription-{{ meal.id }}">
-                <hr>
-                <p>{% if meal.description is not null %}{{ meal.description|raw }}{% else %}<i>--popis nevyplněn--</i>{% endif %}</p>
-            </div>
-        </div>
-    {% endfor %}
+	{% for meal in meals %}
+		<div class="row app-list-row app-list-row-sm">
+			<div class="app-list-row-header col" data-bs-toggle="collapse" data-bs-target="#mealDescription-{{ meal.id }}" aria-expanded="false" aria-controls="mealDescription-{{ meal.id }}">
+				<div class="row">
+					<span class="col" style="max-width: 5.4em">
+						<img
+								src="{{ meal.image|checkNoImg(meal) }}"
+								alt="{{ meal.name }}"
+								class="app-list-icon-sm"
+						>
+					</span>
+					<span class="col">
+						<h4>{{ meal.name }}</h4>
+					</span>
+				</div>
+			</div>
+			{% if meal.mealTags is not empty %}
+				<div class="mt-2">
+					{% for mealTag in meal.mealTags %}
+						<span class="badge bg-primary">{{ mealTag.name }}</span>
+					{% endfor %}
+				</div>
+			{% endif %}
+			<div class="collapse app-list-row-detail" id="mealDescription-{{ meal.id }}">
+				<hr>
+				<p>{% if meal.description is not null %}{{ meal.description|raw }}{% else %}<i>--popis nevyplněn--</i>{% endif %}</p>
+			</div>
+		</div>
+	{% endfor %}
 </div>

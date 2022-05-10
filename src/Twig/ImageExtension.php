@@ -32,10 +32,9 @@ class ImageExtension extends AbstractExtension
 	public function checkNoImg(?Image $image, ?Entity $entity = null): string
 	{
 		if ($image === null || Strings::isEmpty($image->getFullFilename())) {
-		    $entityClassName = $this->getEntityClassName($entity);
-			$filename = $entity !== null && array_key_exists($entityClassName, $this->noImgFilenames)
-                ? $this->noImgFilenames[$entityClassName]
-                : self::NO_IMG_DEFAULT;
+			$filename = $entity !== null && array_key_exists($this->getEntityClassName($entity), $this->noImgFilenames)
+				? $this->noImgFilenames[$this->getEntityClassName($entity)]
+				: self::NO_IMG_DEFAULT;
 
 			return self::DIR_NO_IMG . $filename;
 		}

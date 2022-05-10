@@ -23,44 +23,44 @@ class MealController extends BaseController
 	private MealIngredientManager $mealIngredientManager;
 	private ImageFacade $imageFacade;
 	private UserMealManager $userMealManager;
-    private MealListFactory $mealListFactory;
+	private MealListFactory $mealListFactory;
 
-    public function __construct(
+	public function __construct(
 		EntityManagerInterface $entityManager,
 		MealIngredientManager $mealIngredientManager,
 		ImageFacade $imageFacade,
 		UserMealManager $userMealManager,
-        MealListFactory $mealListFactory
+		MealListFactory $mealListFactory
 	)
 	{
 		$this->entityManager = $entityManager;
 		$this->mealIngredientManager = $mealIngredientManager;
 		$this->imageFacade = $imageFacade;
 		$this->userMealManager = $userMealManager;
-        $this->mealListFactory = $mealListFactory;
-    }
+		$this->mealListFactory = $mealListFactory;
+	}
 
 	public function list(): Response
 	{
 		$this->checkAccessLoggedIn();
 
 		$meals = $this->entityManager->createQueryBuilder()
-            ->select('meal')
-            ->addSelect('createdByUser')
-            ->addSelect('mealIngredients')
-            ->addSelect('ingredient')
-            ->addSelect('mealTags')
-            ->from(Meal::class, 'meal')
-            ->leftJoin('meal.createdByUser', 'createdByUser')
-            ->leftJoin('meal.mealIngredients', 'mealIngredients')
-            ->leftJoin('mealIngredients.ingredient', 'ingredient')
-            ->leftJoin('meal.mealTags', 'mealTags')
-            ->getQuery()
-            ->getResult();
+			->select('meal')
+			->addSelect('createdByUser')
+			->addSelect('mealIngredients')
+			->addSelect('ingredient')
+			->addSelect('mealTags')
+			->from(Meal::class, 'meal')
+			->leftJoin('meal.createdByUser', 'createdByUser')
+			->leftJoin('meal.mealIngredients', 'mealIngredients')
+			->leftJoin('mealIngredients.ingredient', 'ingredient')
+			->leftJoin('meal.mealTags', 'mealTags')
+			->getQuery()
+			->getResult();
 
 		return $this->renderByClass('list.html.twig', [
-            'mealList' => $this->mealListFactory->create($meals)->render(),
-        ]);
+			'mealList' => $this->mealListFactory->create($meals)->render(),
+		]);
 	}
 
 	public function create(Request $request): Response
