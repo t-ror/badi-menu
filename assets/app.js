@@ -18,10 +18,12 @@ import Flashes from './js/Flashes.js';
 import QuillEditor from './js/QuillEditor.js';
 import EmbedForm from './js/EmbedForm';
 import Select2 from './js/Select2';
+import PreventDoubleSubmit from './js/PreventDoubleSubmit';
 
 $(document).ready(function() {
     Flashes.init();
     QuillEditor.init();
     EmbedForm.init();
     Select2.init();
+    PreventDoubleSubmit.init();
 });

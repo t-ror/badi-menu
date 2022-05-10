@@ -2,79 +2,79 @@
 {% extends 'layout.html.twig' %}
 
 {% macro mealIngredientForm(item) %}
-    <span class="col-5">
-        {{ form_label(item.name) }}
-        {{ form_widget(item.name) }}
-    </span>
-    <span class="col-5">
-        {{ form_label(item.amount) }}
-        {{ form_widget(item.amount) }}
-    </span>
+	<span class="col-5">
+		{{ form_label(item.name) }}
+		{{ form_widget(item.name) }}
+	</span>
+	<span class="col-5">
+		{{ form_label(item.amount) }}
+		{{ form_widget(item.amount) }}
+	</span>
 {% endmacro %}
 
 {% block body %}
-    <div class="container app-container-main">
-        <h1>Vytvořit jídlo</h1>
-        {{ form_start(mealForm) }}
-        <div class="mb-3">
-            <strong>{{ form_label(mealForm.name) }}</strong>
-            {{ form_widget(mealForm.name) }}
-        </div>
-        <div class="mb-3">
-            <strong>{{ form_label(mealForm.description) }}</strong>
-            {{ form_widget(mealForm.description) }}
-        </div>
-        <div class="mb-3">
-            <strong>{{ form_label(mealForm.image) }}</strong>
-            {{ form_widget(mealForm.image) }}
-            <i>formát: JPEG/PNG</i>
-            {{ form_errors(mealForm.image) }}
-        </div>
-        <div class="mb-3">
-            <strong>{{ form_label(mealForm.mealIngredients) }}</strong>
-            <div class="mealIngredients app_embed-form" style="max-width: 50em;"
-                data-index="{{ mealForm.mealIngredients|length > 0 ? mealForm.mealIngredients|last.vars.name + 1 : 0 }}"
-                data-prototype="{{ _self.mealIngredientForm(mealForm.mealIngredients.vars.prototype)|e }}">
-                {% if mealForm.mealIngredients|length == 0 %}
-                    {{ form_widget(mealForm.mealIngredients) }}
-                {% endif %}
-                {% for mealIngredient in mealForm.mealIngredients %}
-                    <div class="row mb-2">
-                        {{ _self.mealIngredientForm(mealIngredient) }}
-                    </div>
-                {% endfor %}
-            </div>
-            <button type="button" class="add_item_link btn btn-outline-primary" data-collection-holder-class="mealIngredients">
-                <span class="fa fa-plus"></span> Přidat ingredienci
-            </button>
-        </div>
-        <div class="mb-3">
-            <strong>{{ form_label(mealForm.method) }}</strong>
-            {{ form_widget(mealForm.method) }}
-        </div>
-        <div class="mb-3">
-            <strong>{{ form_label(mealForm.mealTags) }}</strong>
-            <div>
-                {{ form_widget(mealForm.mealTags) }}
-            </div>
-        </div>
-        <div class="mb-3">
-            <strong>{{ form_label(mealForm.ableToPrepare) }}</strong>
-            <div>
-                {{ form_widget(mealForm.ableToPrepare) }}
-            </div>
-        </div>
-        <div class="mb-3">
-            <strong>{{ form_label(mealForm.favorite) }}</strong>
-            <div>
-                {{ form_widget(mealForm.favorite) }}
-            </div>
-        </div>
-        <div class="mb-3">
-            <div class="d-grid gap-2">
-                {{ form_widget(mealForm.submit) }}
-            </div>
-        </div>
-    {{ form_end(mealForm) }}
-    </div>
+	<div class="container app-container-main">
+		<h1>Vytvořit jídlo</h1>
+		{{ form_start(mealForm, { 'attr' : { 'class': 'app_prevent-double-submit' } }) }}
+		<div class="mb-3">
+			<strong>{{ form_label(mealForm.name) }}</strong>
+			{{ form_widget(mealForm.name) }}
+		</div>
+		<div class="mb-3">
+			<strong>{{ form_label(mealForm.description) }}</strong>
+			{{ form_widget(mealForm.description) }}
+		</div>
+		<div class="mb-3">
+			<strong>{{ form_label(mealForm.image) }}</strong>
+			{{ form_widget(mealForm.image) }}
+			<i>formát: JPEG/PNG</i>
+			{{ form_errors(mealForm.image) }}
+		</div>
+		<div class="mb-3">
+			<strong>{{ form_label(mealForm.mealIngredients) }}</strong>
+			<div class="mealIngredients app_embed-form" style="max-width: 50em;"
+				data-index="{{ mealForm.mealIngredients|length > 0 ? mealForm.mealIngredients|last.vars.name + 1 : 0 }}"
+				data-prototype="{{ _self.mealIngredientForm(mealForm.mealIngredients.vars.prototype)|e }}">
+				{% if mealForm.mealIngredients|length == 0 %}
+					{{ form_widget(mealForm.mealIngredients) }}
+				{% endif %}
+				{% for mealIngredient in mealForm.mealIngredients %}
+					<div class="row mb-2">
+						{{ _self.mealIngredientForm(mealIngredient) }}
+					</div>
+				{% endfor %}
+			</div>
+			<button type="button" class="add_item_link btn btn-outline-primary" data-collection-holder-class="mealIngredients">
+				<span class="fa fa-plus"></span> Přidat ingredienci
+			</button>
+		</div>
+		<div class="mb-3">
+			<strong>{{ form_label(mealForm.method) }}</strong>
+			{{ form_widget(mealForm.method) }}
+		</div>
+		<div class="mb-3">
+			<strong>{{ form_label(mealForm.mealTags) }}</strong>
+			<div>
+				{{ form_widget(mealForm.mealTags) }}
+			</div>
+		</div>
+		<div class="mb-3">
+			<strong>{{ form_label(mealForm.ableToPrepare) }}</strong>
+			<div>
+				{{ form_widget(mealForm.ableToPrepare) }}
+			</div>
+		</div>
+		<div class="mb-3">
+			<strong>{{ form_label(mealForm.favorite) }}</strong>
+			<div>
+				{{ form_widget(mealForm.favorite) }}
+			</div>
+		</div>
+		<div class="mb-3">
+			<div class="d-grid gap-2">
+				{{ form_widget(mealForm.submit) }}
+			</div>
+		</div>
+	{{ form_end(mealForm) }}
+	</div>
 {% endblock %}
