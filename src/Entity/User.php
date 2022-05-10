@@ -184,4 +184,18 @@ class User extends Entity
 		return $userMeal === false ? null : $userMeal;
 	}
 
+	public function isAbleToPrepareMeal(Meal $meal): bool
+	{
+		return $this->userMeals->exists(function (int $key, UserMeal $userMeal) use ($meal): bool {
+			return $userMeal->getMeal()->getId() === $meal->getId() && $userMeal->isAbleToPrepare();
+		});
+	}
+
+	public function isMealFavourite(Meal $meal): bool
+	{
+		return $this->userMeals->exists(function (int $key, UserMeal $userMeal) use ($meal): bool {
+			return $userMeal->getMeal()->getId() === $meal->getId() && $userMeal->isFavorite();
+		});
+	}
+
 }

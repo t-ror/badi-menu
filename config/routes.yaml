@@ -31,3 +31,6 @@ mealCreate:
 mealDetail:
   path: /jidlo/{url}
   controller: App\Controller\Meal\MealController::detail
+mealEdit:
+  path: /jidlo/upravit/{url}
+  controller: App\Controller\Meal\MealController::edit

@@ -31,12 +31,11 @@ class MealIngredientType extends AbstractType
 			],
 		])->add('amount', TextType::class, [
 			'label' => 'Množství',
-			'required' => true,
+			'required' => false,
 			'attr' => [
 				'maxlength' => 32,
 			],
 			'constraints' => [
-				new NotBlank(['message' => 'Vyplňte název ingredience']),
 				new Length([
 					'max' => 32,
 					'maxMessage' => 'Množství může obsahovat maximálně {{ limit }} znaků',

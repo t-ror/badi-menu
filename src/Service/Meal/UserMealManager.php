@@ -47,4 +47,34 @@ class UserMealManager
 		$this->entityManager->persist($userMeal);
 	}
 
+	public function removeAbleToPrepare(User $user, Meal $meal): void
+	{
+		$userMeal = $user->getUserMealByMeal($meal);
+		if ($userMeal !== null) {
+			$userMeal->setAbleToPrepare(false);
+
+			return;
+		}
+
+		$userMeal = new UserMeal($user, $meal);
+		$userMeal->setAbleToPrepare(false);
+
+		$this->entityManager->persist($userMeal);
+	}
+
+	public function removeFavorite(User $user, Meal $meal): void
+	{
+		$userMeal = $user->getUserMealByMeal($meal);
+		if ($userMeal !== null) {
+			$userMeal->setFavorite(false);
+
+			return;
+		}
+
+		$userMeal = new UserMeal($user, $meal);
+		$userMeal->setFavorite(false);
+
+		$this->entityManager->persist($userMeal);
+	}
+
 }

@@ -7,7 +7,14 @@
 		<div class="pt-2 mb-2">
 			<a href="{{ path('mealList') }}">Jídla</a> > <strong>{{ meal.name }}</strong>
 		</div>
-		<h1>{{ meal.name }}</h1>
+		<div class="row">
+			<div class="col" style="text-align: left;">
+				<h1>{{ meal.name }}</h1>
+			</div>
+			<div class="col" style="text-align: right;">
+				<a href="{{ path('mealEdit', {url: meal.url}) }}" class="btn btn-primary"><i class="fa fa-pen"></i> Upravit</a>
+			</div>
+		</div>
 		{% if meal.mealTags is not empty %}
 			<div class="mt-2 mb-2">
 				{% for mealTag in meal.mealTags %}
@@ -23,7 +30,7 @@
 			<h2>Ingredience</h2>
 			<ul>
 				{% for mealIngredient in meal.mealIngredients %}
-					<li><strong>{{ mealIngredient.ingredient.name }}</strong> - {{ mealIngredient.amount }}</li>
+					<li><strong>{{ mealIngredient.ingredient.name }}</strong> {% if mealIngredient.amount is not null %}- {{ mealIngredient.amount }}{% endif %}</li>
 				{% endfor %}
 			</ul>
 		{% endif %}

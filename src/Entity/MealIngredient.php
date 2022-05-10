@@ -26,7 +26,7 @@ class MealIngredient extends Entity
 	 */
 	private Ingredient $ingredient;
 
-	/** @ORM\Column(length=32, type="string", nullable=false) */
+	/** @ORM\Column(length=32, type="string", nullable=true) */
 	private ?string $amount = null;
 
 	public function __construct(Meal $meal, Ingredient $ingredient)

@@ -121,6 +121,24 @@ class Meal extends Entity
 		return $this->mealIngredients;
 	}
 
+	/**
+	 * @return array<int, array<string, string|null>>
+	 */
+	public function getMealIngredientsArray(): array
+	{
+		$mealIngredientsArray = [];
+
+		/** @var MealIngredient $mealIngredient */
+		foreach ($this->mealIngredients as $mealIngredient) {
+			$mealIngredientsArray[] = [
+				'name' => $mealIngredient->getIngredient()->getName(),
+				'amount' => $mealIngredient->getAmount(),
+			];
+		}
+
+		return $mealIngredientsArray;
+	}
+
 	public function addMealIngredient(MealIngredient $mealIngredient): void
 	{
 		if ($this->mealIngredients->contains($mealIngredient)) {
@@ -142,6 +160,15 @@ class Meal extends Entity
 		return $this->mealIngredients->exists(function (int $key, MealIngredient $mealIngredient) use ($ingredientName): bool {
 			return $mealIngredient->getIngredient()->getName() === $ingredientName;
 		});
+	}
+
+	public function getMealIngredientWithName(string $ingredientName): ?MealIngredient
+	{
+		$mealIngredient = $this->mealIngredients->filter(function (MealIngredient $mealIngredient) use ($ingredientName): bool {
+			return $mealIngredient->getIngredient()->getName() === $ingredientName;
+		})->first();
+
+		return $mealIngredient !== false ? $mealIngredient : null;
 	}
 
 	/**
