@@ -36,3 +36,21 @@ body {
     background-color: #f8f9fa;
     border-color: #f8f9fa;
 }
+.app-img-meal {
+    max-width: 100%;
+    max-height: 12em;
+}
+
+@media only screen and (min-width: 768px) {
+    /* For desktop: */
+    .app-img-meal {
+        max-height: 60em;
+    }
+}
+
+@media only screen and (min-width: 600px) {
+    /* For tablets: */
+    .app-img-meal {
+        max-height: 40em;
+    }
+}

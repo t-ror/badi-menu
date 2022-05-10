@@ -28,3 +28,6 @@ mealList:
 mealCreate:
     path: /jidlo/vytvorit
     controller: App\Controller\Meal\MealController::create
+mealDetail:
+  path: /jidlo/{url}
+  controller: App\Controller\Meal\MealController::detail

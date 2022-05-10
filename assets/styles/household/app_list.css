@@ -1,6 +1,7 @@
 .app-list-row, .app-list-row:focus, .app-list-row:active {
     border: 0.08em solid #dee1ea;
     padding: 1.2em 0.6em;
+    min-height: 5.4em;
 }
 .app-list-row.app-list-row-sm {
     padding: 0.8em 0.6em;
@@ -29,9 +30,9 @@
 }
 .app-list-icon-sm {
     width: 3.8em;
-    height: 3.8em;
+    max-height: 3.8em;
 }
 .app-list-icon-xs {
     width: 2em;
-    height: 2em;
+    max-height: 2em;
 }

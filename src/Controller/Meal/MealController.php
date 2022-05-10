@@ -2,6 +2,7 @@
 
 namespace App\Controller\Meal;
 
+use _PHPStan_76800bfb5\Nette\Utils\DateTime;
 use App\Component\Meal\MealList\MealListFactory;
 use App\Controller\BaseController;
 use App\Entity\Meal;
@@ -43,6 +44,7 @@ class MealController extends BaseController
 	public function list(): Response
 	{
 		$this->checkAccessLoggedIn();
+		$this->checkHouseholdSelected();
 
 		$meals = $this->entityManager->createQueryBuilder()
 			->select('meal')
@@ -66,6 +68,8 @@ class MealController extends BaseController
 	public function create(Request $request): Response
 	{
 		$this->checkAccessLoggedIn();
+		$this->checkHouseholdSelected();
+
 		$mealForm = $this->createForm(MealType::class);
 		$mealForm->handleRequest($request);
 		if ($mealForm->isSubmitted() && $mealForm->isValid()) {
@@ -79,12 +83,41 @@ class MealController extends BaseController
 		]);
 	}
 
+	public function detail(string $url): Response
+	{
+		$this->checkAccessLoggedIn();
+		$this->checkHouseholdSelected();
+
+		$meal = $this->entityManager->createQueryBuilder()
+			->select('meal')
+			->addSelect('mealIngredient')
+			->addSelect('ingredient')
+			->from(Meal::class, 'meal')
+			->leftJoin('meal.mealIngredients', 'mealIngredient')
+			->leftJoin('mealIngredient.ingredient', 'ingredient')
+			->where('meal.url = :url')
+			->setParameter('url', $url)
+			->getQuery()
+			->getOneOrNullResult();
+
+		if ($meal === null) {
+			$this->addFlash('warning', 'Vybrané jídlo nebylo nalezeno');
+
+			return $this->redirectToRoute('mealList');
+		}
+
+		return $this->renderByClass('detail.html.twig', [
+			'meal' => $meal,
+		]);
+	}
+
 	private function processCreateForm(FormInterface $form): void
 	{
 		$values = $form->getData();
 
 		$loggedUser = $this->getUserManager()->getLoggedUser();
-		$meal = new Meal($values['name'], $loggedUser);
+
+		$meal = new Meal($values['name'], $this->generateUrlForMeal($values['name']), $loggedUser);
 		$meal->setDescription($values['description']);
 		$meal->setMethod($values['method']);
 
@@ -129,6 +162,16 @@ class MealController extends BaseController
 		}
 
 		$this->addFlash('success', 'Jídlo bylo úspěšně vytvořeno');
+	}
+
+	private function generateUrlForMeal(string $mealName): string
+	{
+		$randomHash = bin2hex(random_bytes(4));
+		$date = (new DateTime())->format('Ymd');
+
+		return Strings::webalize(
+			sprintf('%s-%s%s', $mealName, $date, $randomHash)
+		);
 	}
 
 }

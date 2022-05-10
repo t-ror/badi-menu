@@ -1,7 +1,7 @@
 <div class="container">
 	{% for meal in meals %}
 		<div class="row app-list-row app-list-row-sm">
-			<div class="app-list-row-header col" data-bs-toggle="collapse" data-bs-target="#mealDescription-{{ meal.id }}" aria-expanded="false" aria-controls="mealDescription-{{ meal.id }}">
+			<a href="{{ path('mealDetail', {url: meal.url}) }}" class="app-list-row-header col">
 				<div class="row">
 					<span class="col" style="max-width: 5.4em">
 						<img
@@ -14,7 +14,7 @@
 						<h4>{{ meal.name }}</h4>
 					</span>
 				</div>
-			</div>
+			</a>
 			{% if meal.mealTags is not empty %}
 				<div class="mt-2">
 					{% for mealTag in meal.mealTags %}
@@ -22,10 +22,6 @@
 					{% endfor %}
 				</div>
 			{% endif %}
-			<div class="collapse app-list-row-detail" id="mealDescription-{{ meal.id }}">
-				<hr>
-				<p>{% if meal.description is not null %}{{ meal.description|raw }}{% else %}<i>--popis nevyplněn--</i>{% endif %}</p>
-			</div>
 		</div>
 	{% endfor %}
 </div>

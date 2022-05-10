@@ -1,0 +1,33 @@
+{# @controller Meal:detail #}
+{% extends 'layout.html.twig' %}
+{% block title %}BadiMenu | {{ meal.name }}{% endblock %}
+
+{% block body %}
+	<div class="container app-container-main">
+		<div class="pt-2 mb-2">
+			<a href="{{ path('mealList') }}">Jídla</a> > <strong>{{ meal.name }}</strong>
+		</div>
+		<h1>{{ meal.name }}</h1>
+		{% if meal.mealTags is not empty %}
+			<div class="mt-2 mb-2">
+				{% for mealTag in meal.mealTags %}
+					<span class="badge bg-primary">{{ mealTag.name }}</span>
+				{% endfor %}
+			</div>
+		{% endif %}
+		{% if meal.image is not null %}
+			<img class="app-img-meal" src="{{ meal.image|checkNoImg }}" alt="{{ meal.name }}">
+		{% endif %}
+		<p>{{ meal.description|raw }}</p>
+		{% if meal.mealTags is not empty %}
+			<h2>Ingredience</h2>
+			<ul>
+				{% for mealIngredient in meal.mealIngredients %}
+					<li><strong>{{ mealIngredient.ingredient.name }}</strong> - {{ mealIngredient.amount }}</li>
+				{% endfor %}
+			</ul>
+		{% endif %}
+		<h2>Postup</h2>
+		<p>{% if meal.method is not null %}{{ meal.method|raw }}{% else %}<i>--postup nevyplněn--</i>{% endif %}</p>
+	</div>
+{% endblock %}

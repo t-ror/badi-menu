@@ -10,7 +10,12 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity()
- * @ORM\Table(name="app_meal")
+ * @ORM\Table(
+ *     name="app_meal",
+ *     uniqueConstraints={
+ *          @ORM\UniqueConstraint(columns={"url"})
+ *     }
+ * )
  */
 class Meal extends Entity
 {
@@ -19,6 +24,9 @@ class Meal extends Entity
 
 	/** @ORM\Column(type="string", nullable=false) */
 	private string $name;
+
+	/** @ORM\Column(type="string", nullable=false) */
+	private string $url;
 
 	/** @ORM\Column(type="string", nullable=true) */
 	private ?string $image = null;
@@ -47,9 +55,10 @@ class Meal extends Entity
 	 */
 	private User $createdByUser;
 
-	public function __construct(string $name, User $createdByUser)
+	public function __construct(string $name, string $url, User $createdByUser)
 	{
 		$this->name = $name;
+		$this->url = $url;
 		$this->createdByUser = $createdByUser;
 		$this->mealIngredients = new ArrayCollection();
 		$this->mealTags = new ArrayCollection();
@@ -63,6 +72,11 @@ class Meal extends Entity
 	public function setName(string $name): void
 	{
 		$this->name = $name;
+	}
+
+	public function getUrl(): string
+	{
+		return $this->url;
 	}
 
 	public function getImage(): ?Image
