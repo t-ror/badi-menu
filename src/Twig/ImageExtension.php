@@ -4,6 +4,7 @@ namespace App\Twig;
 
 use App\Entity\Entity;
 use App\Entity\Household;
+use App\Entity\Meal;
 use App\Utils\Strings;
 use App\ValueObject\File\Image;
 use Twig\Extension\AbstractExtension;
@@ -17,6 +18,7 @@ class ImageExtension extends AbstractExtension
 
 	private array $noImgFilenames = [
 		Household::class => 'house-door.svg',
+		Meal::class => 'meal-icon.svg',
 	];
 
 	/**
