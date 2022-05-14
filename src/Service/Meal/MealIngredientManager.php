@@ -19,16 +19,13 @@ class MealIngredientManager
 
 	public function addIngredientToMealByName(Meal $meal, string $ingredientName, ?string $amount = null): void
 	{
+		if ($meal->containsIngredientWithName($ingredientName)) {
+			return;
+		}
+
 		$ingredient = $this->entityManager->getRepository(Ingredient::class)->findOneBy([
 			'name' => $ingredientName,
 		]);
-
-		if (
-			($ingredient !== null && $meal->containsIngredient($ingredient))
-			|| $meal->containsIngredientWithName($ingredientName)
-		) {
-			return;
-		}
 
 		if ($ingredient === null) {
 			$ingredient = new Ingredient($ingredientName);
