@@ -2,25 +2,24 @@
 
 namespace App\Component\Meal\MealList;
 
-use App\Entity\Meal;
+use Doctrine\ORM\EntityManagerInterface;
 use Twig\Environment;
 
 class MealListFactory
 {
 
 	private Environment $twig;
+	private EntityManagerInterface $entityManager;
 
-	public function __construct(Environment $twig)
+	public function __construct(Environment $twig, EntityManagerInterface $entityManager)
 	{
 		$this->twig = $twig;
+		$this->entityManager = $entityManager;
 	}
 
-	/**
-	 * @param array<int, Meal> $meals
-	 */
-	public function create(array $meals): MealList
+	public function create(): MealList
 	{
-		return new MealList($meals, $this->twig);
+		return new MealList($this->twig, $this->entityManager);
 	}
 
 }

@@ -51,26 +51,12 @@ class MealController extends BaseController
 
 		$user = $this->getUserManager()->getLoggedUser();
 		$household = $this->getHouseholdManager()->getSelectedHouseholdForUser($user);
-		$meals = $this->entityManager->createQueryBuilder()
-			->select('meal')
-			->addSelect('createdByUser')
-			->addSelect('mealIngredients')
-			->addSelect('ingredient')
-			->addSelect('mealTags')
-			->from(Meal::class, 'meal')
-			->leftJoin('meal.createdByUser', 'createdByUser')
-			->leftJoin('meal.mealIngredients', 'mealIngredients')
-			->leftJoin('mealIngredients.ingredient', 'ingredient')
-			->leftJoin('meal.mealTags', 'mealTags')
-			->leftJoin('meal.householdMeals', 'householdMeals')
-			->andWhere('householdMeals.household = :household')
-			->setParameter('household', $household)
-			->addOrderBy('meal.name', 'ASC')
-			->getQuery()
-			->getResult();
+		$mealList = $this->mealListFactory->create()
+			->forHousehold($household)
+			->orderByName();
 
 		return $this->renderByClass('list.html.twig', [
-			'mealList' => $this->mealListFactory->create($meals)->render(),
+			'mealList' => $mealList->render(),
 		]);
 	}
 
