@@ -5,6 +5,7 @@ namespace App\Controller\Meal;
 use _PHPStan_76800bfb5\Nette\Utils\DateTime;
 use App\Component\Meal\MealList\MealListFactory;
 use App\Controller\BaseController;
+use App\Entity\HouseholdMeal;
 use App\Entity\Meal;
 use App\Entity\User;
 use App\Service\File\ImageFacade;
@@ -47,6 +48,8 @@ class MealController extends BaseController
 		$this->checkAccessLoggedIn();
 		$this->checkHouseholdSelected();
 
+		$user = $this->getUserManager()->getLoggedUser();
+		$household = $this->getHouseholdManager()->getSelectedHouseholdForUser($user);
 		$meals = $this->entityManager->createQueryBuilder()
 			->select('meal')
 			->addSelect('createdByUser')
@@ -58,6 +61,9 @@ class MealController extends BaseController
 			->leftJoin('meal.mealIngredients', 'mealIngredients')
 			->leftJoin('mealIngredients.ingredient', 'ingredient')
 			->leftJoin('meal.mealTags', 'mealTags')
+			->leftJoin('meal.householdMeals', 'householdMeals')
+			->andWhere('householdMeals.household = :household')
+			->setParameter('household', $household)
 			->addOrderBy('meal.name', 'ASC')
 			->getQuery()
 			->getResult();
@@ -198,10 +204,14 @@ class MealController extends BaseController
 		$values = $form->getData();
 
 		$user = $this->getUserManager()->getLoggedUser();
+		$household = $this->getHouseholdManager()->getSelectedHouseholdForUser($user);
 
 		$meal = new Meal($values['name'], $this->generateUrlForMeal($values['name']), $user);
 		$meal->setDescription($values['description']);
 		$meal->setMethod($values['method']);
+
+		$householdMeal = new HouseholdMeal($household, $meal);
+		$this->entityManager->persist($householdMeal);
 
 		foreach ($values['mealIngredients'] as $mealIngredient) {
 			$this->mealIngredientManager->addIngredientToMealByName(

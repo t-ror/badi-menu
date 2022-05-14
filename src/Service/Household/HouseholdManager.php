@@ -6,6 +6,7 @@ use App\Entity\Household;
 use App\Entity\User;
 use App\Entity\UserHousehold;
 use Doctrine\ORM\EntityManagerInterface;
+use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 class HouseholdManager
@@ -34,7 +35,7 @@ class HouseholdManager
 		$this->session->save();
 	}
 
-	public function getSelectedHouseholdForUser(User $user): ?Household
+	public function getSelectedHouseholdForUserOrNull(User $user): ?Household
 	{
 		$selectedHousehold = $this->session->get(self::GLOBAL_SELECTED_HOUSEHOLD);
 		if ($selectedHousehold === null) {
@@ -58,6 +59,16 @@ class HouseholdManager
 		}
 
 		return $this->entityManager->find(Household::class, $householdId);
+	}
+
+	public function getSelectedHouseholdForUser(User $user): Household
+	{
+		$household = $this->getSelectedHouseholdForUserOrNull($user);
+		if ($household === null) {
+			throw new InvalidArgumentException('Household is not selected');
+		}
+
+		return $household;
 	}
 
 	public function addHouseholdToUser(Household $household, User $user): void

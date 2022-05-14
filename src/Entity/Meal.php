@@ -50,6 +50,12 @@ class Meal extends Entity
 	private Collection $mealTags;
 
 	/**
+	 * @var Collection<HouseholdMeal>
+	 * @ORM\ManyToMany(targetEntity="HouseholdMeal", mappedBy="meal")
+	 */
+	private Collection $householdMeals;
+
+	/**
 	 * @ORM\ManyToOne(targetEntity="User")
 	 * @ORM\JoinColumn(referencedColumnName="id", nullable=false)
 	 */
@@ -62,6 +68,7 @@ class Meal extends Entity
 		$this->createdByUser = $createdByUser;
 		$this->mealIngredients = new ArrayCollection();
 		$this->mealTags = new ArrayCollection();
+		$this->householdMeals = new ArrayCollection();
 	}
 
 	public function getName(): string
@@ -186,6 +193,23 @@ class Meal extends Entity
 		}
 
 		$this->mealTags->add($mealTag);
+	}
+
+	/**
+	 * @return Collection<HouseholdMeal>
+	 */
+	public function getHouseholdMeals(): Collection
+	{
+		return $this->householdMeals;
+	}
+
+	public function addHouseholdMeal(HouseholdMeal $householdMeal): void
+	{
+		if ($this->householdMeals->contains($householdMeal)) {
+			return;
+		}
+
+		$this->householdMeals->add($householdMeal);
 	}
 
 	public function getCreatedByUser(): User

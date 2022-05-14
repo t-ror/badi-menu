@@ -34,10 +34,17 @@ class Household extends Entity
 	 */
 	private Collection $userHouseholds;
 
+	/**
+	 * @var Collection<HouseholdMeal>
+	 * @ORM\OneToMany(targetEntity="HouseholdMeal", mappedBy="household")
+	 */
+	private Collection $householdMeals;
+
 	public function __construct(string $name)
 	{
 		$this->name = $name;
 		$this->userHouseholds = new ArrayCollection();
+		$this->householdMeals = new ArrayCollection();
 	}
 
 	public function getName(): string
@@ -84,6 +91,23 @@ class Household extends Entity
 	public function hasAnyMember(): bool
 	{
 		return $this->userHouseholds->count() > 0;
+	}
+
+	/**
+	 * @return Collection<HouseholdMeal>
+	 */
+	public function getHouseholdMeals(): Collection
+	{
+		return $this->householdMeals;
+	}
+
+	public function addHouseholdMeal(HouseholdMeal $householdMeal): void
+	{
+		if ($this->householdMeals->contains($householdMeal)) {
+			return;
+		}
+
+		$this->householdMeals->add($householdMeal);
 	}
 
 }

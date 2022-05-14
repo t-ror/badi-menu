@@ -25,7 +25,7 @@ class UserHouseholdList extends Component
 	{
 		return $this->twig->render($this->getTemplatePath('userHouseholdList.html.twig'), [
 			'userHouseholds' => $this->user->getUserHouseholdsOrdered(),
-			'selectedHousehold' => $this->householdManager->getSelectedHouseholdForUser($this->user),
+			'selectedHousehold' => $this->householdManager->getSelectedHouseholdForUserOrNull($this->user),
 		]);
 	}
 

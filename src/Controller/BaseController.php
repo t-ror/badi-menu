@@ -31,7 +31,7 @@ abstract class BaseController extends AbstractController
 		$loggedUser = $this->getUserManager()->getLoggedUserOrNull();
 		$parameters['loggedUser'] = $loggedUser;
 		$parameters['selectedHousehold'] = $loggedUser !== null
-			? $this->getHouseholdManager()->getSelectedHouseholdForUser($loggedUser)
+			? $this->getHouseholdManager()->getSelectedHouseholdForUserOrNull($loggedUser)
 			: null;
 
 		return parent::render(
@@ -75,6 +75,7 @@ abstract class BaseController extends AbstractController
 
 	/**
 	 * @param array<string, mixed> $parameters
+	 * @throws RedirectException
 	 */
 	protected function redirectClean(string $route, array $parameters = []): void
 	{
@@ -94,7 +95,7 @@ abstract class BaseController extends AbstractController
 			return;
 		}
 
-		$household = $this->getHouseholdManager()->getSelectedHouseholdForUser($user);
+		$household = $this->getHouseholdManager()->getSelectedHouseholdForUserOrNull($user);
 		if ($household === null) {
 			$this->redirectClean('householdList');
 		}
