@@ -13,10 +13,10 @@
 		<div class="collapse navbar-collapse" id="navbarNavAltMarkup">
 			{% if loggedUser is not null and selectedHousehold is not null %}
 				<div class="navbar-nav">
-					<a class="nav-link active" href="{{ path('householdList')}}"><i class="bi-house"></i> Změnit domácnost</a>
+					<a class="nav-link {% if activeMenuLink is same as(constant('App\\Controller\\BaseController::MENU_HOUSEHOLD')) %}active{% endif %}" href="{{ path('householdList')}}"><i class="bi-house"></i> Změnit domácnost</a>
 					<a class="nav-link disabled" href="#"><i class="bi-calendar-week"></i> Kalendář</a>
 					<a class="nav-link disabled" href="#"><i class="bi-list-ol"></i> Jídelní lístek</a>
-					<a class="nav-link" href="{{ path('mealList')}}"><i class="fa fa-pizza-slice"></i> Jídla</a>
+					<a class="nav-link  {% if activeMenuLink is same as(constant('App\\Controller\\BaseController::MENU_MEAL')) %}active{% endif %}" href="{{ path('mealList')}}"><i class="fa fa-pizza-slice"></i> Jídla</a>
 				</div>
 			{% endif %}
 			<hr style="color: #FFFFFF;height: 0.1em;opacity: 0.5;">

@@ -39,6 +39,7 @@ class HouseholdController extends BaseController
 	{
 		$this->checkAccessLoggedIn();
 		$user = $this->getUserManager()->getLoggedUser();
+		$this->setActiveMenuLink(self::MENU_HOUSEHOLD);
 
 		return $this->renderByClass('list.html.twig', [
 			'userHouseholdList' => $this->userHouseholdListFactory->create($user)->render(),
@@ -49,6 +50,7 @@ class HouseholdController extends BaseController
 	{
 		$this->checkAccessLoggedIn();
 		$user = $this->getUserManager()->getLoggedUser();
+		$this->setActiveMenuLink(self::MENU_HOUSEHOLD);
 
 		$userHousehold = $user->getUserHouseholdWithHouseholdId($id);
 		if ($userHousehold === null) {
@@ -71,6 +73,7 @@ class HouseholdController extends BaseController
 	public function listAdd(): Response
 	{
 		$this->checkAccessLoggedIn();
+		$this->setActiveMenuLink(self::MENU_HOUSEHOLD);
 
 		$user = $this->getUserManager()->getLoggedUser();
 		$availableHouseholds = $this->householdRepository->findUnassignedForUser($user);
@@ -84,6 +87,7 @@ class HouseholdController extends BaseController
 	{
 		$this->checkAccessLoggedIn();
 		$user = $this->getUserManager()->getLoggedUser();
+		$this->setActiveMenuLink(self::MENU_HOUSEHOLD);
 
 		$userHousehold = $user->getUserHouseholdWithHouseholdId($id);
 		if ($userHousehold !== null) {

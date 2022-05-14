@@ -47,6 +47,7 @@ class MealController extends BaseController
 	{
 		$this->checkAccessLoggedIn();
 		$this->checkHouseholdSelected();
+		$this->setActiveMenuLink(self::MENU_MEAL);
 
 		$user = $this->getUserManager()->getLoggedUser();
 		$household = $this->getHouseholdManager()->getSelectedHouseholdForUser($user);
@@ -77,6 +78,7 @@ class MealController extends BaseController
 	{
 		$this->checkAccessLoggedIn();
 		$this->checkHouseholdSelected();
+		$this->setActiveMenuLink(self::MENU_MEAL);
 
 		$mealForm = $this->createForm(MealType::class);
 		$mealForm->handleRequest($request);
@@ -95,6 +97,7 @@ class MealController extends BaseController
 	{
 		$this->checkAccessLoggedIn();
 		$this->checkHouseholdSelected();
+		$this->setActiveMenuLink(self::MENU_MEAL);
 
 		$meal = $this->findMealForUrl($url);
 		if ($meal === null) {
@@ -131,6 +134,7 @@ class MealController extends BaseController
 	{
 		$this->checkAccessLoggedIn();
 		$this->checkHouseholdSelected();
+		$this->setActiveMenuLink(self::MENU_MEAL);
 
 		$meal = $this->findMealForUrl($url);
 		if ($meal === null) {

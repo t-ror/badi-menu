@@ -11,6 +11,11 @@ use Symfony\Component\HttpFoundation\Response;
 abstract class BaseController extends AbstractController
 {
 
+	public const MENU_HOUSEHOLD = 'household';
+	public const MENU_MEAL = 'meal';
+
+	private ?string $activeMenuLink = null;
+
 	/**
 	 * @return array<string, string>
 	 */
@@ -33,6 +38,8 @@ abstract class BaseController extends AbstractController
 		$parameters['selectedHousehold'] = $loggedUser !== null
 			? $this->getHouseholdManager()->getSelectedHouseholdForUserOrNull($loggedUser)
 			: null;
+
+		$parameters['activeMenuLink'] = $this->activeMenuLink;
 
 		return parent::render(
 			$view,
@@ -104,6 +111,11 @@ abstract class BaseController extends AbstractController
 	protected function getHouseholdManager(): HouseholdManager
 	{
 		return $this->container->get(HouseholdManager::class);
+	}
+
+	protected function setActiveMenuLink(?string $activeMenuLink): void
+	{
+		$this->activeMenuLink = $activeMenuLink;
 	}
 
 }
