@@ -58,6 +58,7 @@ class MealController extends BaseController
 			->leftJoin('meal.mealIngredients', 'mealIngredients')
 			->leftJoin('mealIngredients.ingredient', 'ingredient')
 			->leftJoin('meal.mealTags', 'mealTags')
+			->addOrderBy('meal.name', 'ASC')
 			->getQuery()
 			->getResult();
 
