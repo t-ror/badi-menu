@@ -26,7 +26,7 @@
 			<img class="app-img-meal" src="{{ meal.image|checkNoImg }}" alt="{{ meal.name }}">
 		{% endif %}
 		<p>{{ meal.description|raw }}</p>
-		{% if meal.mealTags is not empty %}
+		{% if meal.mealIngredients is not empty %}
 			<h2>Ingredience</h2>
 			<ul>
 				{% for mealIngredient in meal.mealIngredients %}
