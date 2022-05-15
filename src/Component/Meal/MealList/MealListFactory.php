@@ -2,6 +2,7 @@
 
 namespace App\Component\Meal\MealList;
 
+use App\Entity\User;
 use App\Service\Form\ListFilterFormFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use InvalidArgumentException;
@@ -40,9 +41,10 @@ class MealListFactory
 		$this->request = $request;
 	}
 
-	public function create(): MealList
+	public function create(User $user): MealList
 	{
 		return new MealList(
+			$user,
 			$this->twig,
 			$this->entityManager,
 			$this->request,

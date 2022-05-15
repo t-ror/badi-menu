@@ -77,4 +77,13 @@ class UserMealManager
 		$this->entityManager->persist($userMeal);
 	}
 
+	public function toggleFavorite(User $user, Meal $meal): void
+	{
+		if ($user->isMealFavourite($meal)) {
+			$this->removeFavorite($user, $meal);
+		} else {
+			$this->addFavorite($user, $meal);
+		}
+	}
+
 }

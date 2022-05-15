@@ -5,6 +5,7 @@ namespace App\Controller\Meal;
 use _PHPStan_76800bfb5\Nette\Utils\DateTime;
 use App\Component\Meal\MealList\MealListFactory;
 use App\Controller\BaseController;
+use App\Entity\Household;
 use App\Entity\HouseholdMeal;
 use App\Entity\Meal;
 use App\Entity\User;
@@ -16,6 +17,7 @@ use App\Utils\Strings;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -51,13 +53,13 @@ class MealController extends BaseController
 
 		$user = $this->getUserManager()->getLoggedUser();
 		$household = $this->getHouseholdManager()->getSelectedHouseholdForUser($user);
-		$mealList = $this->mealListFactory->create()
+		$mealList = $this->mealListFactory->create($user)
 			->forHousehold($household)
 			->orderByName()
 			->addFilterName()
 			->addFilterMealTags()
-			->addFilterCanBePreparedBy($user)
-			->addFilterFavorite($user);
+			->addFilterCanBePreparedBy()
+			->addFilterFavorite();
 
 		return $this->renderByClass('list.html.twig', [
 			'mealList' => $mealList->render(),
@@ -89,7 +91,9 @@ class MealController extends BaseController
 		$this->checkHouseholdSelected();
 		$this->setActiveMenuLink(self::MENU_MEAL);
 
-		$meal = $this->findMealForUrl($url);
+		$user = $this->getUserManager()->getLoggedUser();
+		$household = $this->getHouseholdManager()->getSelectedHouseholdForUser($user);
+		$meal = $this->findMealForUrl($url, $household);
 		if ($meal === null) {
 			$this->addFlash('warning', 'Vybrané jídlo nebylo nalezeno');
 
@@ -126,7 +130,9 @@ class MealController extends BaseController
 		$this->checkHouseholdSelected();
 		$this->setActiveMenuLink(self::MENU_MEAL);
 
-		$meal = $this->findMealForUrl($url);
+		$user = $this->getUserManager()->getLoggedUser();
+		$household = $this->getHouseholdManager()->getSelectedHouseholdForUser($user);
+		$meal = $this->findMealForUrl($url, $household);
 		if ($meal === null) {
 			$this->addFlash('warning', 'Vybrané jídlo nebylo nalezeno');
 
@@ -136,6 +142,27 @@ class MealController extends BaseController
 		return $this->renderByClass('detail.html.twig', [
 			'meal' => $meal,
 		]);
+	}
+
+	public function toggleFavorite(string $url): RedirectResponse
+	{
+		$this->checkAccessLoggedIn();
+		$this->checkHouseholdSelected();
+		$this->setActiveMenuLink(self::MENU_MEAL);
+
+		$user = $this->getUserManager()->getLoggedUser();
+		$household = $this->getHouseholdManager()->getSelectedHouseholdForUser($user);
+		$meal = $this->findMealForUrl($url, $household);
+		if ($meal === null) {
+			$this->addFlash('warning', 'Vybrané jídlo nebylo nalezeno');
+
+			return $this->redirectToRoute('mealList');
+		}
+
+		$this->userMealManager->toggleFavorite($user, $meal);
+		$this->entityManager->flush();
+
+		return $this->redirectToRoute('mealDetail', ['url' => $meal->getUrl()]);
 	}
 
 	private function processEditForm(FormInterface $form, Meal $meal, User $user): void
@@ -260,17 +287,21 @@ class MealController extends BaseController
 		);
 	}
 
-	private function findMealForUrl(string $url): ?Meal
+	private function findMealForUrl(string $url, Household $household): ?Meal
 	{
 		return $this->entityManager->createQueryBuilder()
 			->select('meal')
 			->addSelect('mealIngredient')
 			->addSelect('ingredient')
+			->addSelect('householdMeals')
 			->from(Meal::class, 'meal')
 			->leftJoin('meal.mealIngredients', 'mealIngredient')
 			->leftJoin('mealIngredient.ingredient', 'ingredient')
+			->leftJoin('meal.householdMeals', 'householdMeals')
 			->where('meal.url = :url')
 			->setParameter('url', $url)
+			->andWhere('householdMeals.household = :household')
+			->setParameter('household', $household)
 			->getQuery()
 			->getOneOrNullResult();
 	}

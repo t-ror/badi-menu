@@ -46,8 +46,10 @@ class MealList extends Component
 	private EventDispatcherInterface $eventDispatcher;
 	private MealTagRepository $mealTagRepository;
 	private UserRepository $userRepository;
+	private User $user;
 
 	public function __construct(
+		User $user,
 		Environment $twig,
 		EntityManagerInterface $entityManager,
 		Request $request,
@@ -65,6 +67,7 @@ class MealList extends Component
 		$this->queryBuilder = $this->getBaseQueryBuilder();
 		$this->mealTagRepository = $entityManager->getRepository(MealTag::class);
 		$this->userRepository = $entityManager->getRepository(User::class);
+		$this->user = $user;
 	}
 
 	public function render(): string
@@ -80,6 +83,7 @@ class MealList extends Component
 			'meals' => $meals,
 			'filterForm' => $filterForm->createView(),
 			'filters' => $this->filters,
+			'loggedUser' => $this->user,
 		]);
 	}
 
@@ -157,13 +161,13 @@ class MealList extends Component
 		return $this;
 	}
 
-	public function addFilterCanBePreparedBy(User $user): self
+	public function addFilterCanBePreparedBy(): self
 	{
 		if ($this->filters->containsKey(self::FILTER_CAN_BE_PREPARED_BY)) {
 			throw new InvalidArgumentException('Name filter has been already added');
 		}
 
-		$filter = new FilterMultiSelect(self::FILTER_CAN_BE_PREPARED_BY, 'Umí připravit', $this->userRepository->findPairs($this->household, $user));
+		$filter = new FilterMultiSelect(self::FILTER_CAN_BE_PREPARED_BY, 'Umí připravit', $this->userRepository->findPairs($this->household, $this->user));
 
 		$value = $this->request->get(self::FILTER_CAN_BE_PREPARED_BY);
 		if ($value !== null) {
@@ -189,7 +193,7 @@ class MealList extends Component
 		return $this;
 	}
 
-	public function addFilterFavorite(User $user): self
+	public function addFilterFavorite(): self
 	{
 		if ($this->filters->containsKey(self::FILTER_FAVORITE)) {
 			throw new InvalidArgumentException('Name filter has been already added');
@@ -211,7 +215,7 @@ class MealList extends Component
 			);
 
 			$this->queryBuilder->andWhere($userMealExists)
-				->setParameter(':user', $user);
+				->setParameter(':user', $this->user);
 		}
 
 		$this->filters->add($filter);
