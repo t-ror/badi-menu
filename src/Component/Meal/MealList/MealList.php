@@ -6,8 +6,11 @@ use App\Component\Household\Component;
 use App\Entity\Household;
 use App\Entity\Meal;
 use App\Entity\MealTag;
+use App\Entity\User;
+use App\Entity\UserMeal;
 use App\Event\FormSubmittedEvent;
 use App\Repository\MealTagRepository;
+use App\Repository\UserRepository;
 use App\Service\Form\ListFilterFormFactory;
 use App\ValueObject\Lists\Filter\Filter;
 use App\ValueObject\Lists\Filter\FilterCollection;
@@ -26,8 +29,10 @@ class MealList extends Component
 
 	private const FILTER_KEY_NAME = 'name';
 	private const FILTER_KEY_MEAL_TAGS = 'mealTags';
+	private const FILTER_CAN_BE_PREPARED_BY = 'canBePreparedBy';
 
 	private QueryBuilder $queryBuilder;
+	private ?Household $household = null;
 
 	/** @var FilterCollection<Filter> */
 	private FilterCollection $filters;
@@ -38,6 +43,7 @@ class MealList extends Component
 	private ListFilterFormFactory $listFilterFormFactory;
 	private EventDispatcherInterface $eventDispatcher;
 	private MealTagRepository $mealTagRepository;
+	private UserRepository $userRepository;
 
 	public function __construct(
 		Environment $twig,
@@ -56,6 +62,7 @@ class MealList extends Component
 
 		$this->queryBuilder = $this->getBaseQueryBuilder();
 		$this->mealTagRepository = $entityManager->getRepository(MealTag::class);
+		$this->userRepository = $entityManager->getRepository(User::class);
 	}
 
 	public function render(): string
@@ -78,6 +85,8 @@ class MealList extends Component
 	{
 		$this->queryBuilder->andWhere('householdMeals.household = :household')
 			->setParameter('household', $household);
+
+		$this->household = $household;
 
 		return $this;
 	}
@@ -146,6 +155,38 @@ class MealList extends Component
 		return $this;
 	}
 
+	public function addFilterCanBePreparedBy(): self
+	{
+		if ($this->filters->containsKey(self::FILTER_CAN_BE_PREPARED_BY)) {
+			throw new InvalidArgumentException('Name filter has been already added');
+		}
+
+		$filter = new FilterMultiSelect(self::FILTER_CAN_BE_PREPARED_BY, 'Umí připravit', $this->userRepository->findPairs($this->household));
+
+		$value = $this->request->get(self::FILTER_CAN_BE_PREPARED_BY);
+		if ($value !== null) {
+			$filter->setValue($value);
+			$expr = $this->entityManager->getExpressionBuilder();
+			$values = explode(FilterMultiSelect::URL_VALUES_SEPARATOR, $value);
+
+			$userMealExists = $expr->exists(
+				$this->entityManager->createQueryBuilder()
+					->select('1')
+					->from(UserMeal::class, 'userMeal')
+					->where('userMeal.meal = meal')
+					->andWhere('userMeal.user IN (:userIds)')
+					->andWhere('userMeal.ableToPrepare = 1')
+			);
+
+			$this->queryBuilder->andWhere($userMealExists)
+				->setParameter(':userIds', $values);
+		}
+
+		$this->filters->add($filter);
+
+		return $this;
+	}
+
 	private function getBaseQueryBuilder(): QueryBuilder
 	{
 		return $this->entityManager->createQueryBuilder()
@@ -167,8 +208,14 @@ class MealList extends Component
 		$values = $filterForm->getData();
 		$parameters = [];
 		foreach ($values as $key => $value) {
+			if ($value === null) {
+				continue;
+			}
+
 			if (is_array($value)) {
-				$parameters[$key] = implode(FilterMultiSelect::URL_VALUES_SEPARATOR, $value);
+				if (count($value) > 0) {
+					$parameters[$key] = implode(FilterMultiSelect::URL_VALUES_SEPARATOR, $value);
+				}
 
 				continue;
 			}

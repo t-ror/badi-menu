@@ -2,8 +2,11 @@
 
 namespace App\Repository;
 
+use App\Entity\Household;
 use App\Entity\User;
+use App\Entity\UserHousehold;
 use Doctrine\ORM\EntityRepository;
+use Nette\Utils\Arrays;
 
 class UserRepository extends EntityRepository
 {
@@ -33,6 +36,38 @@ class UserRepository extends EntityRepository
 			->setParameter('email', $email)
 			->getQuery()
 			->getOneOrNullResult();
+	}
+
+	/**
+	 * @return array<int, string>
+	 */
+	public function findPairs(?Household $household = null): array
+	{
+		$queryBuilder = $this->createQueryBuilder('users')
+			->addSelect('users.id')
+			->addSelect('users.name');
+
+		if ($household !== null) {
+			$expr = $this->getEntityManager()->getExpressionBuilder();
+			$householdExists = $expr->exists(
+				$this->getEntityManager()->createQueryBuilder()
+					->select('1')
+					->from(UserHousehold::class, 'userHousehold')
+					->where('userHousehold.user = users')
+					->andWhere('userHousehold.household = :household')
+					->andWhere('userHousehold.allowed = 1')
+			);
+
+			$queryBuilder->andWhere($householdExists)
+				->setParameter('household', $household);
+		}
+
+		$mealTags = $queryBuilder->getQuery()->getArrayResult();
+
+		/** @var array<int, string> $pairs */
+		$pairs = Arrays::associate($mealTags, 'name=id');
+
+		return $pairs;
 	}
 
 }
