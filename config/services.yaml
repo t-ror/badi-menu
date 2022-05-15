@@ -32,3 +32,6 @@ services:
     App\EventListener\RedirectExceptionEventListener:
         tags:
             - { name: kernel.event_listener, event: kernel.exception }
+    App\EventListener\FormSubscriber:
+        tags:
+            - { name: form.filter_form_submitted, event: onFormSubmitted }

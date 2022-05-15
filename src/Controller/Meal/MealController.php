@@ -53,7 +53,8 @@ class MealController extends BaseController
 		$household = $this->getHouseholdManager()->getSelectedHouseholdForUser($user);
 		$mealList = $this->mealListFactory->create()
 			->forHousehold($household)
-			->orderByName();
+			->orderByName()
+			->addFilterName();
 
 		return $this->renderByClass('list.html.twig', [
 			'mealList' => $mealList->render(),

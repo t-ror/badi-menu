@@ -22,3 +22,4 @@ parameters:
 
     ignoreErrors:
         - '#^Property (.)+ \((.)+\) does not accept Doctrine\\ORM\\EntityRepository<(.)+>\.$#'
+        - '#^Return type (.)+ of method (.)+\:\:getSubscribedEvents\(\) should be covariant with return type (.)+ of method Symfony\\Component\\EventDispatcher\\EventSubscriberInterface::getSubscribedEvents\(\)$#'

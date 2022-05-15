@@ -1,4 +1,5 @@
 <div class="container">
+	{{ form(filterForm) }}
 	{% for meal in meals %}
 		<div class="row app-list-row app-list-row-sm">
 			<a href="{{ path('mealDetail', {url: meal.url}) }}" class="app-list-row-header col">

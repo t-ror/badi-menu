@@ -5,33 +5,63 @@ namespace App\Component\Meal\MealList;
 use App\Component\Household\Component;
 use App\Entity\Household;
 use App\Entity\Meal;
+use App\Event\FormSubmittedEvent;
+use App\Service\Form\ListFilterFormFactory;
+use App\ValueObject\Lists\Filter\Filter;
+use App\ValueObject\Lists\Filter\FilterText;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 use InvalidArgumentException;
+use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Twig\Environment;
 
 class MealList extends Component
 {
 
+	private const FILTER_KEY_NAME = 'name';
+
 	private QueryBuilder $queryBuilder;
+
+	/** @var array<string, Filter> */
+	private array $filters = [];
 
 	private Environment $twig;
 	private EntityManagerInterface $entityManager;
+	private Request $request;
+	private ListFilterFormFactory $listFilterFormFactory;
+	private EventDispatcherInterface $eventDispatcher;
 
-	public function __construct(Environment $twig, EntityManagerInterface $entityManager)
+	public function __construct(
+		Environment $twig,
+		EntityManagerInterface $entityManager,
+		Request $request,
+		ListFilterFormFactory $listFilterFormFactory,
+		EventDispatcherInterface $eventDispatcher
+	)
 	{
 		$this->twig = $twig;
 		$this->entityManager = $entityManager;
+		$this->request = $request;
+		$this->listFilterFormFactory = $listFilterFormFactory;
 
 		$this->queryBuilder = $this->getBaseQueryBuilder();
+		$this->eventDispatcher = $eventDispatcher;
 	}
 
 	public function render(): string
 	{
 		$meals = $this->queryBuilder->getQuery()->getResult();
+		$filterForm = $this->listFilterFormFactory->create($this->filters);
+		$filterForm->handleRequest($this->request);
+		if ($filterForm->isSubmitted()) {
+			$this->processFilterForm($filterForm);
+		}
 
 		return $this->twig->render($this->getTemplatePath('mealList.html.twig'), [
 			'meals' => $meals,
+			'filterForm' => $filterForm->createView(),
 		]);
 	}
 
@@ -54,6 +84,25 @@ class MealList extends Component
 		return $this;
 	}
 
+	public function addFilterName(): self
+	{
+		if (array_key_exists(self::FILTER_KEY_NAME, $this->filters)) {
+			throw new InvalidArgumentException('Name filter has been already added');
+		}
+
+		$this->filters[self::FILTER_KEY_NAME] = new FilterText(self::FILTER_KEY_NAME, 'Název');
+
+		$value = $this->request->get(self::FILTER_KEY_NAME);
+		if ($value !== null) {
+			$this->filters[self::FILTER_KEY_NAME]->setValue($value);
+
+			$this->queryBuilder->andWhere('meal.name LIKE :name')
+				->setParameter('name', '%' . $value . '%');
+		}
+
+		return $this;
+	}
+
 	private function getBaseQueryBuilder(): QueryBuilder
 	{
 		return $this->entityManager->createQueryBuilder()
@@ -68,6 +117,13 @@ class MealList extends Component
 			->leftJoin('mealIngredients.ingredient', 'ingredient')
 			->leftJoin('meal.mealTags', 'mealTags')
 			->leftJoin('meal.householdMeals', 'householdMeals');
+	}
+
+	private function processFilterForm(FormInterface $filterForm): void
+	{
+		$values = $filterForm->getData();
+		$submittedEvent = new FormSubmittedEvent($values, 'mealList');
+		$this->eventDispatcher->dispatch($submittedEvent, FormSubmittedEvent::NAME_FILTER_FORM);
 	}
 
 }

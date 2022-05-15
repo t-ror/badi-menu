@@ -84,7 +84,7 @@ abstract class BaseController extends AbstractController
 	 * @param array<string, mixed> $parameters
 	 * @throws RedirectException
 	 */
-	protected function redirectClean(string $route, array $parameters = []): void
+	public function redirectClean(string $route, array $parameters = []): void
 	{
 		throw new RedirectException($this->redirectToRoute($route, $parameters));
 	}
