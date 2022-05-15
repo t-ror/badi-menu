@@ -4,6 +4,9 @@ namespace App\Service\Form;
 
 use App\ValueObject\Lists\Filter\Filter;
 use App\ValueObject\Lists\Filter\FilterCollection;
+use App\ValueObject\Lists\Filter\FilterMultiSelect;
+use App\ValueObject\Lists\Filter\FilterText;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -27,8 +30,10 @@ class ListFilterFormFactory
 	public function create(FilterCollection $filterCollection): FormInterface
 	{
 		$filterForm = $this->formFactory->create(FormType::class);
+
+		/** @var Filter $filter */
 		foreach ($filterCollection as $filter) {
-			if ($filter->isFilterText()) {
+			if ($filter instanceof FilterText) {
 				$filterForm->add($filter->getName(), TextType::class, [
 					'data' => $filter->getValue(),
 					'label' => $filter->getLabel(),
@@ -41,6 +46,19 @@ class ListFilterFormFactory
 							'max' => 255,
 							'maxMessage' => $filter->getLabel() . ' může obsahovat maximálně {{ limit }} znaků',
 						]),
+					],
+				]);
+			}
+
+			if ($filter instanceof FilterMultiSelect) {
+				$filterForm->add($filter->getName(), ChoiceType::class, [
+					'data' => $filter->getValues(),
+					'label' => $filter->getLabel(),
+					'required' => false,
+					'multiple' => true,
+					'choices' => $filter->getOptions(),
+					'attr' => [
+						'class' => 'app_select2',
 					],
 				]);
 			}

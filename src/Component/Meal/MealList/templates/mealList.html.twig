@@ -17,7 +17,13 @@
 		<div class="mb-2">
 			aktivní:
 			{% for filter in filters.withValue %}
-				<a href="{{ path('mealList', filters.withoutFilter(filter).asParametersArray) }}" class="btn btn-sm btn-secondary">{{ filter.label }} - "{{ filter.value }}" <i class="fa fa-xmark"></i></a>
+				{% if filter.isFilterMultiSelect %}
+					{% for selectValue, selectValueFilterView in filter.valuesForView %}
+						<a href="{{ path('mealList', filters.asParametersArray(filter, selectValue)) }}" class="btn btn-sm btn-secondary">{{ filter.label }} - {{ selectValueFilterView }} <i class="fa fa-xmark"></i></a>
+					{% endfor %}
+				{% else %}
+					<a href="{{ path('mealList', filters.asParametersArray(filter)) }}" class="btn btn-sm btn-secondary">{{ filter.label }} - {{ filter.valueForView }} <i class="fa fa-xmark"></i></a>
+				{% endif %}
 			{% endfor %}
 			<div class="d-grid mt-2 mb-2">
 				<a href="{{ path('mealList') }}" class="btn btn-outline-danger">Zrušit filtry</a>

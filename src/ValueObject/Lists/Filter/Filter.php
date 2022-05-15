@@ -35,9 +35,19 @@ abstract class Filter
 		$this->value = $value;
 	}
 
+	public function getValueForView(): ?string
+	{
+		return sprintf('"%s"', $this->getValue());
+	}
+
 	public function isFilterText(): bool
 	{
 		return $this instanceof FilterText;
+	}
+
+	public function isFilterMultiSelect(): bool
+	{
+		return $this instanceof FilterMultiSelect;
 	}
 
 }

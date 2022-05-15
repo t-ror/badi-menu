@@ -5,10 +5,13 @@ namespace App\Component\Meal\MealList;
 use App\Component\Household\Component;
 use App\Entity\Household;
 use App\Entity\Meal;
+use App\Entity\MealTag;
 use App\Event\FormSubmittedEvent;
+use App\Repository\MealTagRepository;
 use App\Service\Form\ListFilterFormFactory;
 use App\ValueObject\Lists\Filter\Filter;
 use App\ValueObject\Lists\Filter\FilterCollection;
+use App\ValueObject\Lists\Filter\FilterMultiSelect;
 use App\ValueObject\Lists\Filter\FilterText;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
@@ -22,6 +25,7 @@ class MealList extends Component
 {
 
 	private const FILTER_KEY_NAME = 'name';
+	private const FILTER_KEY_MEAL_TAGS = 'mealTags';
 
 	private QueryBuilder $queryBuilder;
 
@@ -33,6 +37,7 @@ class MealList extends Component
 	private Request $request;
 	private ListFilterFormFactory $listFilterFormFactory;
 	private EventDispatcherInterface $eventDispatcher;
+	private MealTagRepository $mealTagRepository;
 
 	public function __construct(
 		Environment $twig,
@@ -50,6 +55,7 @@ class MealList extends Component
 		$this->filters = new FilterCollection();
 
 		$this->queryBuilder = $this->getBaseQueryBuilder();
+		$this->mealTagRepository = $entityManager->getRepository(MealTag::class);
 	}
 
 	public function render(): string
@@ -89,7 +95,7 @@ class MealList extends Component
 
 	public function addFilterName(): self
 	{
-		if ($this->filters->containsKey('name')) {
+		if ($this->filters->containsKey(self::FILTER_KEY_NAME)) {
 			throw new InvalidArgumentException('Name filter has been already added');
 		}
 
@@ -101,6 +107,38 @@ class MealList extends Component
 
 			$this->queryBuilder->andWhere('meal.name LIKE :name')
 				->setParameter('name', '%' . $value . '%');
+		}
+
+		$this->filters->add($filter);
+
+		return $this;
+	}
+
+	public function addFilterMealTags(): self
+	{
+		if ($this->filters->containsKey(self::FILTER_KEY_MEAL_TAGS)) {
+			throw new InvalidArgumentException('Name filter has been already added');
+		}
+
+		$filter = new FilterMultiSelect(self::FILTER_KEY_MEAL_TAGS, 'Štítky', $this->mealTagRepository->findPairs());
+
+		$values = $this->request->get(self::FILTER_KEY_MEAL_TAGS);
+		if ($values !== null) {
+			$filter->setValue($values);
+			$expr = $this->entityManager->getExpressionBuilder();
+
+			foreach (explode(FilterMultiSelect::URL_VALUES_SEPARATOR, $values) as $value) {
+				$mealWithTagExists = $expr->exists(
+					$this->entityManager->createQueryBuilder()
+						->select('1')
+						->from(Meal::class, 'meal' . $value)
+						->leftJoin('meal.mealTags', 'mealTags' . $value)
+						->where('mealTags' . $value . '.id = :mealTagId' . $value)
+				);
+
+				$this->queryBuilder->andWhere($mealWithTagExists)
+					->setParameter(':mealTagId' . $value, $value);
+			}
 		}
 
 		$this->filters->add($filter);
@@ -127,7 +165,18 @@ class MealList extends Component
 	private function processFilterForm(FormInterface $filterForm): void
 	{
 		$values = $filterForm->getData();
-		$submittedEvent = new FormSubmittedEvent($values, 'mealList');
+		$parameters = [];
+		foreach ($values as $key => $value) {
+			if (is_array($value)) {
+				$parameters[$key] = implode(FilterMultiSelect::URL_VALUES_SEPARATOR, $value);
+
+				continue;
+			}
+
+			$parameters[$key] = $value;
+		}
+
+		$submittedEvent = new FormSubmittedEvent($parameters, 'mealList');
 		$this->eventDispatcher->dispatch($submittedEvent, FormSubmittedEvent::NAME_FILTER_FORM);
 	}
 

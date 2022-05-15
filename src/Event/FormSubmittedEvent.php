@@ -9,12 +9,12 @@ class FormSubmittedEvent extends Event
 
 	public const NAME_FILTER_FORM = 'form.filter_form_submitted';
 
-	/** @var array<string, mixed> */
+	/** @var array<int|string, mixed> */
 	private array $values;
 	private string $redirectToAction;
 
 	/**
-	 * @param array<string, mixed> $values
+	 * @param array<int|string, mixed> $values
 	 */
 	public function __construct(array $values, string $redirectToAction)
 	{
@@ -23,7 +23,7 @@ class FormSubmittedEvent extends Event
 	}
 
 	/**
-	 * @return array<string, mixed>
+	 * @return array<int|string, mixed>
 	 */
 	public function getValues(): array
 	{

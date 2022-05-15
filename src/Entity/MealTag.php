@@ -6,7 +6,7 @@ use App\Entity\Traits\TId;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity()
+ * @ORM\Entity(repositoryClass="App\Repository\MealTagRepository")
  * @ORM\Table(name="app_meal_tag")
  */
 class MealTag extends Entity
