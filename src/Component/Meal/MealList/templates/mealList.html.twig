@@ -1,8 +1,21 @@
+<div class="accordion mb-2" id="accordionFilters">
+	<div class="accordion-item">
+		<h2 class="accordion-header" id="headingOne">
+			<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+				Filtry
+			</button>
+		</h2>
+		<div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionFilters">
+			<div class="accordion-body">
+				{{ form(filterForm) }}
+			</div>
+		</div>
+	</div>
+</div>
 <div class="container">
-	{{ form(filterForm) }}
 	{% if not filters.withValue.empty %}
 		<div class="mb-2">
-			<strong>Filtry: </strong>
+			aktivní:
 			{% for filter in filters.withValue %}
 				<a href="{{ path('mealList', filters.withoutFilter(filter).asParametersArray) }}" class="btn btn-sm btn-secondary">{{ filter.label }} - "{{ filter.value }}" <i class="fa fa-xmark"></i></a>
 			{% endfor %}
