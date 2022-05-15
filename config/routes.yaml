@@ -35,5 +35,8 @@ mealEdit:
   path: /jidlo/upravit/{url}
   controller: App\Controller\Meal\MealController::edit
 mealToggleFavorite:
-  path: /jidlo/oblíbený/{url}
+  path: /jidlo/oblíbeny/{url}
   controller: App\Controller\Meal\MealController::toggleFavorite
+mealToggleAbleToPrepare:
+  path: /jidlo/umim-pripravit/{url}
+  controller: App\Controller\Meal\MealController::toggleAbleToPrepare

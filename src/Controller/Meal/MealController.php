@@ -165,6 +165,27 @@ class MealController extends BaseController
 		return $this->redirectToRoute('mealDetail', ['url' => $meal->getUrl()]);
 	}
 
+	public function toggleAbleToPrepare(string $url): RedirectResponse
+	{
+		$this->checkAccessLoggedIn();
+		$this->checkHouseholdSelected();
+		$this->setActiveMenuLink(self::MENU_MEAL);
+
+		$user = $this->getUserManager()->getLoggedUser();
+		$household = $this->getHouseholdManager()->getSelectedHouseholdForUser($user);
+		$meal = $this->findMealForUrl($url, $household);
+		if ($meal === null) {
+			$this->addFlash('warning', 'Vybrané jídlo nebylo nalezeno');
+
+			return $this->redirectToRoute('mealList');
+		}
+
+		$this->userMealManager->toggleAbleToPrepare($user, $meal);
+		$this->entityManager->flush();
+
+		return $this->redirectToRoute('mealDetail', ['url' => $meal->getUrl()]);
+	}
+
 	private function processEditForm(FormInterface $form, Meal $meal, User $user): void
 	{
 		$values = $form->getData();

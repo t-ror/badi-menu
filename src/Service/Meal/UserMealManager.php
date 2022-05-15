@@ -86,4 +86,13 @@ class UserMealManager
 		}
 	}
 
+	public function toggleAbleToPrepare(User $user, Meal $meal): void
+	{
+		if ($user->isAbleToPrepareMeal($meal)) {
+			$this->removeAbleToPrepare($user, $meal);
+		} else {
+			$this->addAbleToPrepare($user, $meal);
+		}
+	}
+
 }

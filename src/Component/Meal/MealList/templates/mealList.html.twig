@@ -46,10 +46,13 @@
 					</span>
 				</div>
 			</a>
-			{% if meal.mealTags is not empty or loggedUser.isMealFavourite(meal) %}
+			{% if meal.mealTags is not empty or loggedUser.isMealFavourite(meal) or loggedUser.isAbleToPrepareMeal(meal) %}
 				<div class="mt-2">
 					{% if loggedUser.isMealFavourite(meal) %}
 						<span class="badge bg-danger">Oblíbené <i class="fa-solid fa-heart"></i></span>
+					{% endif %}
+					{% if loggedUser.isAbleToPrepareMeal(meal) %}
+						<span class="badge bg-warning">Umím připravit <i class="fa fa-spoon"></i></span>
 					{% endif %}
 					{% for mealTag in meal.mealTags %}
 						<span class="badge bg-primary">{{ mealTag.name }}</span>
