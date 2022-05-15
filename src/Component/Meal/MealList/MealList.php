@@ -13,6 +13,7 @@ use App\Repository\MealTagRepository;
 use App\Repository\UserRepository;
 use App\Service\Form\ListFilterFormFactory;
 use App\ValueObject\Lists\Filter\Filter;
+use App\ValueObject\Lists\Filter\FilterCheckBox;
 use App\ValueObject\Lists\Filter\FilterCollection;
 use App\ValueObject\Lists\Filter\FilterMultiSelect;
 use App\ValueObject\Lists\Filter\FilterText;
@@ -30,6 +31,7 @@ class MealList extends Component
 	private const FILTER_KEY_NAME = 'name';
 	private const FILTER_KEY_MEAL_TAGS = 'mealTags';
 	private const FILTER_CAN_BE_PREPARED_BY = 'canBePreparedBy';
+	private const FILTER_FAVORITE = 'favorite';
 
 	private QueryBuilder $queryBuilder;
 	private ?Household $household = null;
@@ -155,13 +157,13 @@ class MealList extends Component
 		return $this;
 	}
 
-	public function addFilterCanBePreparedBy(): self
+	public function addFilterCanBePreparedBy(User $user): self
 	{
 		if ($this->filters->containsKey(self::FILTER_CAN_BE_PREPARED_BY)) {
 			throw new InvalidArgumentException('Name filter has been already added');
 		}
 
-		$filter = new FilterMultiSelect(self::FILTER_CAN_BE_PREPARED_BY, 'Umí připravit', $this->userRepository->findPairs($this->household));
+		$filter = new FilterMultiSelect(self::FILTER_CAN_BE_PREPARED_BY, 'Umí připravit', $this->userRepository->findPairs($this->household, $user));
 
 		$value = $this->request->get(self::FILTER_CAN_BE_PREPARED_BY);
 		if ($value !== null) {
@@ -180,6 +182,36 @@ class MealList extends Component
 
 			$this->queryBuilder->andWhere($userMealExists)
 				->setParameter(':userIds', $values);
+		}
+
+		$this->filters->add($filter);
+
+		return $this;
+	}
+
+	public function addFilterFavorite(User $user): self
+	{
+		if ($this->filters->containsKey(self::FILTER_FAVORITE)) {
+			throw new InvalidArgumentException('Name filter has been already added');
+		}
+
+		$filter = new FilterCheckBox(self::FILTER_FAVORITE, 'Oblíbené');
+
+		$value = $this->request->get(self::FILTER_FAVORITE);
+		if ($value === FilterCheckBox::BOOL_TRUE) {
+			$filter->setValue($value);
+			$expr = $this->entityManager->getExpressionBuilder();
+			$userMealExists = $expr->exists(
+				$this->entityManager->createQueryBuilder()
+					->select('1')
+					->from(UserMeal::class, 'userMeal2')
+					->where('userMeal2.meal = meal')
+					->andWhere('userMeal2.user = :user')
+					->andWhere('userMeal2.favorite = 1')
+			);
+
+			$this->queryBuilder->andWhere($userMealExists)
+				->setParameter(':user', $user);
 		}
 
 		$this->filters->add($filter);

@@ -37,7 +37,7 @@ abstract class Filter
 
 	public function getValueForView(): ?string
 	{
-		return sprintf('"%s"', $this->getValue());
+		return sprintf('%s - "%s"', $this->getLabel(), $this->getValue());
 	}
 
 	public function isFilterText(): bool

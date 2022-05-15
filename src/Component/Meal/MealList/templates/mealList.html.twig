@@ -19,10 +19,10 @@
 			{% for filter in filters.withValue %}
 				{% if filter.isFilterMultiSelect %}
 					{% for selectValue, selectValueFilterView in filter.valuesForView %}
-						<a href="{{ path('mealList', filters.asParametersArray(filter, selectValue)) }}" class="btn btn-sm btn-secondary">{{ filter.label }} - {{ selectValueFilterView }} <i class="fa fa-xmark"></i></a>
+						<a href="{{ path('mealList', filters.asParametersArray(filter, selectValue)) }}" class="btn btn-sm btn-secondary">{{ selectValueFilterView }} <i class="fa fa-xmark"></i></a>
 					{% endfor %}
 				{% else %}
-					<a href="{{ path('mealList', filters.asParametersArray(filter)) }}" class="btn btn-sm btn-secondary">{{ filter.label }} - {{ filter.valueForView }} <i class="fa fa-xmark"></i></a>
+					<a href="{{ path('mealList', filters.asParametersArray(filter)) }}" class="btn btn-sm btn-secondary">{{ filter.valueForView }} <i class="fa fa-xmark"></i></a>
 				{% endif %}
 			{% endfor %}
 			<div class="d-grid mt-2 mb-2">

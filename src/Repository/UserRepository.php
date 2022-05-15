@@ -41,11 +41,20 @@ class UserRepository extends EntityRepository
 	/**
 	 * @return array<int, string>
 	 */
-	public function findPairs(?Household $household = null): array
+	public function findPairs(?Household $household = null, ?User $currenUser = null): array
 	{
-		$queryBuilder = $this->createQueryBuilder('users')
-			->addSelect('users.id')
-			->addSelect('users.name');
+		if ($currenUser !== null) {
+			$queryBuilder = $this->createQueryBuilder('users')
+				->addSelect('users.id')
+				->addSelect('CASE WHEN users = :currentUser THEN CONCAT(users.name, \' (Já)\') ELSE users.name END AS name')
+				->addSelect('CASE WHEN users = :currentUser THEN 1 ELSE 0 END AS HIDDEN orderCurrentUser')
+				->setParameter('currentUser', $currenUser)
+				->orderBy('orderCurrentUser', 'DESC');
+		} else {
+			$queryBuilder = $this->createQueryBuilder('users')
+				->addSelect('users.id')
+				->addSelect('users.name');
+		}
 
 		if ($household !== null) {
 			$expr = $this->getEntityManager()->getExpressionBuilder();
@@ -62,10 +71,10 @@ class UserRepository extends EntityRepository
 				->setParameter('household', $household);
 		}
 
-		$mealTags = $queryBuilder->getQuery()->getArrayResult();
+		$userMeals = $queryBuilder->getQuery()->getArrayResult();
 
 		/** @var array<int, string> $pairs */
-		$pairs = Arrays::associate($mealTags, 'name=id');
+		$pairs = Arrays::associate($userMeals, 'name=id');
 
 		return $pairs;
 	}

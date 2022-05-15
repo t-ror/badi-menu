@@ -3,9 +3,11 @@
 namespace App\Service\Form;
 
 use App\ValueObject\Lists\Filter\Filter;
+use App\ValueObject\Lists\Filter\FilterCheckBox;
 use App\ValueObject\Lists\Filter\FilterCollection;
 use App\ValueObject\Lists\Filter\FilterMultiSelect;
 use App\ValueObject\Lists\Filter\FilterText;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -48,9 +50,13 @@ class ListFilterFormFactory
 						]),
 					],
 				]);
-			}
-
-			if ($filter instanceof FilterMultiSelect) {
+			} elseif ($filter instanceof FilterCheckBox) {
+				$filterForm->add($filter->getName(), CheckboxType::class, [
+					'data' => $filter->getValueBool(),
+					'label' => $filter->getLabel(),
+					'required' => false,
+				]);
+			} elseif ($filter instanceof FilterMultiSelect) {
 				$filterForm->add($filter->getName(), ChoiceType::class, [
 					'data' => $filter->getValues(),
 					'label' => $filter->getLabel(),

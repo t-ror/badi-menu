@@ -35,7 +35,7 @@ class FilterMultiSelect extends Filter
 				continue;
 			}
 
-			$result[$value] = sprintf('"%s"', $optionsFlipped[$value]);
+			$result[$value] = sprintf('%s - "%s"', $this->getLabel(), $optionsFlipped[$value]);
 		}
 
 		return $result;

@@ -56,7 +56,8 @@ class MealController extends BaseController
 			->orderByName()
 			->addFilterName()
 			->addFilterMealTags()
-			->addFilterCanBePreparedBy();
+			->addFilterCanBePreparedBy($user)
+			->addFilterFavorite($user);
 
 		return $this->renderByClass('list.html.twig', [
 			'mealList' => $mealList->render(),
