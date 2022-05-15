@@ -18,7 +18,7 @@
 					<a href="{{ path('mealToggleFavorite', {url: meal.url}) }}" class="btn btn-outline-danger mb-1" title="Přidat do oblíbených"><i class="fa-regular fa-heart"></i></a>
 				{% endif %}
 				{% if loggedUser.isAbleToPrepareMeal(meal) %}
-					<a href="{{ path('mealToggleAbleToPrepare', {url: meal.url}) }}" class="btn btn-warning mb-1" title="Neumím připravit"><i class="fa-solid fa-spoon"></i></a>
+					<a href="{{ path('mealToggleAbleToPrepare', {url: meal.url}) }}" class="btn btn-warning mb-1" style="color: #FFFFFF" title="Neumím připravit"><i class="fa-solid fa-spoon"></i></a>
 				{% else %}
 					<a href="{{ path('mealToggleAbleToPrepare', {url: meal.url}) }}" class="btn btn-outline-warning mb-1" title="Umím připravit"><i class="fa fa-spoon"></i></a>
 				{% endif %}
