@@ -147,8 +147,9 @@ class MealList extends Component
 					$this->entityManager->createQueryBuilder()
 						->select('1')
 						->from(Meal::class, 'meal' . $value)
-						->leftJoin('meal.mealTags', 'mealTags' . $value)
-						->where('mealTags' . $value . '.id = :mealTagId' . $value)
+						->leftJoin('meal' . $value . '.mealTags', 'mealTags' . $value)
+						->where('meal' . $value . ' = meal')
+						->andWhere('mealTags' . $value . '.id = :mealTagId' . $value)
 				);
 
 				$this->queryBuilder->andWhere($mealWithTagExists)
