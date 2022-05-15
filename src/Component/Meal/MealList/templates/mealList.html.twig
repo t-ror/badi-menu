@@ -1,5 +1,16 @@
 <div class="container">
 	{{ form(filterForm) }}
+	{% if not filters.withValue.empty %}
+		<div class="mb-2">
+			<strong>Filtry: </strong>
+			{% for filter in filters.withValue %}
+				<a href="{{ path('mealList', filters.withoutFilter(filter).asParametersArray) }}" class="btn btn-sm btn-secondary">{{ filter.label }} - "{{ filter.value }}" <i class="fa fa-xmark"></i></a>
+			{% endfor %}
+			<div class="d-grid mt-2 mb-2">
+				<a href="{{ path('mealList') }}" class="btn btn-outline-danger">Zrušit filtry</a>
+			</div>
+		</div>
+	{% endif %}
 	{% for meal in meals %}
 		<div class="row app-list-row app-list-row-sm">
 			<a href="{{ path('mealDetail', {url: meal.url}) }}" class="app-list-row-header col">

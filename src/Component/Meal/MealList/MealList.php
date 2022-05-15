@@ -8,6 +8,7 @@ use App\Entity\Meal;
 use App\Event\FormSubmittedEvent;
 use App\Service\Form\ListFilterFormFactory;
 use App\ValueObject\Lists\Filter\Filter;
+use App\ValueObject\Lists\Filter\FilterCollection;
 use App\ValueObject\Lists\Filter\FilterText;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
@@ -24,8 +25,8 @@ class MealList extends Component
 
 	private QueryBuilder $queryBuilder;
 
-	/** @var array<string, Filter> */
-	private array $filters = [];
+	/** @var FilterCollection<Filter> */
+	private FilterCollection $filters;
 
 	private Environment $twig;
 	private EntityManagerInterface $entityManager;
@@ -45,9 +46,10 @@ class MealList extends Component
 		$this->entityManager = $entityManager;
 		$this->request = $request;
 		$this->listFilterFormFactory = $listFilterFormFactory;
+		$this->eventDispatcher = $eventDispatcher;
+		$this->filters = new FilterCollection();
 
 		$this->queryBuilder = $this->getBaseQueryBuilder();
-		$this->eventDispatcher = $eventDispatcher;
 	}
 
 	public function render(): string
@@ -62,6 +64,7 @@ class MealList extends Component
 		return $this->twig->render($this->getTemplatePath('mealList.html.twig'), [
 			'meals' => $meals,
 			'filterForm' => $filterForm->createView(),
+			'filters' => $this->filters,
 		]);
 	}
 
@@ -86,19 +89,21 @@ class MealList extends Component
 
 	public function addFilterName(): self
 	{
-		if (array_key_exists(self::FILTER_KEY_NAME, $this->filters)) {
+		if ($this->filters->containsKey('name')) {
 			throw new InvalidArgumentException('Name filter has been already added');
 		}
 
-		$this->filters[self::FILTER_KEY_NAME] = new FilterText(self::FILTER_KEY_NAME, 'Název');
+		$filter = new FilterText(self::FILTER_KEY_NAME, 'Název');
 
 		$value = $this->request->get(self::FILTER_KEY_NAME);
 		if ($value !== null) {
-			$this->filters[self::FILTER_KEY_NAME]->setValue($value);
+			$filter->setValue($value);
 
 			$this->queryBuilder->andWhere('meal.name LIKE :name')
 				->setParameter('name', '%' . $value . '%');
 		}
+
+		$this->filters->add($filter);
 
 		return $this;
 	}

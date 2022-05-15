@@ -3,6 +3,7 @@
 namespace App\Service\Form;
 
 use App\ValueObject\Lists\Filter\Filter;
+use App\ValueObject\Lists\Filter\FilterCollection;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -21,12 +22,12 @@ class ListFilterFormFactory
 	}
 
 	/**
-	 * @param array<Filter> $filters
+	 * @param FilterCollection<string, Filter> $filterCollection
 	 */
-	public function create(array $filters): FormInterface
+	public function create(FilterCollection $filterCollection): FormInterface
 	{
 		$filterForm = $this->formFactory->create(FormType::class);
-		foreach ($filters as $filter) {
+		foreach ($filterCollection as $filter) {
 			if ($filter->isFilterText()) {
 				$filterForm->add($filter->getName(), TextType::class, [
 					'data' => $filter->getValue(),
@@ -47,6 +48,9 @@ class ListFilterFormFactory
 
 		$filterForm->add('submit', SubmitType::class, [
 			'label' => 'Filtrovat',
+			'attr' => [
+				'style' => 'width: 100%;',
+			],
 		]);
 
 		return $filterForm;
