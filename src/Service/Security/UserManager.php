@@ -62,8 +62,13 @@ class UserManager
 
 	public function loginUser(User $user, bool $remember, Response $response): void
 	{
-		$token = bin2hex(random_bytes(16));
-		$user->setToken($token);
+		if ($user->getToken() !== null) {
+			$token = $user->getToken();
+		} else {
+			$token = bin2hex(random_bytes(16));
+			$user->setToken($token);
+		}
+
 		if ($remember) {
 			$expire = time() + (86400 * 30);
 			$response->headers->setCookie(Cookie::create('user', $user->getName(), $expire));
