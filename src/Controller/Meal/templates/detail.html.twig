@@ -46,5 +46,8 @@
 		{% endif %}
 		<h2>Postup</h2>
 		<p>{% if meal.method is not null %}{{ meal.method|raw }}{% else %}<i>--postup nevyplněn--</i>{% endif %}</p>
+		<div>
+			<i>Vytvořil(a): {{ meal.createdByUser.name }}</i>
+		</div>
 	</div>
 {% endblock %}
