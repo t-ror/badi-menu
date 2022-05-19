@@ -7,10 +7,15 @@ use App\Component\Meal\MealList\MealListFactory;
 use App\Controller\BaseController;
 use App\Entity\User;
 use App\Repository\UserRepository;
+use App\Service\File\ImageFacade;
 use App\Type\User\LoginType;
 use App\Type\User\RegisterType;
+use App\Type\User\UserChangePasswordType;
+use App\Type\User\UserEditType;
 use App\Utils\UserUrl;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -20,16 +25,21 @@ class UserController extends BaseController
 	private UserRepository $userRepository;
 	private MealListFactory $mealListFactory;
 	private UserHouseholdListFactory $userHouseholdListFactory;
+	private ImageFacade $imageFacade;
+	private EntityManagerInterface $entityManager;
 
 	public function __construct(
 		EntityManagerInterface $entityManager,
 		MealListFactory $mealListFactory,
-		UserHouseholdListFactory $userHouseholdListFactory
+		UserHouseholdListFactory $userHouseholdListFactory,
+		ImageFacade $imageFacade
 	)
 	{
+		$this->entityManager = $entityManager;
 		$this->userRepository = $entityManager->getRepository(User::class);
 		$this->mealListFactory = $mealListFactory;
 		$this->userHouseholdListFactory = $userHouseholdListFactory;
+		$this->imageFacade = $imageFacade;
 	}
 
 	public function login(Request $request): Response
@@ -124,6 +134,80 @@ class UserController extends BaseController
 			'mealListFavorite' => $mealListFavorite->render(),
 			'userHouseholdList' => $this->userHouseholdListFactory->create($user)->renderPreview(),
 		]);
+	}
+
+	public function edit(Request $request): Response
+	{
+		$this->checkAccessLoggedIn();
+
+		$user = $this->getUserManager()->getLoggedUser();
+		$userEditForm = $this->createForm(UserEditType::class, ['email' => $user->getEmail()]);
+		$userEditForm->handleRequest($request);
+		if ($userEditForm->isSubmitted() && $userEditForm->isValid()) {
+			$this->processUserEditForm($userEditForm, $user);
+
+			return $this->redirectToRoute('userEdit');
+		}
+
+		$userChangePasswordForm = $this->createForm(UserChangePasswordType::class);
+		$userChangePasswordForm->handleRequest($request);
+		if ($userChangePasswordForm->isSubmitted() && $userChangePasswordForm->isValid()) {
+			$this->processUserChangePasswordForm($userChangePasswordForm, $user);
+
+			return $this->redirectToRoute('userEdit');
+		}
+
+		return $this->renderByClass('edit.html.twig', [
+			'user' => $user,
+			'userEditForm' => $userEditForm->createView(),
+			'userChangePasswordForm' => $userChangePasswordForm->createView(),
+		]);
+	}
+
+	private function processUserEditForm(FormInterface $form, User $user): void
+	{
+		$values = $form->getData();
+
+		$user->setEmail($values['email']);
+
+		/** @var UploadedFile|null $imageFile */
+		$imageFile = $values['image'];
+		if ($imageFile !== null) {
+			$image = $this->imageFacade->saveAndOverwrite(
+				$imageFile,
+				User::class,
+				$user->getId(),
+				$imageFile->getClientOriginalName()
+			);
+
+			$user->setImage($image);
+		}
+
+		$this->entityManager->flush();
+
+		$this->addFlash('success', 'Informace úspěšně upraveny');
+	}
+
+	private function processUserChangePasswordForm(FormInterface $form, User $user): void
+	{
+		$values = $form->getData();
+		if (!$this->getUserManager()->isPasswordValid($user, $values['passwordOld'])) {
+			$this->addFlash('warning', 'Zadali jste špatně staré heslo');
+
+			$this->redirectClean('userEdit');
+		}
+
+		if ($values['passwordNew'] !== $values['passwordNewCheck']) {
+			$this->addFlash('warning', 'Hesla se neshodují');
+
+			$this->redirectClean('userEdit');
+		}
+
+		$this->getUserManager()->setNewPassword($user, $values['passwordNew']);
+
+		$this->entityManager->flush();
+
+		$this->addFlash('success', 'Heslo úspěšně změněno');
 	}
 
 }

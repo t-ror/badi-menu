@@ -1,0 +1,52 @@
+{% extends 'layout.html.twig' %}
+{% block title %}BadiMenu | {{ user.name }} - editace{% endblock %}
+
+{% block body %}
+	<div class="container app-container-main">
+		<div class="pt-2 mb-2">
+			<a href="{{ path('userDetail', {url: loggedUser.url}) }}">{{ user.name }}</a> > <strong>editace</strong>
+		</div>
+		<h1>{{ user.name }} - editace</h1>
+		{{ form_start(userEditForm, { 'attr' : { 'class': 'app_prevent-double-submit' } }) }}
+			<div class="mb-3">
+				<strong>{{ form_label(userEditForm.email) }}</strong>
+				{{ form_widget(userEditForm.email) }}
+				{{ form_errors(userEditForm.email) }}
+			</div>
+			<div class="mb-3">
+				<strong>{{ form_label(userEditForm.image) }}</strong><br>
+				<img class="app-img-user mb-1" src="{{ user.image|checkNoImg(user) }}" alt="{{ user.name }}">
+				{{ form_widget(userEditForm.image) }}
+				<i>formát: JPEG/PNG</i>
+				{{ form_errors(userEditForm.image) }}
+			</div>
+			<div class="mb-3">
+				<div class="d-grid gap-2">
+					{{ form_widget(userEditForm.submit) }}
+				</div>
+			</div>
+		{{ form_end(userEditForm) }}
+		{{ form_start(userChangePasswordForm, { 'attr' : { 'class': 'app_prevent-double-submit' } }) }}
+			<div class="mb-3">
+				<strong>{{ form_label(userChangePasswordForm.passwordOld) }}</strong>
+				{{ form_widget(userChangePasswordForm.passwordOld) }}
+				{{ form_errors(userChangePasswordForm.passwordOld) }}
+			</div>
+			<div class="mb-3">
+				<strong>{{ form_label(userChangePasswordForm.passwordNew) }}</strong>
+				{{ form_widget(userChangePasswordForm.passwordNew) }}
+				{{ form_errors(userChangePasswordForm.passwordNew) }}
+			</div>
+			<div class="mb-3">
+				<strong>{{ form_label(userChangePasswordForm.passwordNewCheck) }}</strong>
+				{{ form_widget(userChangePasswordForm.passwordNewCheck) }}
+				{{ form_errors(userChangePasswordForm.passwordNewCheck) }}
+			</div>
+			<div class="mb-3">
+				<div class="d-grid gap-2">
+					{{ form_widget(userChangePasswordForm.submit) }}
+				</div>
+			</div>
+		{{ form_end(userChangePasswordForm) }}
+	</div>
+{% endblock %}

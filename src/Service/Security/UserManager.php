@@ -53,11 +53,16 @@ class UserManager
 	public function authenticateAndGetUser(string $nameOrEmail, string $password): ?User
 	{
 		$user = $this->userRepository->getByNameOrEmail($nameOrEmail);
-		if ($user === null || !$this->encoder->isPasswordValid($user->getPassword(), $password, null)) {
+		if ($user === null || !$this->isPasswordValid($user, $password)) {
 			return null;
 		}
 
 		return $user;
+	}
+
+	public function isPasswordValid(User $user, string $password): bool
+	{
+		return $this->encoder->isPasswordValid($user->getPassword(), $password, null);
 	}
 
 	public function loginUser(User $user, bool $remember, Response $response): void
@@ -134,6 +139,11 @@ class UserManager
 
 		$this->entityManager->persist($user);
 		$this->entityManager->flush();
+	}
+
+	public function setNewPassword(User $user, string $password): void
+	{
+		$user->setPassword($this->encoder->encodePassword($password, null));
 	}
 
 }

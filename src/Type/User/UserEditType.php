@@ -3,16 +3,18 @@
 namespace App\Type\User;
 
 use App\Service\Security\UserManager;
+use App\ValueObject\File\Image as ImageUtil;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Validator\Constraints\Email;
+use Symfony\Component\Validator\Constraints\Image;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
-class RegisterType extends AbstractType
+class UserEditType extends AbstractType
 {
 
 	/**
@@ -20,22 +22,7 @@ class RegisterType extends AbstractType
 	 */
 	public function buildForm(FormBuilderInterface $builder, array $options): void
 	{
-		$builder->add('username', TextType::class, [
-			'label' => 'Uživatelské jméno',
-			'required' => true,
-			'attr' => [
-				'maxlength' => UserManager::USERNAME_EMAIL_MAX_LENGTH,
-			],
-			'constraints' => [
-				new NotBlank(['message' => 'Vyplňte uživatelské jméno']),
-				new Length([
-					'min' => UserManager::USERNAME_EMAIL_MIN_LENGTH,
-					'max' => UserManager::USERNAME_EMAIL_MAX_LENGTH,
-					'minMessage' => 'Uživatelské jméno musí obsahovat minimálně {{ limit }} znaků',
-					'maxMessage' => 'Uživatelské jméno může obsahovat maximálně {{ limit }} znaků',
-				]),
-			],
-		])->add('email', TextType::class, [
+		$builder->add('email', TextType::class, [
 			'label' => 'Email',
 			'required' => true,
 			'attr' => [
@@ -51,20 +38,22 @@ class RegisterType extends AbstractType
 				]),
 				new Email(['message' => 'Zadejte email ve správném formátu']),
 			],
-		])->add('password', PasswordType::class, [
-			'label' => 'Heslo',
-			'required' => true,
+		])->add('image', FileType::class, [
+			'label' => 'Fotka',
+			'required' => false,
 			'constraints' => [
-				new NotBlank(['message' => 'Vyplňte heslo']),
-				new Length([
-					'min' => UserManager::PASSWORD_MIN_LENGTH,
-					'max' => UserManager::PASSWORD_MAX_LENGTH,
-					'minMessage' => 'Heslo musí obsahovat minimálně {{ limit }} znaků',
-					'maxMessage' => 'Heslo může obsahovat maximálně {{ limit }} znaků',
+				new Image([
+					'mimeTypes' => [
+						ImageUtil::MIME_TYPE_JPEG,
+						ImageUtil::MIME_TYPE_PNG,
+					],
+					'mimeTypesMessage' => 'Fotka musí být typu JPEG nebo PNG',
+					'maxSize' => '10m',
+					'maxSizeMessage' => 'Maximální velikost nahrané fotky může být maximálně {{ limit }} MB',
 				]),
 			],
 		])->add('submit', SubmitType::class, [
-			'label' => 'Zaregistrovat',
+			'label' => 'Upravit',
 		]);
 	}
 

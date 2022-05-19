@@ -3,7 +3,12 @@
 
 {% block body %}
 	<div class="container app-container-main">
-		<h1>{{ user.name }}</h1>
+		<div class="row pt-2">
+			<div class="col" style="text-align: left;"><h1>{{ user.name }}</h1></div>
+			{% if loggedUser.id is same as user.id %}
+				<div class="col" style="text-align: right;"><a href="{{ path('userEdit') }}" class="btn btn-primary"><i class="fa fa-pen"></i> Upravit</a></div>
+			{% endif %}
+		</div>
 		<img class="app-img-user" src="{{ user.image|checkNoImg(user) }}" alt="{{ user.name }}">
 		<div>
 			<h3>Domácnosti: </h3>

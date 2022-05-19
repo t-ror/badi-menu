@@ -10,6 +10,9 @@ logout:
 register:
     path: /registrace
     controller: App\Controller\User\UserController::register
+userEdit:
+  path: /uzivatel/editace
+  controller: App\Controller\User\UserController::edit
 userDetail:
   path: /uzivatel/{url}
   controller: App\Controller\User\UserController::detail
