@@ -53,7 +53,7 @@ class MealController extends BaseController
 
 		$user = $this->getUserManager()->getLoggedUser();
 		$household = $this->getHouseholdManager()->getSelectedHouseholdForUser($user);
-		$mealList = $this->mealListFactory->create($user)
+		$mealList = $this->mealListFactory->create()
 			->forHousehold($household)
 			->orderByName()
 			->addFilterName()

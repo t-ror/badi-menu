@@ -2,8 +2,8 @@
 
 namespace App\Component\Meal\MealList;
 
-use App\Entity\User;
 use App\Service\Form\ListFilterFormFactory;
+use App\Service\Security\UserManager;
 use Doctrine\ORM\EntityManagerInterface;
 use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,19 +19,22 @@ class MealListFactory
 	private Request $request;
 	private ListFilterFormFactory $listFilterFormFactory;
 	private EventDispatcherInterface $eventDispatcher;
+	private UserManager $userManager;
 
 	public function __construct(
 		Environment $twig,
 		EntityManagerInterface $entityManager,
 		RequestStack $requestStack,
 		ListFilterFormFactory $listFilterFormFactory,
-		EventDispatcherInterface $eventDispatcher
+		EventDispatcherInterface $eventDispatcher,
+		UserManager $userManager
 	)
 	{
 		$this->twig = $twig;
 		$this->entityManager = $entityManager;
 		$this->listFilterFormFactory = $listFilterFormFactory;
 		$this->eventDispatcher = $eventDispatcher;
+		$this->userManager = $userManager;
 
 		$request = $requestStack->getCurrentRequest();
 		if ($request === null) {
@@ -41,10 +44,10 @@ class MealListFactory
 		$this->request = $request;
 	}
 
-	public function create(User $user): MealList
+	public function create(): MealList
 	{
 		return new MealList(
-			$user,
+			$this->userManager->getLoggedUser(),
 			$this->twig,
 			$this->entityManager,
 			$this->request,

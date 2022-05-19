@@ -97,6 +97,24 @@ class MealList extends Component
 		return $this;
 	}
 
+	public function forUserFavorite(User $user): self
+	{
+		$expr = $this->entityManager->getExpressionBuilder();
+		$userMealExists = $expr->exists(
+			$this->entityManager->createQueryBuilder()
+				->select('1')
+				->from(UserMeal::class, 'userMeal1')
+				->where('userMeal1.meal = meal')
+				->andWhere('userMeal1.user = :forUser')
+				->andWhere('userMeal1.favorite = 1')
+		);
+
+		$this->queryBuilder->andWhere($userMealExists)
+			->setParameter('forUser', $user);
+
+		return $this;
+	}
+
 	public function orderByName(?string $sort = 'ASC'): self
 	{
 		if ($sort !== 'ASC' && $sort !== 'DESC') {

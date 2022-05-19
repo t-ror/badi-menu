@@ -47,7 +47,7 @@
 		<h2>Postup</h2>
 		<p>{% if meal.method is not null %}{{ meal.method|raw }}{% else %}<i>--postup nevyplněn--</i>{% endif %}</p>
 		<div>
-			<i>Vytvořil(a): {{ meal.createdByUser.name }}</i>
+			<i>Vytvořil(a):</i> <a href="{{ path('userDetail', {url: meal.createdByUser.url}) }}" class="btn btn-sm btn-outline-primary"><i class="bi-person-circle"></i> {{ meal.createdByUser.name }}</a>
 		</div>
 	</div>
 {% endblock %}

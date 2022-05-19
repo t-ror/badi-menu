@@ -2,7 +2,9 @@
 
 namespace App\Entity;
 
+use App\Entity\Collection\UserMealCollection;
 use App\Entity\Traits\TId;
+use App\Utils\UserUrl;
 use App\ValueObject\File\Image;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -48,7 +50,7 @@ class User extends Entity
 	private Collection $userHouseholds;
 
 	/**
-	 * @var Collection<UserMeal>
+	 * @var UserMealCollection<UserMeal>
 	 * @ORM\OneToMany(targetEntity="UserMeal", mappedBy="user")
 	 */
 	private Collection $userMeals;
@@ -60,7 +62,7 @@ class User extends Entity
 		$this->email = $email;
 
 		$this->userHouseholds = new ArrayCollection();
-		$this->userMeals = new ArrayCollection();
+		$this->userMeals = new UserMealCollection();
 	}
 
 	public function getName(): string
@@ -91,6 +93,11 @@ class User extends Entity
 	public function setToken(?string $token): void
 	{
 		$this->token = $token;
+	}
+
+	public function getUrl(): string
+	{
+		return UserUrl::createFromUser($this)->getUrl();
 	}
 
 	public function addUserHousehold(UserHousehold $userHousehold): void
@@ -170,14 +177,14 @@ class User extends Entity
 		$this->userMeals->add($userMeal);
 	}
 
-	public function getUserMeals(): Collection
+	public function getUserMeals(): UserMealCollection
 	{
-		return $this->userMeals;
+		return new UserMealCollection($this->userMeals->toArray());
 	}
 
 	public function getUserMealByMeal(Meal $meal): ?UserMeal
 	{
-		$userMeal = $this->userMeals->filter(function (UserMeal $userMeal) use ($meal): bool {
+		$userMeal = $this->getUserMeals()->filter(function (UserMeal $userMeal) use ($meal): bool {
 			return $userMeal->getMeal()->getId() === $meal->getId();
 		})->first();
 
@@ -186,16 +193,12 @@ class User extends Entity
 
 	public function isAbleToPrepareMeal(Meal $meal): bool
 	{
-		return $this->userMeals->exists(function (int $key, UserMeal $userMeal) use ($meal): bool {
-			return $userMeal->getMeal()->getId() === $meal->getId() && $userMeal->isAbleToPrepare();
-		});
+		return $this->getUserMeals()->hasMealAbleToPrepare($meal);
 	}
 
 	public function isMealFavourite(Meal $meal): bool
 	{
-		return $this->userMeals->exists(function (int $key, UserMeal $userMeal) use ($meal): bool {
-			return $userMeal->getMeal()->getId() === $meal->getId() && $userMeal->isFavorite();
-		});
+		return $this->getUserMeals()->hasMealFavourite($meal);
 	}
 
 }

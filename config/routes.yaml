@@ -10,6 +10,9 @@ logout:
 register:
     path: /registrace
     controller: App\Controller\User\UserController::register
+userDetail:
+  path: /uzivatel/{url}
+  controller: App\Controller\User\UserController::detail
 householdList:
     path: /domacnost
     controller: App\Controller\Household\HouseholdController::list

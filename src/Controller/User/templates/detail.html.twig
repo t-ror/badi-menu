@@ -1,0 +1,23 @@
+{% extends 'layout.html.twig' %}
+{% block title %}BadiMenu | {{ user.name }}{% endblock %}
+
+{% block body %}
+	<div class="container app-container-main">
+		<h1>{{ user.name }}</h1>
+		<img class="app-img-user" src="{{ user.image|checkNoImg(user) }}" alt="{{ user.name }}">
+		<div>
+			<h3>Domácnosti: </h3>
+			{% if user.userHouseholds.empty %}
+				<div class="alert alert-info"><strong>{{ user.name }}</strong> není v žádné domácnosti</div>
+			{% else %}
+				{{ userHouseholdList|raw }}
+			{% endif %}
+			<h3>Oblíbená jídla: </h3>
+			{% if user.userMeals.favoriteUserMeals.empty %}
+				<div class="alert alert-info"><strong>{{ user.name }}</strong> nemá žádné oblíbené jídla</div>
+			{% else %}
+				{{ mealListFavorite|raw }}
+			{% endif %}
+		</div>
+	</div>
+{% endblock %}

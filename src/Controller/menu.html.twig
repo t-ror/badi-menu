@@ -14,14 +14,14 @@
 			{% if loggedUser is not null and selectedHousehold is not null %}
 				<div class="navbar-nav">
 					<a class="nav-link {% if activeMenuLink is same as(constant('App\\Controller\\BaseController::MENU_HOUSEHOLD')) %}active{% endif %}" href="{{ path('householdList')}}"><i class="bi-house"></i> Změnit domácnost</a>
-					<a class="nav-link disabled" href="#"><i class="bi-calendar-week"></i> Kalendář</a>
-					<a class="nav-link disabled" href="#"><i class="bi-list-ol"></i> Jídelní lístek</a>
+{#					<a class="nav-link disabled" href="#"><i class="bi-calendar-week"></i> Kalendář</a>#}
+{#					<a class="nav-link disabled" href="#"><i class="bi-list-ol"></i> Jídelní lístek</a>#}
 					<a class="nav-link  {% if activeMenuLink is same as(constant('App\\Controller\\BaseController::MENU_MEAL')) %}active{% endif %}" href="{{ path('mealList')}}"><i class="fa fa-pizza-slice"></i> Jídla</a>
 				</div>
 			{% endif %}
 			<hr style="color: #FFFFFF;height: 0.1em;opacity: 0.5;">
 			<div class="navbar-nav ms-auto">
-				<a class="btn btn-light" href="#"><i class="bi-person-circle"></i> {{ loggedUser.name }}</a>
+				<a class="btn btn-light" href="{{ path('userDetail', {url: loggedUser.url}) }}"><i class="bi-person-circle"></i> {{ loggedUser.name }}</a>
 				<a class="btn btn-outline-light" href="{{ path('logout')}}"><i class="bi-power"></i> Odhlásit se</a>
 			</div>
 		</div>

@@ -1,17 +1,19 @@
-<div class="accordion mb-2" id="accordionFilters">
-	<div class="accordion-item">
-		<h2 class="accordion-header" id="headingOne">
-			<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-				Filtry
-			</button>
-		</h2>
-		<div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionFilters">
-			<div class="accordion-body">
-				{{ form(filterForm) }}
+{% if not filters.empty %}
+	<div class="accordion mb-2" id="accordionFilters">
+		<div class="accordion-item">
+			<h2 class="accordion-header" id="headingOne">
+				<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+					Filtry
+				</button>
+			</h2>
+			<div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionFilters">
+				<div class="accordion-body">
+					{{ form(filterForm) }}
+				</div>
 			</div>
 		</div>
 	</div>
-</div>
+{% endif %}
 <div class="container">
 	{% if not filters.withValue.empty %}
 		<div class="mb-2">

@@ -2,11 +2,14 @@
 
 namespace App\Controller\User;
 
+use App\Component\Household\UserHouseholdList\UserHouseholdListFactory;
+use App\Component\Meal\MealList\MealListFactory;
 use App\Controller\BaseController;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use App\Type\User\LoginType;
 use App\Type\User\RegisterType;
+use App\Utils\UserUrl;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,10 +18,18 @@ class UserController extends BaseController
 {
 
 	private UserRepository $userRepository;
+	private MealListFactory $mealListFactory;
+	private UserHouseholdListFactory $userHouseholdListFactory;
 
-	public function __construct(EntityManagerInterface $entityManager)
+	public function __construct(
+		EntityManagerInterface $entityManager,
+		MealListFactory $mealListFactory,
+		UserHouseholdListFactory $userHouseholdListFactory
+	)
 	{
 		$this->userRepository = $entityManager->getRepository(User::class);
+		$this->mealListFactory = $mealListFactory;
+		$this->userHouseholdListFactory = $userHouseholdListFactory;
 	}
 
 	public function login(Request $request): Response
@@ -93,6 +104,25 @@ class UserController extends BaseController
 
 		return $this->renderByClass('register.html.twig', [
 			'registerForm' => $registerForm->createView(),
+		]);
+	}
+
+	public function detail(string $url): Response
+	{
+		$this->checkAccessLoggedIn();
+		$userUrl = UserUrl::createFromUrl($url);
+
+		$user = $this->userRepository->getByUserUrl($userUrl);
+		if ($user === null) {
+			return $this->redirectToRoute('homepage');
+		}
+
+		$mealListFavorite = $this->mealListFactory->create()->forUserFavorite($user);
+
+		return $this->renderByClass('detail.html.twig', [
+			'user' => $user,
+			'mealListFavorite' => $mealListFavorite->render(),
+			'userHouseholdList' => $this->userHouseholdListFactory->create($user)->renderPreview(),
 		]);
 	}
 

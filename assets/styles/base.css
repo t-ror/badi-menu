@@ -54,3 +54,8 @@ body {
         max-height: 40em;
     }
 }
+
+.app-img-user {
+    max-height: 19em;
+    width: 16em;
+}

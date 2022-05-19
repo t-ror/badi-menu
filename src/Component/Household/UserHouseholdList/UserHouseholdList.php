@@ -29,4 +29,11 @@ class UserHouseholdList extends Component
 		]);
 	}
 
+	public function renderPreview(): string
+	{
+		return $this->twig->render($this->getTemplatePath('userHouseholdListPreview.html.twig'), [
+			'userHouseholds' => $this->user->getUserHouseholdsOrdered(),
+		]);
+	}
+
 }

@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Household;
 use App\Entity\User;
 use App\Entity\UserHousehold;
+use App\Utils\UserUrl;
 use Doctrine\ORM\EntityRepository;
 use Nette\Utils\Arrays;
 
@@ -34,6 +35,17 @@ class UserRepository extends EntityRepository
 		return $this->createQueryBuilder('users')
 			->where('users.email = :email')
 			->setParameter('email', $email)
+			->getQuery()
+			->getOneOrNullResult();
+	}
+
+	public function getByUserUrl(UserUrl $userUrl): ?User
+	{
+		return $this->createQueryBuilder('users')
+			->where('users.id = :userId')
+			->andWhere('users.name = :name')
+			->setParameter('userId', $userUrl->getId())
+			->setParameter('name', $userUrl->getName())
 			->getQuery()
 			->getOneOrNullResult();
 	}
