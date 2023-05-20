@@ -192,7 +192,7 @@ class MealController extends BaseController
 
 		$meal->setName($values['name']);
 		$meal->setDescription($values['description']);
-		$meal->setMethod($values['description']);
+		$meal->setMethod($values['method']);
 
 		foreach ($meal->getMealIngredients() as $mealIngredient) {
 			$this->entityManager->remove($mealIngredient);
