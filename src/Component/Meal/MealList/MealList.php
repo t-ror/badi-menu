@@ -153,7 +153,7 @@ class MealList extends Component
 			throw new InvalidArgumentException('Name filter has been already added');
 		}
 
-		$filter = new FilterMultiSelect(self::FILTER_KEY_MEAL_TAGS, 'Štítky', $this->mealTagRepository->findPairs());
+		$filter = new FilterMultiSelect(self::FILTER_KEY_MEAL_TAGS, 'Štítky', $this->mealTagRepository->findPairs($this->household));
 
 		$values = $this->request->get(self::FILTER_KEY_MEAL_TAGS);
 		if ($values !== null) {

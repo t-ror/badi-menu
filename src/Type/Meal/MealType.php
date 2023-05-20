@@ -15,6 +15,7 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Image;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
@@ -81,8 +82,10 @@ class MealType extends AbstractType
 			'required' => false,
 			'class' => MealTag::class,
 			'multiple' => true,
-			'query_builder' => function (EntityRepository $entityRepository): QueryBuilder {
+			'query_builder' => function (EntityRepository $entityRepository) use ($options): QueryBuilder {
 				return $entityRepository->createQueryBuilder('mealTag')
+					->andWhere('mealTag.household = :household')
+					->setParameter('household', $options['household'])
 					->orderBy('mealTag.name', 'ASC');
 			},
 			'choice_label' => 'name',
@@ -97,6 +100,13 @@ class MealType extends AbstractType
 			'required' => false,
 		])->add('submit', SubmitType::class, [
 			'label' => 'Potvrdit',
+		]);
+	}
+
+	public function configureOptions(OptionsResolver $resolver): void
+	{
+		$resolver->setDefaults([
+			'household' => null,
 		]);
 	}
 

@@ -17,14 +17,26 @@ class MealTag extends Entity
 	/** @ORM\Column(length=32, type="string", nullable=false) */
 	private string $name;
 
-	public function __construct(string $name)
+	/**
+	 * @ORM\ManyToOne(targetEntity="Household", inversedBy="householdMeals")
+	 * @ORM\JoinColumn(referencedColumnName="id", nullable=false)
+	 */
+	private Household $household;
+
+	public function __construct(string $name, Household $household)
 	{
 		$this->name = $name;
+		$this->household = $household;
 	}
 
 	public function getName(): string
 	{
 		return $this->name;
+	}
+
+	public function getHousehold(): Household
+	{
+		return $this->household;
 	}
 
 }

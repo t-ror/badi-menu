@@ -2,7 +2,6 @@
 
 namespace App\Controller\Meal;
 
-use _PHPStan_76800bfb5\Nette\Utils\DateTime;
 use App\Component\Meal\MealList\MealListFactory;
 use App\Controller\BaseController;
 use App\Entity\Household;
@@ -14,6 +13,7 @@ use App\Service\Meal\MealIngredientManager;
 use App\Service\Meal\UserMealManager;
 use App\Type\Meal\MealType;
 use App\Utils\Strings;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -109,7 +109,7 @@ class MealController extends BaseController
 			'mealTags' => $meal->getMealTags(),
 			'ableToPrepare' => $user->isAbleToPrepareMeal($meal),
 			'favorite' => $user->isMealFavourite($meal),
-		]);
+		], ['household' => $household]);
 
 		$mealForm->handleRequest($request);
 		if ($mealForm->isSubmitted() && $mealForm->isValid()) {
