@@ -16,6 +16,7 @@ export default class QuillEditor {
                 modules: {
                     toolbar: [
                         ['bold', 'italic', 'underline'],
+                        ['link'],
                         [{ list: 'ordered' }, { list: 'bullet' }],
                     ]
                 },
@@ -42,6 +43,24 @@ export default class QuillEditor {
                 element.html(quill.root.innerHTML);
             });
         });
+
+        let Link = Quill.import('formats/link');
+
+        class CustomLink extends Link {
+
+            static sanitize(url) {
+                let value = super.sanitize(url);
+                if (value) {
+                    for (let i = 0; i < this.PROTOCOL_WHITELIST.length; i++)
+                        if(value.startsWith(this.PROTOCOL_WHITELIST[i]))
+                            return value;
+
+                    return `http://${value}`
+                }
+                return value;
+            }
+        }
+        Quill.register(CustomLink);
     }
 
 }
