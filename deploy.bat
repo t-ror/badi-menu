@@ -1,1 +1,1 @@
-vendor\bin\deployment deployment.ini -t
+vendor\bin\deployment deployment.ini

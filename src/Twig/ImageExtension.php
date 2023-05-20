@@ -14,7 +14,7 @@ use Twig\TwigFilter;
 class ImageExtension extends AbstractExtension
 {
 
-	private const DIR_NO_IMG = Image::IMAGE_DIR . '/no-img/';
+	private const DIR_NO_IMG = '/assets/img/no-img/';
 	private const NO_IMG_DEFAULT = 'image.svg';
 
 	private array $noImgFilenames = [
