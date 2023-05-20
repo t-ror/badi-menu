@@ -1,0 +1,1 @@
+vendor\bin\deployment deployment.ini -t
