@@ -118,4 +118,9 @@ abstract class BaseController extends AbstractController
 		$this->activeMenuLink = $activeMenuLink;
 	}
 
+	protected function isProductionEnv(): bool
+	{
+		return $this->getParameter('kernel.environment') === 'prod';
+	}
+
 }

@@ -1,0 +1,13 @@
+{# @controller Error:show #}
+{% extends 'layout.html.twig' %}
+{% block title %}BadiMenu | Chyba{% endblock %}
+
+{% block body %}
+	<div class="app-error-page app-container-main">
+		<h1>Jejda něco se pokazilo</h1>
+		<p>Při načítání stránky došlo k chybě... :(</p>
+		<div class="app-error-page-img-wrap">
+			<img class="app-error-page-img" src="{{ asset('assets/img/other/error-page-img.png') }}" alt="error :(">
+		</div>
+	</div>
+{% endblock %}

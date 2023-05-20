@@ -1,0 +1,13 @@
+.app-error-page {
+    text-align: center;
+    padding-bottom: 4em;
+    padding-top: 2em;
+}
+.app-error-page-img-wrap {
+    max-width: 28em;
+    margin: auto;
+}
+.app-error-page-img {
+    width: 100%;
+    height: auto;
+}

@@ -1,0 +1,13 @@
+{# @controller Error:show #}
+{% extends 'layout.html.twig' %}
+{% block title %}BadiMenu | Chyba{% endblock %}
+
+{% block body %}
+	<div class="app-error-page app-container-main">
+		<h1>Stránku se nepodařilo najít</h1>
+		<p>Bohužel požadovaná stránka nebyla vyčmuchána... :(</p>
+		<div class="app-error-page-img-wrap">
+			<img class="app-error-page-img" src="{{ asset('assets/img/other/error-404-page-img.png') }}" alt="error :(">
+		</div>
+	</div>
+{% endblock %}
