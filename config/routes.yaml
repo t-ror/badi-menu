@@ -46,3 +46,9 @@ mealToggleFavorite:
 mealToggleAbleToPrepare:
   path: /jidlo/umim-pripravit/{url}
   controller: App\Controller\Meal\MealController::toggleAbleToPrepare
+mealTagList:
+  path: /stitky
+  controller: App\Controller\MealTag\MealTagController::list
+mealTagDelete:
+  path: /stitek/smazat/{id}
+  controller: App\Controller\MealTag\MealTagController::delete

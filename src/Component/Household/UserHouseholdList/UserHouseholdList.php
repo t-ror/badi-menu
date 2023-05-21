@@ -2,7 +2,7 @@
 
 namespace App\Component\Household\UserHouseholdList;
 
-use App\Component\Household\Component;
+use App\Component\Component;
 use App\Entity\User;
 use App\Service\Household\HouseholdManager;
 use Twig\Environment;

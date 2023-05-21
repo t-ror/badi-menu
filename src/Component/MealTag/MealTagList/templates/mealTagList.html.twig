@@ -1,0 +1,36 @@
+<div>
+	<table>
+		{% for mealTag in mealTags %}
+			<tr class="py-2">
+				<td class="px-2 py-1"><span class="badge bg-primary">{{ mealTag.name }}</span></td>
+				<td class="px-2 py-1">
+					{% if mealTagUsage[mealTag.id] is same as 0 %}
+						<i>použito: {{ mealTagUsage[mealTag.id] }}</i>
+					{% else %}
+						<a href="{{ path('mealList', {'mealTags': mealTag.id}) }}" target="_blank">
+							<i>použito: {{ mealTagUsage[mealTag.id] }}</i>
+						</a>
+					{% endif %}
+				</td>
+				<td class="px-2 py-1">
+					<a class="btn btn-primary" data-bs-toggle="collapse" href="#edit-form-{{ mealTag.id }}" role="button" aria-expanded="false" aria-controls="edit-form-{{ mealTag.id }}" title="upravit"><i class="fa fa-pen"></i></a> <a onclick="return confirm('Opravdu chcete štítek smazat?')" href="{{ path('mealTagDelete', {'id': mealTag.id}) }}" class="btn btn-danger" title="smazat"><i class="fa fa-trash"></i></a>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="3">
+					<div class="collapse" id="edit-form-{{ mealTag.id }}">
+						{% form_theme editForms[mealTag.id] 'bootstrap_5_horizontal_layout.html.twig' %}
+						{{ form_start(editForms[mealTag.id]) }}
+						<div class="row mt-3">
+							<div class="col-auto">{{ form_widget(editForms[mealTag.id].name) }}</div>
+							{{ form_row(editForms[mealTag.id].id) }}
+							<div class="col-auto">{{ form_row(editForms[mealTag.id].submit, {'label': 'Upravit'}) }}</div>
+						</div>
+						{{ form_end(editForms[mealTag.id]) }}
+						<hr>
+					</div>
+				</td>
+			</tr>
+		{% endfor %}
+	</table>
+</div>

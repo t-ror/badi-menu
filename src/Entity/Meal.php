@@ -195,6 +195,15 @@ class Meal extends Entity
 		$this->mealTags->add($mealTag);
 	}
 
+	public function removeMealTag(MealTag $mealTag): void
+	{
+		if (!$this->mealTags->contains($mealTag)) {
+			return;
+		}
+
+		$this->mealTags->removeElement($mealTag);
+	}
+
 	/**
 	 * @return Collection<HouseholdMeal>
 	 */

@@ -2,7 +2,7 @@
 
 namespace App\Component\Meal\MealList;
 
-use App\Component\Household\Component;
+use App\Component\Component;
 use App\Entity\Household;
 use App\Entity\Meal;
 use App\Entity\MealTag;
@@ -278,8 +278,8 @@ class MealList extends Component
 			$parameters[$key] = $value;
 		}
 
-		$submittedEvent = new FormSubmittedEvent($parameters, 'mealList');
-		$this->eventDispatcher->dispatch($submittedEvent, FormSubmittedEvent::NAME_FILTER_FORM);
+		$submittedEvent = new FormSubmittedEvent('mealList', $parameters);
+		$this->eventDispatcher->dispatch($submittedEvent, FormSubmittedEvent::NAME_DEFAULT);
 	}
 
 }

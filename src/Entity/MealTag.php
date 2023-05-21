@@ -34,6 +34,11 @@ class MealTag extends Entity
 		return $this->name;
 	}
 
+	public function setName(string $name): void
+	{
+		$this->name = $name;
+	}
+
 	public function getHousehold(): Household
 	{
 		return $this->household;

@@ -13,6 +13,7 @@ abstract class BaseController extends AbstractController
 
 	public const MENU_HOUSEHOLD = 'household';
 	public const MENU_MEAL = 'meal';
+	public const MENU_MEAL_TAG = 'meal-tag';
 
 	private ?string $activeMenuLink = null;
 

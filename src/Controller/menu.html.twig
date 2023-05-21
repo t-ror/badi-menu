@@ -17,6 +17,7 @@
 {#					<a class="nav-link disabled" href="#"><i class="bi-calendar-week"></i> Kalendář</a>#}
 {#					<a class="nav-link disabled" href="#"><i class="bi-list-ol"></i> Jídelní lístek</a>#}
 					<a class="nav-link  {% if activeMenuLink is same as(constant('App\\Controller\\BaseController::MENU_MEAL')) %}active{% endif %}" href="{{ path('mealList')}}"><i class="fa fa-pizza-slice"></i> Jídla</a>
+					<a class="nav-link  {% if activeMenuLink is same as(constant('App\\Controller\\BaseController::MENU_MEAL_TAG')) %}active{% endif %}" href="{{ path('mealTagList')}}"><i class="fa fa-tag"></i> Štítky</a>
 				</div>
 			{% endif %}
 			<hr style="color: #FFFFFF;height: 0.1em;opacity: 0.5;">

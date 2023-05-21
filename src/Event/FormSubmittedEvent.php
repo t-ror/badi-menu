@@ -7,19 +7,28 @@ use Symfony\Contracts\EventDispatcher\Event;
 class FormSubmittedEvent extends Event
 {
 
-	public const NAME_FILTER_FORM = 'form.filter_form_submitted';
+	public const NAME_DEFAULT = 'form.form_submitted';
+
+	private string $redirectToAction;
 
 	/** @var array<int|string, mixed> */
 	private array $values;
-	private string $redirectToAction;
+
+	/** @var array<array<string, string>>  */
+	private array $flashes = [];
 
 	/**
 	 * @param array<int|string, mixed> $values
 	 */
-	public function __construct(array $values, string $redirectToAction)
+	public function __construct(string $redirectToAction, array $values = [])
 	{
-		$this->values = $values;
 		$this->redirectToAction = $redirectToAction;
+		$this->values = $values;
+	}
+
+	public function getRedirectToAction(): string
+	{
+		return $this->redirectToAction;
 	}
 
 	/**
@@ -30,9 +39,20 @@ class FormSubmittedEvent extends Event
 		return $this->values;
 	}
 
-	public function getRedirectToAction(): string
+	/**
+	 * @return array<array<string, string>>
+	 */
+	public function getFlashes(): array
 	{
-		return $this->redirectToAction;
+		return $this->flashes;
+	}
+
+	public function addFlash(string $type, string $message): void
+	{
+		$this->flashes[] = [
+			'type' => $type,
+			'message' => $message,
+		];
 	}
 
 }

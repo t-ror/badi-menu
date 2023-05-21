@@ -1,0 +1,21 @@
+{# @controller MealTag:list #}
+{% extends 'layout.html.twig' %}
+{% block title %}BadiMenu | Štítky{% endblock %}
+
+{% block body %}
+	<div class="container app-container-main">
+		<h1>Štítky</h1>
+		<div>
+			{% form_theme mealTagForm 'bootstrap_5_horizontal_layout.html.twig' %}
+			{{ form_start(mealTagForm) }}
+				<div class="row">
+					<div class="col-auto text-nowrap">{{ form_label(mealTagForm.name, 'Přidat nový') }} </div>
+					<div class="col-auto">{{ form_widget(mealTagForm.name) }}</div>
+					<div class="col-auto">{{ form_row(mealTagForm.submit, {'label': 'Přidat'}) }}</div>
+				</div>
+			{{ form_end(mealTagForm) }}
+		</div>
+		<hr>
+		{{ mealTagList|raw }}
+	</div>
+{% endblock %}
