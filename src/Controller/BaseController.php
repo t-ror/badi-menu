@@ -65,6 +65,21 @@ abstract class BaseController extends AbstractController
 		);
 	}
 
+	/**
+	 * @param array<string, mixed> $parameters
+	 */
+	protected function renderViewByClass(string $view, array $parameters = []): string
+	{
+		$classNameParsed = explode('\\', get_class($this));
+		$className = array_pop($classNameParsed);
+		$classNameWithoutController = str_replace('Controller', '', $className);
+
+		return $this->renderView(
+			$classNameWithoutController . '/templates/' . $view,
+			$parameters,
+		);
+	}
+
 	protected function checkAccessLoggedIn(): void
 	{
 		$user = $this->getUserManager()->getLoggedUserOrNull();

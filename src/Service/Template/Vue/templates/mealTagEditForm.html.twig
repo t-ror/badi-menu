@@ -1,0 +1,8 @@
+{% form_theme editForm 'bootstrap_5_horizontal_layout.html.twig' %}
+{{ form_start(editForm) }}
+<div class="row mt-3">
+	<div class="col-auto">{{ form_widget(editForm.name) }}</div>
+	{{ form_row(editForm.id) }}
+	<div class="col-auto">{{ form_row(editForm.submit, {'label': 'Upravit'}) }}</div>
+</div>
+{{ form_end(editForm) }}

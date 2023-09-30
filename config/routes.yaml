@@ -52,3 +52,12 @@ mealTagList:
 mealTagDelete:
   path: /stitek/smazat/{id}
   controller: App\Controller\MealTag\MealTagController::delete
+mealTagCreate:
+  path: /stitek/vytvorit
+  controller: App\Controller\MealTag\MealTagController::create
+mealTagEdit:
+  path: /stitek/upravit/{id}
+  controller: App\Controller\MealTag\MealTagController::edit
+mealTagProvideListData:
+  path:  /meal-tag/list
+  controller: App\Controller\MealTag\MealTagController::provideListData
