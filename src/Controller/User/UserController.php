@@ -22,25 +22,14 @@ use Symfony\Component\HttpFoundation\Response;
 class UserController extends BaseController
 {
 
-	private UserRepository $userRepository;
-	private MealListFactory $mealListFactory;
-	private UserHouseholdListFactory $userHouseholdListFactory;
-	private ImageFacade $imageFacade;
-	private EntityManagerInterface $entityManager;
-
 	public function __construct(
-		EntityManagerInterface $entityManager,
-		MealListFactory $mealListFactory,
-		UserHouseholdListFactory $userHouseholdListFactory,
-		ImageFacade $imageFacade,
-		UserRepository $userRepository,
+		private EntityManagerInterface $entityManager,
+		private MealListFactory $mealListFactory,
+		private UserHouseholdListFactory $userHouseholdListFactory,
+		private ImageFacade $imageFacade,
+		private UserRepository $userRepository,
 	)
 	{
-		$this->entityManager = $entityManager;
-		$this->mealListFactory = $mealListFactory;
-		$this->userHouseholdListFactory = $userHouseholdListFactory;
-		$this->imageFacade = $imageFacade;
-		$this->userRepository = $userRepository;
 	}
 
 	public function login(Request $request): Response

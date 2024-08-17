@@ -24,25 +24,14 @@ use Symfony\Component\HttpFoundation\Response;
 class MealController extends BaseController
 {
 
-	private EntityManagerInterface $entityManager;
-	private MealIngredientManager $mealIngredientManager;
-	private ImageFacade $imageFacade;
-	private UserMealManager $userMealManager;
-	private MealListFactory $mealListFactory;
-
 	public function __construct(
-		EntityManagerInterface $entityManager,
-		MealIngredientManager $mealIngredientManager,
-		ImageFacade $imageFacade,
-		UserMealManager $userMealManager,
-		MealListFactory $mealListFactory
+		private EntityManagerInterface $entityManager,
+		private MealIngredientManager $mealIngredientManager,
+		private ImageFacade $imageFacade,
+		private UserMealManager $userMealManager,
+		private MealListFactory $mealListFactory
 	)
 	{
-		$this->entityManager = $entityManager;
-		$this->mealIngredientManager = $mealIngredientManager;
-		$this->imageFacade = $imageFacade;
-		$this->userMealManager = $userMealManager;
-		$this->mealListFactory = $mealListFactory;
 	}
 
 	public function list(): Response

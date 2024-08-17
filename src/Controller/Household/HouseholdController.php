@@ -15,25 +15,14 @@ use Symfony\Component\HttpFoundation\Response;
 class HouseholdController extends BaseController
 {
 
-	private UserHouseholdListFactory $userHouseholdListFactory;
-	private HouseholdManager $householdManager;
-	private EntityManagerInterface $entityManager;
-	private HouseholdListFactory $householdListFactory;
-	private HouseholdRepository $householdRepository;
-
 	public function __construct(
-		UserHouseholdListFactory $userHouseholdListFactory,
-		HouseholdManager $householdManager,
-		EntityManagerInterface $entityManager,
-		HouseholdListFactory $householdListFactory,
-		HouseholdRepository $householdRepository,
+		private UserHouseholdListFactory $userHouseholdListFactory,
+		private HouseholdManager $householdManager,
+		private EntityManagerInterface $entityManager,
+		private HouseholdListFactory $householdListFactory,
+		private HouseholdRepository $householdRepository,
 	)
 	{
-		$this->userHouseholdListFactory = $userHouseholdListFactory;
-		$this->householdManager = $householdManager;
-		$this->entityManager = $entityManager;
-		$this->householdListFactory = $householdListFactory;
-		$this->householdRepository = $householdRepository;
 	}
 
 	public function list(): Response

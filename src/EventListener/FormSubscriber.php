@@ -14,13 +14,13 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 class FormSubscriber implements EventSubscriberInterface
 {
 
-	private UrlGeneratorInterface $urlGenerator;
 	private FlashBagInterface $flashBag;
 
-	public function __construct(UrlGeneratorInterface $urlGenerator, RequestStack $requestStack)
+	public function __construct(
+		private UrlGeneratorInterface $urlGenerator,
+		RequestStack $requestStack
+	)
 	{
-		$this->urlGenerator = $urlGenerator;
-
 		/** @var Session $session */
 		$session = $requestStack->getSession();
 		$this->flashBag = $session->getFlashBag();

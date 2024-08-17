@@ -35,40 +35,22 @@ class MealList extends Component
 	private QueryBuilder $queryBuilder;
 	private ?Household $household = null;
 
-	/** @var FilterCollection<Filter> */
-	private FilterCollection $filters;
-
-	private Environment $twig;
-	private EntityManagerInterface $entityManager;
-	private Request $request;
-	private ListFilterFormFactory $listFilterFormFactory;
-	private EventDispatcherInterface $eventDispatcher;
-	private MealTagRepository $mealTagRepository;
-	private UserRepository $userRepository;
-	private User $user;
-
+	/**
+	 * @param FilterCollection<Filter> $filters
+	 */
 	public function __construct(
-		User $user,
-		Environment $twig,
-		EntityManagerInterface $entityManager,
-		Request $request,
-		ListFilterFormFactory $listFilterFormFactory,
-		EventDispatcherInterface $eventDispatcher,
-		MealTagRepository $mealTagRepository,
-		UserRepository $userRepository,
+		private User $user,
+		private Environment $twig,
+		private EntityManagerInterface $entityManager,
+		private Request $request,
+		private ListFilterFormFactory $listFilterFormFactory,
+		private EventDispatcherInterface $eventDispatcher,
+		private MealTagRepository $mealTagRepository,
+		private UserRepository $userRepository,
+		private FilterCollection $filters = new FilterCollection(),
 	)
 	{
-		$this->twig = $twig;
-		$this->entityManager = $entityManager;
-		$this->request = $request;
-		$this->listFilterFormFactory = $listFilterFormFactory;
-		$this->eventDispatcher = $eventDispatcher;
-		$this->mealTagRepository = $mealTagRepository;
-		$this->userRepository = $userRepository;
-		$this->filters = new FilterCollection();
-
 		$this->queryBuilder = $this->getBaseQueryBuilder();
-		$this->user = $user;
 	}
 
 	public function render(): string

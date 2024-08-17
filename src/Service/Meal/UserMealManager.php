@@ -10,11 +10,8 @@ use Doctrine\ORM\EntityManagerInterface;
 class UserMealManager
 {
 
-	private EntityManagerInterface $entityManager;
-
-	public function __construct(EntityManagerInterface $entityManager)
+	public function __construct(private EntityManagerInterface $entityManager)
 	{
-		$this->entityManager = $entityManager;
 	}
 
 	public function addAbleToPrepare(User $user, Meal $meal): void

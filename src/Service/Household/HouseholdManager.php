@@ -18,12 +18,13 @@ class HouseholdManager
 	private const GLOBAL_HOUSEHOLD_ID = 'household';
 
 	private SessionInterface $session;
-	private EntityManagerInterface $entityManager;
 
-	public function __construct(RequestStack $requestStack, EntityManagerInterface $entityManager)
+	public function __construct(
+		private EntityManagerInterface $entityManager,
+		RequestStack $requestStack,
+	)
 	{
 		$this->session = $requestStack->getSession();
-		$this->entityManager = $entityManager;
 	}
 
 	public function setSelectedHousehold(Household $household, User $user): void

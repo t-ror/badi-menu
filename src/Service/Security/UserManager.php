@@ -26,21 +26,17 @@ class UserManager
 	private const GLOBAL_AUTH_TOKEN = 'authToken';
 
 	private PasswordHasherInterface $encoder;
-	private EntityManagerInterface $entityManager;
-	private UserRepository $userRepository;
 	private SessionInterface $session;
 	private Request $request;
 
 	public function __construct(
-		EntityManagerInterface $entityManager,
+		private EntityManagerInterface $entityManager,
+		private UserRepository $userRepository,
 		PasswordHasherFactoryInterface $encoderFactory,
 		RequestStack $requestStack,
-		UserRepository $userRepository,
 	)
 	{
-		$this->entityManager = $entityManager;
 		$this->encoder = $encoderFactory->getPasswordHasher(User::class);
-		$this->userRepository = $userRepository;
 		$this->session = $requestStack->getSession();
 
 		$request = $requestStack->getCurrentRequest();

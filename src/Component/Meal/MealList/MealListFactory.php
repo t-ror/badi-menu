@@ -16,34 +16,19 @@ use Twig\Environment;
 class MealListFactory
 {
 
-	private Environment $twig;
-	private EntityManagerInterface $entityManager;
 	private Request $request;
-	private ListFilterFormFactory $listFilterFormFactory;
-	private EventDispatcherInterface $eventDispatcher;
-	private UserManager $userManager;
-	private MealTagRepository $mealTagRepository;
-	private UserRepository $userRepository;
 
 	public function __construct(
-		Environment $twig,
-		EntityManagerInterface $entityManager,
+		private Environment $twig,
+		private EntityManagerInterface $entityManager,
+		private ListFilterFormFactory $listFilterFormFactory,
+		private EventDispatcherInterface $eventDispatcher,
+		private UserManager $userManager,
+		private MealTagRepository $mealTagRepository,
+		private UserRepository $userRepository,
 		RequestStack $requestStack,
-		ListFilterFormFactory $listFilterFormFactory,
-		EventDispatcherInterface $eventDispatcher,
-		UserManager $userManager,
-		MealTagRepository $mealTagRepository,
-		UserRepository $userRepository,
 	)
 	{
-		$this->twig = $twig;
-		$this->entityManager = $entityManager;
-		$this->listFilterFormFactory = $listFilterFormFactory;
-		$this->eventDispatcher = $eventDispatcher;
-		$this->userManager = $userManager;
-		$this->mealTagRepository = $mealTagRepository;
-		$this->userRepository = $userRepository;
-
 		$request = $requestStack->getCurrentRequest();
 		if ($request === null) {
 			throw new InvalidArgumentException('There is no request');

@@ -9,17 +9,14 @@ use Twig\Environment;
 class HouseholdList extends Component
 {
 
-	/** @var array<int, Household> */
-	private array $households;
-	private Environment $twig;
-
 	/**
-	 * @param array<int, Household> $households
+	 * @param array<Household> $households
 	 */
-	public function __construct(array $households, Environment $twig)
+	public function __construct(
+		private array $households,
+		private Environment $twig,
+	)
 	{
-		$this->twig = $twig;
-		$this->households = $households;
 	}
 
 	public function render(): string

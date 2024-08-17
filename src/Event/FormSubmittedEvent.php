@@ -9,21 +9,17 @@ class FormSubmittedEvent extends Event
 
 	public const NAME_DEFAULT = 'form.form_submitted';
 
-	private string $redirectToAction;
-
-	/** @var array<int|string, mixed> */
-	private array $values;
-
 	/** @var array<array<string, string>>  */
 	private array $flashes = [];
 
 	/**
 	 * @param array<int|string, mixed> $values
 	 */
-	public function __construct(string $redirectToAction, array $values = [])
+	public function __construct(
+		private string $redirectToAction,
+		private array $values = [],
+	)
 	{
-		$this->redirectToAction = $redirectToAction;
-		$this->values = $values;
 	}
 
 	public function getRedirectToAction(): string

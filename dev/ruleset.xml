@@ -183,7 +183,6 @@
 	<rule ref="SlevomatCodingStandard.Classes.MethodSpacing"/>
 	<rule ref="SlevomatCodingStandard.Classes.PropertySpacing"/>
 	<rule ref="SlevomatCodingStandard.Classes.RequireMultiLineMethodSignature"/>
-	<rule ref="SlevomatCodingStandard.Classes.RequireSingleLineMethodSignature"/>
 	<rule ref="SlevomatCodingStandard.Classes.SuperfluousInterfaceNaming"/>
 	<rule ref="SlevomatCodingStandard.Classes.SuperfluousTraitNaming"/>
 	<rule ref="SlevomatCodingStandard.Classes.TraitUseDeclaration"/>

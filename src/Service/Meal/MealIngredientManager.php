@@ -10,11 +10,8 @@ use Doctrine\ORM\EntityManagerInterface;
 class MealIngredientManager
 {
 
-	private EntityManagerInterface $entityManager;
-
-	public function __construct(EntityManagerInterface $entityManager)
+	public function __construct(private EntityManagerInterface $entityManager)
 	{
-		$this->entityManager = $entityManager;
 	}
 
 	public function addIngredientToMealByName(Meal $meal, string $ingredientName, ?string $amount = null): void

@@ -21,13 +21,11 @@ use Symfony\Component\HttpFoundation\Response;
 class MealTagController extends BaseController
 {
 
-	private EntityManagerInterface $entityManager;
-	private MealTagListItemMapper $mealTagListItemMapper;
-
-	public function __construct(EntityManagerInterface $entityManager, MealTagListItemMapper $mealTagListItemMapper)
+	public function __construct(
+		private EntityManagerInterface $entityManager,
+		private MealTagListItemMapper $mealTagListItemMapper,
+	)
 	{
-		$this->entityManager = $entityManager;
-		$this->mealTagListItemMapper = $mealTagListItemMapper;
 	}
 
 	public function provideListData(): JsonResponse

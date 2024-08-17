@@ -9,13 +9,11 @@ use Twig\Environment;
 class UserHouseholdListFactory
 {
 
-	private Environment $twig;
-	private HouseholdManager $householdManager;
-
-	public function __construct(Environment $twig, HouseholdManager $householdManager)
+	public function __construct(
+		private Environment $twig,
+		private HouseholdManager $householdManager,
+	)
 	{
-		$this->twig = $twig;
-		$this->householdManager = $householdManager;
 	}
 
 	public function create(User $user): UserHouseholdList

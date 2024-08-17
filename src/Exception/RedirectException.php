@@ -9,16 +9,13 @@ use Throwable;
 class RedirectException extends Exception
 {
 
-	private RedirectResponse $redirectResponse;
-
 	public function __construct(
-		RedirectResponse $redirectResponse,
+		private RedirectResponse $redirectResponse,
 		string $message = '',
 		int $code = 0,
 		?Throwable $previousException = null
 	)
 	{
-		$this->redirectResponse = $redirectResponse;
 		parent::__construct($message, $code, $previousException);
 	}
 

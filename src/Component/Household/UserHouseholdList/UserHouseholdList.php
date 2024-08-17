@@ -10,15 +10,12 @@ use Twig\Environment;
 class UserHouseholdList extends Component
 {
 
-	private User $user;
-	private Environment $twig;
-	private HouseholdManager $householdManager;
-
-	public function __construct(User $user, Environment $twig, HouseholdManager $householdManager)
+	public function __construct(
+		private User $user,
+		private Environment $twig,
+		private HouseholdManager $householdManager,
+	)
 	{
-		$this->user = $user;
-		$this->twig = $twig;
-		$this->householdManager = $householdManager;
 	}
 
 	public function render(): string

@@ -19,11 +19,8 @@ use Symfony\Component\Validator\Constraints\Length;
 class ListFilterFormFactory
 {
 
-	private FormFactoryInterface $formFactory;
-
-	public function __construct(FormFactoryInterface $formFactory)
+	public function __construct(private FormFactoryInterface $formFactory)
 	{
-		$this->formFactory = $formFactory;
 	}
 
 	/**

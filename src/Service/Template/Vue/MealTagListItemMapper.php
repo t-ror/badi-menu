@@ -15,22 +15,13 @@ use Twig\Environment;
 class MealTagListItemMapper
 {
 
-	private EntityManagerInterface $entityManager;
-	private UrlGeneratorInterface $urlGenerator;
-	private FormFactoryInterface $formFactory;
-	private Environment $environment;
-
 	public function __construct(
-		EntityManagerInterface $entityManager,
-		UrlGeneratorInterface $urlGenerator,
-		FormFactoryInterface $formFactory,
-		Environment $environment
+		private EntityManagerInterface $entityManager,
+		private UrlGeneratorInterface $urlGenerator,
+		private FormFactoryInterface $formFactory,
+		private Environment $environment
 	)
 	{
-		$this->entityManager = $entityManager;
-		$this->urlGenerator = $urlGenerator;
-		$this->formFactory = $formFactory;
-		$this->environment = $environment;
 	}
 
 	public function map(MealTag $mealTag): MealTagListItem
