@@ -5,7 +5,6 @@ namespace App\Component\Meal\MealList;
 use App\Component\Component;
 use App\Entity\Household;
 use App\Entity\Meal;
-use App\Entity\MealTag;
 use App\Entity\User;
 use App\Entity\UserMeal;
 use App\Event\FormSubmittedEvent;
@@ -54,7 +53,9 @@ class MealList extends Component
 		EntityManagerInterface $entityManager,
 		Request $request,
 		ListFilterFormFactory $listFilterFormFactory,
-		EventDispatcherInterface $eventDispatcher
+		EventDispatcherInterface $eventDispatcher,
+		MealTagRepository $mealTagRepository,
+		UserRepository $userRepository,
 	)
 	{
 		$this->twig = $twig;
@@ -62,11 +63,11 @@ class MealList extends Component
 		$this->request = $request;
 		$this->listFilterFormFactory = $listFilterFormFactory;
 		$this->eventDispatcher = $eventDispatcher;
+		$this->mealTagRepository = $mealTagRepository;
+		$this->userRepository = $userRepository;
 		$this->filters = new FilterCollection();
 
 		$this->queryBuilder = $this->getBaseQueryBuilder();
-		$this->mealTagRepository = $entityManager->getRepository(MealTag::class);
-		$this->userRepository = $entityManager->getRepository(User::class);
 		$this->user = $user;
 	}
 

@@ -2,6 +2,8 @@
 
 namespace App\Component\Meal\MealList;
 
+use App\Repository\MealTagRepository;
+use App\Repository\UserRepository;
 use App\Service\Form\ListFilterFormFactory;
 use App\Service\Security\UserManager;
 use Doctrine\ORM\EntityManagerInterface;
@@ -20,6 +22,8 @@ class MealListFactory
 	private ListFilterFormFactory $listFilterFormFactory;
 	private EventDispatcherInterface $eventDispatcher;
 	private UserManager $userManager;
+	private MealTagRepository $mealTagRepository;
+	private UserRepository $userRepository;
 
 	public function __construct(
 		Environment $twig,
@@ -27,7 +31,9 @@ class MealListFactory
 		RequestStack $requestStack,
 		ListFilterFormFactory $listFilterFormFactory,
 		EventDispatcherInterface $eventDispatcher,
-		UserManager $userManager
+		UserManager $userManager,
+		MealTagRepository $mealTagRepository,
+		UserRepository $userRepository,
 	)
 	{
 		$this->twig = $twig;
@@ -35,6 +41,8 @@ class MealListFactory
 		$this->listFilterFormFactory = $listFilterFormFactory;
 		$this->eventDispatcher = $eventDispatcher;
 		$this->userManager = $userManager;
+		$this->mealTagRepository = $mealTagRepository;
+		$this->userRepository = $userRepository;
 
 		$request = $requestStack->getCurrentRequest();
 		if ($request === null) {
@@ -52,7 +60,9 @@ class MealListFactory
 			$this->entityManager,
 			$this->request,
 			$this->listFilterFormFactory,
-			$this->eventDispatcher
+			$this->eventDispatcher,
+			$this->mealTagRepository,
+			$this->userRepository,
 		);
 	}
 

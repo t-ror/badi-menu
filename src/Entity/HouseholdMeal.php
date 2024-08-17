@@ -3,32 +3,26 @@
 namespace App\Entity;
 
 use App\Entity\Traits\TId;
-use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\Entity;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\Table;
+use Doctrine\ORM\Mapping\UniqueConstraint;
 
-/**
- * @ORM\Entity()
- * @ORM\Table(
- *     name="app_household_meal",
- *     uniqueConstraints={
- *          @ORM\UniqueConstraint(columns={"household_id", "meal_id"})
- *     }
- * )
- */
-class HouseholdMeal extends Entity
+#[Entity]
+#[Table(name: 'app_household_meal')]
+#[UniqueConstraint(columns: ['household_id', 'meal_id'])]
+class HouseholdMeal extends EntityOrm
 {
 
 	use TId;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Household", inversedBy="householdMeals")
-	 * @ORM\JoinColumn(referencedColumnName="id", nullable=false)
-	 */
+	#[ManyToOne(targetEntity: Household::class, inversedBy: 'householdMeals')]
+	#[JoinColumn(referencedColumnName: 'id', nullable: false)]
 	private Household $household;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Meal", inversedBy="householdMeals")
-	 * @ORM\JoinColumn(referencedColumnName="id", nullable=false)
-	 */
+	#[ManyToOne(targetEntity: Meal::class, inversedBy: 'householdMeals')]
+	#[JoinColumn(referencedColumnName: 'id', nullable: false)]
 	private Meal $meal;
 
 	public function __construct(Household $household, Meal $meal)

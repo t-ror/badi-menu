@@ -3,41 +3,36 @@
 namespace App\Entity;
 
 use App\Entity\Traits\TId;
+use App\Repository\HouseholdRepository;
 use App\ValueObject\File\Image;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\Column;
+use Doctrine\ORM\Mapping\Entity;
+use Doctrine\ORM\Mapping\OneToMany;
+use Doctrine\ORM\Mapping\Table;
+use Doctrine\ORM\Mapping\UniqueConstraint;
 
-/**
- * @ORM\Entity(repositoryClass="App\Repository\HouseholdRepository")
- * @ORM\Table(
- *     name="app_household",
- *     uniqueConstraints={
- *          @ORM\UniqueConstraint(columns={"name"})
- *     }
- * )
- */
-class Household extends Entity
+#[Entity(repositoryClass: HouseholdRepository::class)]
+#[Table(name: 'app_household')]
+#[UniqueConstraint(columns: ['name'])]
+class Household extends EntityOrm
 {
 
 	use TId;
 
-	/** @ORM\Column(length=32, type="string", nullable=false) */
+	#[Column(type: 'string', length: 32, nullable: false)]
 	private string $name;
 
-	/** @ORM\Column(type="string", nullable=true) */
+	#[Column(type: 'string', nullable: false)]
 	private ?string $image = null;
 
-	/**
-	 * @var Collection<UserHousehold>
-	 * @ORM\OneToMany(targetEntity="UserHousehold", mappedBy="household")
-	 */
+	/** @var Collection<UserHousehold> */
+	#[OneToMany(targetEntity: UserHousehold::class, mappedBy: 'household')]
 	private Collection $userHouseholds;
 
-	/**
-	 * @var Collection<HouseholdMeal>
-	 * @ORM\OneToMany(targetEntity="HouseholdMeal", mappedBy="household")
-	 */
+	/** @var Collection<HouseholdMeal> */
+	#[OneToMany(targetEntity: HouseholdMeal::class, mappedBy: 'household')]
 	private Collection $householdMeals;
 
 	public function __construct(string $name)

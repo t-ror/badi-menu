@@ -3,24 +3,25 @@
 namespace App\Entity;
 
 use App\Entity\Traits\TId;
-use Doctrine\ORM\Mapping as ORM;
+use App\Repository\MealTagRepository;
+use Doctrine\ORM\Mapping\Column;
+use Doctrine\ORM\Mapping\Entity;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\Table;
 
-/**
- * @ORM\Entity(repositoryClass="App\Repository\MealTagRepository")
- * @ORM\Table(name="app_meal_tag")
- */
-class MealTag extends Entity
+#[Entity(repositoryClass: MealTagRepository::class)]
+#[Table(name: 'app_meal_tag')]
+class MealTag extends EntityOrm
 {
 
 	use TId;
 
-	/** @ORM\Column(length=32, type="string", nullable=false) */
+	#[Column(type: 'string', length: 32, nullable: false)]
 	private string $name;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Household", inversedBy="householdMeals")
-	 * @ORM\JoinColumn(referencedColumnName="id", nullable=false)
-	 */
+	#[ManyToOne(targetEntity: Household::class, inversedBy: 'householdMeals')]
+	#[JoinColumn(referencedColumnName: 'id', nullable: false)]
 	private Household $household;
 
 	public function __construct(string $name, Household $household)

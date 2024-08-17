@@ -3,30 +3,28 @@
 namespace App\Entity;
 
 use App\Entity\Traits\TId;
-use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\Column;
+use Doctrine\ORM\Mapping\Entity;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\Table;
 
-/**
- * @ORM\Entity()
- * @ORM\Table(name="app_meal_ingredient")
- */
-class MealIngredient extends Entity
+#[Entity]
+#[Table(name: 'app_meal_ingredient')]
+class MealIngredient extends EntityOrm
 {
 
 	use TId;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Meal", inversedBy="mealIngredients")
-	 * @ORM\JoinColumn(referencedColumnName="id", nullable=false)
-	 */
+	#[ManyToOne(targetEntity: Meal::class, inversedBy: 'mealIngredients')]
+	#[JoinColumn(referencedColumnName: 'id', nullable: false)]
 	private Meal $meal;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ingredient")
-	 * @ORM\JoinColumn(referencedColumnName="id", nullable=false)
-	 */
+	#[ManyToOne(targetEntity: Ingredient::class)]
+	#[JoinColumn(referencedColumnName: 'id', nullable: false)]
 	private Ingredient $ingredient;
 
-	/** @ORM\Column(length=32, type="string", nullable=true) */
+	#[Column(type: 'string', length: 32, nullable: true)]
 	private ?string $amount = null;
 
 	public function __construct(Meal $meal, Ingredient $ingredient)

@@ -25,14 +25,15 @@ class HouseholdController extends BaseController
 		UserHouseholdListFactory $userHouseholdListFactory,
 		HouseholdManager $householdManager,
 		EntityManagerInterface $entityManager,
-		HouseholdListFactory $householdListFactory
+		HouseholdListFactory $householdListFactory,
+		HouseholdRepository $householdRepository,
 	)
 	{
 		$this->userHouseholdListFactory = $userHouseholdListFactory;
 		$this->householdManager = $householdManager;
 		$this->entityManager = $entityManager;
 		$this->householdListFactory = $householdListFactory;
-		$this->householdRepository = $entityManager->getRepository(Household::class);
+		$this->householdRepository = $householdRepository;
 	}
 
 	public function list(): Response

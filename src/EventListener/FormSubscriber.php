@@ -6,7 +6,9 @@ use App\Event\FormSubmittedEvent;
 use App\Exception\RedirectException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
+use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class FormSubscriber implements EventSubscriberInterface
@@ -15,10 +17,13 @@ class FormSubscriber implements EventSubscriberInterface
 	private UrlGeneratorInterface $urlGenerator;
 	private FlashBagInterface $flashBag;
 
-	public function __construct(UrlGeneratorInterface $urlGenerator, FlashBagInterface $flashBag)
+	public function __construct(UrlGeneratorInterface $urlGenerator, RequestStack $requestStack)
 	{
 		$this->urlGenerator = $urlGenerator;
-		$this->flashBag = $flashBag;
+
+		/** @var Session $session */
+		$session = $requestStack->getSession();
+		$this->flashBag = $session->getFlashBag();
 	}
 
 	/**

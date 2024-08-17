@@ -5,7 +5,7 @@ namespace App\Service\Template\Vue;
 use App\Entity\MealTag;
 use App\Type\MealTag\MealTagType;
 use App\ValueObject\Template\Vue\MealTagListItem;
-use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\FormFactoryInterface;
@@ -90,9 +90,9 @@ class MealTagListItemMapper
 			->addSelect('COUNT(meal_meal_tag.meal_tag_id) AS count')
 			->from('meal_meal_tag')
 			->andWhere('meal_meal_tag.meal_tag_id IN (:mealTagIds)')
-			->setParameter('mealTagIds', $mealTagIds, Connection::PARAM_INT_ARRAY)
+			->setParameter('mealTagIds', $mealTagIds, ArrayParameterType::INTEGER)
 			->groupBy('meal_meal_tag.meal_tag_id')
-			->execute()
+			->executeQuery()
 			->fetchAllAssociative();
 
 		foreach ($counts as $count) {

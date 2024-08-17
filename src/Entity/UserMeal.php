@@ -3,38 +3,33 @@
 namespace App\Entity;
 
 use App\Entity\Traits\TId;
-use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\Column;
+use Doctrine\ORM\Mapping\Entity;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\Table;
+use Doctrine\ORM\Mapping\UniqueConstraint;
 
-/**
- * @ORM\Entity()
- * @ORM\Table(
- *     name="app_user_meal",
- *     uniqueConstraints={
- *          @ORM\UniqueConstraint(columns={"user_id", "meal_id"})
- *     }
- * )
- */
-class UserMeal extends Entity
+#[Entity]
+#[Table(name: 'app_user_meal')]
+#[UniqueConstraint(columns: ['user_id', 'meal_id'])]
+class UserMeal extends EntityOrm
 {
 
 	use TId;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="User", inversedBy="userMeals")
-	 * @ORM\JoinColumn(referencedColumnName="id", nullable=false)
-	 */
+	#[ManyToOne(targetEntity: User::class, inversedBy: 'userMeals')]
+	#[JoinColumn(referencedColumnName: 'id', nullable: false)]
 	private User $user;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Meal")
-	 * @ORM\JoinColumn(referencedColumnName="id", nullable=false)
-	 */
+	#[ManyToOne(targetEntity: Meal::class)]
+	#[JoinColumn(referencedColumnName: 'id', nullable: false)]
 	private Meal $meal;
 
-	/** @ORM\Column(type="boolean", nullable=false, options={"default" : 0}) */
+	#[Column(type: 'boolean', nullable: false, options: ['default' => 0])]
 	private bool $ableToPrepare = false;
 
-	/** @ORM\Column(type="boolean", nullable=false, options={"default" : 0}) */
+	#[Column(type: 'boolean', nullable: false, options: ['default' => 0])]
 	private bool $favorite = false;
 
 	public function __construct(User $user, Meal $meal)

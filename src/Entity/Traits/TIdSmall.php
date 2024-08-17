@@ -2,16 +2,16 @@
 
 namespace App\Entity\Traits;
 
-use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\Column;
+use Doctrine\ORM\Mapping\GeneratedValue;
+use Doctrine\ORM\Mapping\Id;
 
 trait TIdSmall
 {
 
-	/**
-	 * @ORM\Id
-	 * @ORM\GeneratedValue
-	 * @ORM\Column(type="smallint", nullable=false)
-	 */
+	#[Id]
+	#[GeneratedValue]
+	#[Column(type: 'smallint', nullable: false)]
 	private int $id;
 
 	public function getId(): int

@@ -2,7 +2,7 @@
 
 namespace App\Entity;
 
-abstract class Entity
+abstract class EntityOrm
 {
 
 }

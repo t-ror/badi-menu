@@ -2,7 +2,7 @@
 
 namespace App\Twig;
 
-use App\Entity\Entity;
+use App\Entity\EntityOrm;
 use App\Entity\Household;
 use App\Entity\Meal;
 use App\Entity\User;
@@ -34,7 +34,7 @@ class ImageExtension extends AbstractExtension
 		];
 	}
 
-	public function checkNoImg(?Image $image, ?Entity $entity = null): string
+	public function checkNoImg(?Image $image, ?EntityOrm $entity = null): string
 	{
 		if ($image === null || Strings::isEmpty($image->getFullFilename())) {
 			$filename = $entity !== null && array_key_exists($this->getEntityClassName($entity), $this->noImgFilenames)
@@ -47,7 +47,7 @@ class ImageExtension extends AbstractExtension
 		return $image->getFullFilename();
 	}
 
-	private function getEntityClassName(Entity $entity): string
+	private function getEntityClassName(EntityOrm $entity): string
 	{
 		$nameParsed = explode('\\', get_class($entity));
 

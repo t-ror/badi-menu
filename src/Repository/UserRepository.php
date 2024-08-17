@@ -6,11 +6,18 @@ use App\Entity\Household;
 use App\Entity\User;
 use App\Entity\UserHousehold;
 use App\Utils\UserUrl;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Nette\Utils\Arrays;
 
 class UserRepository extends EntityRepository
 {
+
+	public function __construct(EntityManagerInterface $entityManager)
+	{
+		$classMetadata = $entityManager->getClassMetadata(User::class);
+		parent::__construct($entityManager, $classMetadata);
+	}
 
 	public function getByNameOrEmail(string $nameOrEmail): ?User
 	{

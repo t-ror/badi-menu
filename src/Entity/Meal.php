@@ -6,59 +6,52 @@ use App\Entity\Traits\TId;
 use App\ValueObject\File\Image;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\Column;
+use Doctrine\ORM\Mapping\Entity;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToMany;
+use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\OneToMany;
+use Doctrine\ORM\Mapping\Table;
+use Doctrine\ORM\Mapping\UniqueConstraint;
 
-/**
- * @ORM\Entity()
- * @ORM\Table(
- *     name="app_meal",
- *     uniqueConstraints={
- *          @ORM\UniqueConstraint(columns={"url"})
- *     }
- * )
- */
-class Meal extends Entity
+#[Entity]
+#[Table(name: 'app_meal')]
+#[UniqueConstraint(columns: ['url'])]
+class Meal extends EntityOrm
 {
 
 	use TId;
 
-	/** @ORM\Column(type="string", nullable=false) */
+	#[Column(type: 'string', nullable: false)]
 	private string $name;
 
-	/** @ORM\Column(type="string", nullable=false) */
+	#[Column(type: 'string', nullable: false)]
 	private string $url;
 
-	/** @ORM\Column(type="string", nullable=true) */
+	#[Column(type: 'string', nullable: true)]
 	private ?string $image = null;
 
-	/** @ORM\Column(type="text", nullable=true) */
+	#[Column(type: 'text', nullable: true)]
 	private ?string $description = null;
 
-	/** @ORM\Column(type="text", nullable=true) */
+	#[Column(type: 'text', nullable: true)]
 	private ?string $method = null;
 
-	/**
-	 * @var Collection<MealIngredient>
-	 * @ORM\OneToMany(targetEntity="MealIngredient", mappedBy="meal")
-	 */
+	/** @var Collection<MealIngredient> */
+	#[OneToMany(targetEntity: MealIngredient::class, mappedBy: 'meal')]
 	private Collection $mealIngredients;
 
-	/**
-	 * @var Collection<MealTag>
-	 * @ORM\ManyToMany(targetEntity="MealTag")
-	 */
+	/** @var Collection<MealTag> */
+	#[ManyToMany(targetEntity: MealTag::class)]
 	private Collection $mealTags;
 
-	/**
-	 * @var Collection<HouseholdMeal>
-	 * @ORM\OneToMany(targetEntity="HouseholdMeal", mappedBy="meal")
-	 */
+	/** @var Collection<HouseholdMeal> */
+	#[OneToMany(targetEntity: HouseholdMeal::class, mappedBy: 'meal')]
 	private Collection $householdMeals;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="User")
-	 * @ORM\JoinColumn(referencedColumnName="id", nullable=false)
-	 */
+	#[ManyToOne(targetEntity: User::class)]
+	#[JoinColumn(referencedColumnName: 'id', nullable: false)]
 	private User $createdByUser;
 
 	public function __construct(string $name, string $url, User $createdByUser)

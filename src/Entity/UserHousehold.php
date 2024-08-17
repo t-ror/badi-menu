@@ -4,39 +4,38 @@ namespace App\Entity;
 
 use App\Entity\Traits\TId;
 use DateTimeImmutable;
-use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\Column;
+use Doctrine\ORM\Mapping\Entity;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\Table;
 
-/**
- * @ORM\Entity()
- * @ORM\Table(name="app_user_household")
- */
-class UserHousehold extends Entity
+#[Entity]
+#[Table(name: 'app_user_household')]
+class UserHousehold extends EntityOrm
 {
 
 	use TId;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="User", inversedBy="userHouseholds")
-	 * @ORM\JoinColumn(referencedColumnName="id", nullable=false)
-	 */
+	#[ManyToOne(targetEntity: User::class, inversedBy: 'userHouseholds')]
+	#[JoinColumn(referencedColumnName: 'id', nullable: false)]
 	private User $user;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Household", inversedBy="userHouseholds")
-	 * @ORM\JoinColumn(referencedColumnName="id", nullable=false)
-	 */
+	#[ManyToOne(targetEntity: Household::class, inversedBy: 'userHouseholds')]
+	#[JoinColumn(referencedColumnName: 'id', nullable: false)]
 	private Household $household;
 
-	/** @ORM\Column(type="datetime_immutable", nullable=false) */
+	#[Column(type: 'datetime_immutable', nullable: false)]
+
 	private DateTimeImmutable $dateJoined;
 
-	/** @ORM\Column(type="datetime_immutable", nullable=true) */
+	#[Column(type: 'datetime_immutable', nullable: true)]
 	private ?DateTimeImmutable $dateLastSelected = null;
 
-	/** @ORM\Column(type="boolean", options={"default":0}, nullable=false) */
+	#[Column(type: 'boolean', nullable: false, options: ['default' => 0])]
 	private bool $allowed = false;
 
-	/** @ORM\Column(type="boolean", options={"default":0}, nullable=false) */
+	#[Column(type: 'boolean', nullable: false, options: ['default' => 0])]
 	private bool $allowedToCook = false;
 
 	public function __construct(User $user, Household $household)

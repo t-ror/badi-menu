@@ -3,11 +3,19 @@
 namespace App\Repository;
 
 use App\Entity\Household;
+use App\Entity\MealTag;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Nette\Utils\Arrays;
 
 class MealTagRepository extends EntityRepository
 {
+
+	public function __construct(EntityManagerInterface $entityManager)
+	{
+		$classMetadata = $entityManager->getClassMetadata(MealTag::class);
+		parent::__construct($entityManager, $classMetadata);
+	}
 
 	/**
 	 * @return array<int, string>

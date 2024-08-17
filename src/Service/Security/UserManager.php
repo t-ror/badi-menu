@@ -11,9 +11,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
-use Symfony\Component\Security\Core\Encoder\EncoderFactoryInterface;
-use Symfony\Component\Security\Core\Encoder\PasswordEncoderInterface;
-use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
+use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactoryInterface;
+use Symfony\Component\PasswordHasher\PasswordHasherInterface;
+use Symfony\Component\Security\Core\Exception\UserNotFoundException;
 
 class UserManager
 {
@@ -25,7 +25,7 @@ class UserManager
 	private const GLOBAL_USER = 'user';
 	private const GLOBAL_AUTH_TOKEN = 'authToken';
 
-	private PasswordEncoderInterface $encoder;
+	private PasswordHasherInterface $encoder;
 	private EntityManagerInterface $entityManager;
 	private UserRepository $userRepository;
 	private SessionInterface $session;
@@ -33,15 +33,15 @@ class UserManager
 
 	public function __construct(
 		EntityManagerInterface $entityManager,
-		EncoderFactoryInterface $encoderFactory,
-		SessionInterface $session,
-		RequestStack $requestStack
+		PasswordHasherFactoryInterface $encoderFactory,
+		RequestStack $requestStack,
+		UserRepository $userRepository,
 	)
 	{
 		$this->entityManager = $entityManager;
-		$this->encoder = $encoderFactory->getEncoder(User::class);
-		$this->userRepository = $entityManager->getRepository(User::class);
-		$this->session = $session;
+		$this->encoder = $encoderFactory->getPasswordHasher(User::class);
+		$this->userRepository = $userRepository;
+		$this->session = $requestStack->getSession();
 
 		$request = $requestStack->getCurrentRequest();
 		if ($request === null) {
@@ -62,7 +62,7 @@ class UserManager
 
 	public function isPasswordValid(User $user, string $password): bool
 	{
-		return $this->encoder->isPasswordValid($user->getPassword(), $password, null);
+		return $this->encoder->verify($user->getPassword(), $password);
 	}
 
 	public function loginUser(User $user, bool $remember, Response $response): void
@@ -123,7 +123,7 @@ class UserManager
 	{
 		$user = $this->getLoggedUserOrNull();
 		if ($user === null) {
-			throw new UsernameNotFoundException();
+			throw new UserNotFoundException();
 		}
 
 		return $user;
@@ -133,7 +133,7 @@ class UserManager
 	{
 		$user = new User(
 			$name,
-			$this->encoder->encodePassword($password, null),
+			$this->encoder->hash($password),
 			$email
 		);
 
@@ -143,7 +143,7 @@ class UserManager
 
 	public function setNewPassword(User $user, string $password): void
 	{
-		$user->setPassword($this->encoder->encodePassword($password, null));
+		$user->setPassword($this->encoder->hash($password));
 	}
 
 }

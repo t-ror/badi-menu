@@ -8,51 +8,45 @@ use App\Utils\UserUrl;
 use App\ValueObject\File\Image;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\Column;
+use Doctrine\ORM\Mapping\Entity;
+use Doctrine\ORM\Mapping\OneToMany;
+use Doctrine\ORM\Mapping\Table;
+use Doctrine\ORM\Mapping\UniqueConstraint;
 
-/**
- * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
- * @ORM\Table(
- *     name="app_user",
- *     uniqueConstraints={
- *          @ORM\UniqueConstraint(columns={"name"}),
- *          @ORM\UniqueConstraint(columns={"email"})
- *     }
- * )
- */
-class User extends Entity
+#[Entity]
+#[Table(name: 'app_user')]
+#[UniqueConstraint(columns: ['name'])]
+#[UniqueConstraint(columns: ['email'])]
+class User extends EntityOrm
 {
 
 	use TId;
 
-	/** @ORM\Column(length=32, type="string", nullable=false) */
+	#[Column(type: 'string', length: 32, nullable: false)]
 	private string $name;
 
-	/** @ORM\Column(type="string", nullable=false) */
+	#[Column(type: 'string', nullable: false)]
 	private string $password;
 
-	/** @ORM\Column(length=64, type="string", nullable=false) */
+	#[Column(type: 'string', length: 64, nullable: false)]
 	private string $email;
 
-	/** @ORM\Column(type="boolean", options={"default":0}, nullable=false) */
+	#[Column(type: 'boolean', nullable: false, options: ['default' => 0])]
 	private bool $verified = false;
 
-	/** @ORM\Column(type="string", nullable=true) */
+	#[Column(type: 'string', nullable: true)]
 	private ?string $token = null;
 
-	/** @ORM\Column(type="string", nullable=true) */
+	#[Column(type: 'string', nullable: true)]
 	private ?string $image = null;
 
-	/**
-	 * @var Collection<UserHousehold>
-	 * @ORM\OneToMany(targetEntity="UserHousehold", mappedBy="user")
-	 */
+	/** @var Collection<UserHousehold> */
+	#[OneToMany(targetEntity: UserHousehold::class, mappedBy: 'user')]
 	private Collection $userHouseholds;
 
-	/**
-	 * @var UserMealCollection<UserMeal>
-	 * @ORM\OneToMany(targetEntity="UserMeal", mappedBy="user")
-	 */
+	/** @var UserMealCollection<UserMeal> */
+	#[OneToMany(targetEntity: UserMeal::class, mappedBy: 'user')]
 	private Collection $userMeals;
 
 	public function __construct(string $name, string $password, string $email)

@@ -3,18 +3,18 @@
 namespace App\Entity;
 
 use App\Entity\Traits\TId;
-use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\Column;
+use Doctrine\ORM\Mapping\Entity;
+use Doctrine\ORM\Mapping\Table;
 
-/**
- * @ORM\Entity()
- * @ORM\Table(name="app_ingredient")
- */
-class Ingredient extends Entity
+#[Entity]
+#[Table(name: 'app_ingredient')]
+class Ingredient extends EntityOrm
 {
 
 	use TId;
 
-	/** @ORM\Column(length=32, type="string", nullable=false) */
+	#[Column(type: 'string', length: 32, nullable: false)]
 	private string $name;
 
 	public function __construct(string $name)

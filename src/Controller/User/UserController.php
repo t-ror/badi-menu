@@ -32,14 +32,15 @@ class UserController extends BaseController
 		EntityManagerInterface $entityManager,
 		MealListFactory $mealListFactory,
 		UserHouseholdListFactory $userHouseholdListFactory,
-		ImageFacade $imageFacade
+		ImageFacade $imageFacade,
+		UserRepository $userRepository,
 	)
 	{
 		$this->entityManager = $entityManager;
-		$this->userRepository = $entityManager->getRepository(User::class);
 		$this->mealListFactory = $mealListFactory;
 		$this->userHouseholdListFactory = $userHouseholdListFactory;
 		$this->imageFacade = $imageFacade;
+		$this->userRepository = $userRepository;
 	}
 
 	public function login(Request $request): Response

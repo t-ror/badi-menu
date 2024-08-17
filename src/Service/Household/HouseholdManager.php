@@ -7,6 +7,7 @@ use App\Entity\User;
 use App\Entity\UserHousehold;
 use Doctrine\ORM\EntityManagerInterface;
 use InvalidArgumentException;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 class HouseholdManager
@@ -19,9 +20,9 @@ class HouseholdManager
 	private SessionInterface $session;
 	private EntityManagerInterface $entityManager;
 
-	public function __construct(SessionInterface $session, EntityManagerInterface $entityManager)
+	public function __construct(RequestStack $requestStack, EntityManagerInterface $entityManager)
 	{
-		$this->session = $session;
+		$this->session = $requestStack->getSession();
 		$this->entityManager = $entityManager;
 	}
 

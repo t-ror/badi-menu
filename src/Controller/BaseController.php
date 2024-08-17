@@ -7,6 +7,7 @@ use App\Service\Household\HouseholdManager;
 use App\Service\Security\UserManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Contracts\Service\Attribute\SubscribedService;
 
 abstract class BaseController extends AbstractController
 {
@@ -18,7 +19,7 @@ abstract class BaseController extends AbstractController
 	private ?string $activeMenuLink = null;
 
 	/**
-	 * @return array<string, string>
+	 * @return array<string, string|SubscribedService>
 	 */
 	public static function getSubscribedServices(): array
 	{
