@@ -45,6 +45,7 @@ class UserController extends BaseController
 	public function login(Request $request): Response
 	{
 		$this->checkAccessNotLoggedIn();
+		dump($this->entityManager->getConnection());
 
 		$loginForm = $this->createForm(LoginType::class);
 		$loginForm->handleRequest($request);

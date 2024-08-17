@@ -211,13 +211,13 @@ class MealController extends BaseController
 			$meal->addMealTag($mealTag);
 		}
 
-		if ($values['ableToPrepare']) {
+		if ((bool) $values['ableToPrepare']) {
 			$this->userMealManager->addAbleToPrepare($user, $meal);
 		} else {
 			$this->userMealManager->removeAbleToPrepare($user, $meal);
 		}
 
-		if ($values['favorite']) {
+		if ((bool) $values['favorite']) {
 			$this->userMealManager->addFavorite($user, $meal);
 		} else {
 			$this->userMealManager->removeFavorite($user, $meal);
@@ -270,11 +270,11 @@ class MealController extends BaseController
 		$this->entityManager->persist($meal);
 		$this->entityManager->flush();
 
-		if ($values['ableToPrepare']) {
+		if ((bool) $values['ableToPrepare']) {
 			$this->userMealManager->addAbleToPrepare($user, $meal);
 		}
 
-		if ($values['favorite']) {
+		if ((bool) $values['favorite']) {
 			$this->userMealManager->addFavorite($user, $meal);
 		}
 

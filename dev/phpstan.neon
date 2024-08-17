@@ -14,12 +14,9 @@ parameters:
     paths:
         - ..\src
 
-    checkMissingIterableValueType: false
-    checkGenericClassInNonGenericObjectType: false
-
     # Temp directory
     tmpDir: temp/phpstan
 
     ignoreErrors:
-        - '#^Property (.)+ \((.)+\) does not accept Doctrine\\ORM\\EntityRepository<(.)+>\.$#'
+        - identifier: missingType.generics
         - '#^Return type (.)+ of method (.)+\:\:getSubscribedEvents\(\) should be covariant with return type (.)+ of method Symfony\\Component\\EventDispatcher\\EventSubscriberInterface::getSubscribedEvents\(\)$#'

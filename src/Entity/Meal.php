@@ -51,7 +51,7 @@ class Meal extends Entity
 
 	/**
 	 * @var Collection<HouseholdMeal>
-	 * @ORM\ManyToMany(targetEntity="HouseholdMeal", mappedBy="meal")
+	 * @ORM\OneToMany(targetEntity="HouseholdMeal", mappedBy="meal")
 	 */
 	private Collection $householdMeals;
 

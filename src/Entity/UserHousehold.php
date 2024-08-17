@@ -16,13 +16,13 @@ class UserHousehold extends Entity
 	use TId;
 
 	/**
-	 * @ORM\ManyToOne(targetEntity="User", inversedBy="UserHouseholds")
+	 * @ORM\ManyToOne(targetEntity="User", inversedBy="userHouseholds")
 	 * @ORM\JoinColumn(referencedColumnName="id", nullable=false)
 	 */
 	private User $user;
 
 	/**
-	 * @ORM\ManyToOne(targetEntity="Household", inversedBy="UserHouseholds")
+	 * @ORM\ManyToOne(targetEntity="Household", inversedBy="userHouseholds")
 	 * @ORM\JoinColumn(referencedColumnName="id", nullable=false)
 	 */
 	private Household $household;

@@ -17,6 +17,7 @@ class ImageExtension extends AbstractExtension
 	private const DIR_NO_IMG = '/assets/img/no-img/';
 	private const NO_IMG_DEFAULT = 'image.svg';
 
+	/** @var array<string, string>  */
 	private array $noImgFilenames = [
 		Household::class => 'house-door.svg',
 		Meal::class => 'meal-icon.svg',

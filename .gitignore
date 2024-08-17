@@ -20,6 +20,8 @@
 diff.sql
 /node_modules/
 /public/build/
+/docker
+Dockerfile
 
 ###> squizlabs/php_codesniffer ###
 /.phpcs-cache
