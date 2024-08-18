@@ -4,7 +4,7 @@
 {% block body %}
 	<div class="container app-container-main">
 		<div class="pt-2 mb-2">
-			<a href="{{ path('userDetail', {url: loggedUser.url}) }}">{{ user.name }}</a> > <strong>editace</strong>
+			<a href="{{ path('userDetail', {url: loggedInUser.url}) }}">{{ user.name }}</a> > <strong>editace</strong>
 		</div>
 		<h1>{{ user.name }} - editace</h1>
 		{{ form_start(userEditForm, { 'attr' : { 'class': 'app_prevent-double-submit' } }) }}

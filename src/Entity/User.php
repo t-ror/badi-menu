@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use App\Entity\Collection\UserMealCollection;
 use App\Entity\Traits\TId;
+use App\Repository\UserRepository;
+use App\Security\Role;
 use App\Utils\UserUrl;
 use App\ValueObject\File\Image;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -13,12 +15,15 @@ use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\OneToMany;
 use Doctrine\ORM\Mapping\Table;
 use Doctrine\ORM\Mapping\UniqueConstraint;
+use Override;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
-#[Entity]
+#[Entity(repositoryClass: UserRepository::class)]
 #[Table(name: 'app_user')]
 #[UniqueConstraint(columns: ['name'])]
 #[UniqueConstraint(columns: ['email'])]
-class User extends EntityOrm
+class User extends EntityOrm implements UserInterface, PasswordAuthenticatedUserInterface
 {
 
 	use TId;
@@ -31,6 +36,10 @@ class User extends EntityOrm
 
 	#[Column(type: 'string', length: 64, nullable: false)]
 	private string $email;
+
+	/** @var array<string> */
+	#[Column(type: 'json')]
+	private array $roles = [];
 
 	#[Column(type: 'boolean', nullable: false, options: ['default' => 0])]
 	private bool $verified = false;
@@ -57,6 +66,8 @@ class User extends EntityOrm
 
 		$this->userHouseholds = new ArrayCollection();
 		$this->userMeals = new UserMealCollection();
+
+		$this->addRole(Role::USER);
 	}
 
 	public function getName(): string
@@ -203,6 +214,36 @@ class User extends EntityOrm
 	public function isMealFavourite(Meal $meal): bool
 	{
 		return $this->getUserMeals()->hasMealFavourite($meal);
+	}
+
+	/**
+	 * @return array<string>
+	 */
+	#[Override]
+	public function getRoles(): array
+	{
+		$roles = $this->roles;
+
+		return array_unique($roles);
+	}
+
+	private function addRole(Role $role): void
+	{
+		if (!in_array($role->value, $this->roles, true)) {
+			$this->roles[] = $role->value;
+		}
+	}
+
+	#[Override]
+	public function eraseCredentials(): void
+	{
+		// TODO: Implement eraseCredentials() method.
+	}
+
+	#[Override]
+	public function getUserIdentifier(): string
+	{
+		return $this->name;
 	}
 
 }

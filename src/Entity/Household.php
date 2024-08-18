@@ -24,7 +24,7 @@ class Household extends EntityOrm
 	#[Column(type: 'string', length: 32, nullable: false)]
 	private string $name;
 
-	#[Column(type: 'string', nullable: false)]
+	#[Column(type: 'string', nullable: true)]
 	private ?string $image = null;
 
 	/** @var Collection<UserHousehold> */

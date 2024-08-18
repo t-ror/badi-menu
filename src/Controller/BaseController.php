@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
 use App\Exception\RedirectException;
 use App\Service\Household\HouseholdManager;
 use App\Service\Security\UserManager;
@@ -35,10 +36,10 @@ abstract class BaseController extends AbstractController
 	 */
 	protected function render(string $view, array $parameters = [], ?Response $response = null): Response
 	{
-		$loggedUser = $this->getUserManager()->getLoggedUserOrNull();
-		$parameters['loggedUser'] = $loggedUser;
-		$parameters['selectedHousehold'] = $loggedUser !== null
-			? $this->getHouseholdManager()->getSelectedHouseholdForUserOrNull($loggedUser)
+		$loggedInUser = $this->getLoggedInUserOrNull();
+		$parameters['loggedInUser'] = $loggedInUser;
+		$parameters['selectedHousehold'] = $loggedInUser !== null
+			? $this->getHouseholdManager()->getSelectedHouseholdForUserOrNull($loggedInUser)
 			: null;
 
 		$parameters['activeMenuLink'] = $this->activeMenuLink;
@@ -81,17 +82,9 @@ abstract class BaseController extends AbstractController
 		);
 	}
 
-	protected function checkAccessLoggedIn(): void
-	{
-		$user = $this->getUserManager()->getLoggedUserOrNull();
-		if ($user === null) {
-			$this->redirectClean('login');
-		}
-	}
-
 	protected function checkAccessNotLoggedIn(): void
 	{
-		$user = $this->getUserManager()->getLoggedUserOrNull();
+		$user = $this->getLoggedInUserOrNull();
 		if ($user !== null) {
 			$this->redirectClean('homepage');
 		}
@@ -101,7 +94,7 @@ abstract class BaseController extends AbstractController
 	 * @param array<string, mixed> $parameters
 	 * @throws RedirectException
 	 */
-	public function redirectClean(string $route, array $parameters = []): void
+	public function redirectClean(string $route, array $parameters = []): never
 	{
 		throw new RedirectException($this->redirectToRoute($route, $parameters));
 	}
@@ -111,12 +104,21 @@ abstract class BaseController extends AbstractController
 		return $this->container->get(UserManager::class);
 	}
 
+	protected function getLoggedInUser(): User
+	{
+		return $this->getUserManager()->getLoggedInUser();
+	}
+
+	protected function getLoggedInUserOrNull(): ?User
+	{
+		return $this->getUserManager()->getLoggedInUserOrNull();
+	}
+
 	protected function checkHouseholdSelected(): void
 	{
-		$user = $this->getUserManager()->getLoggedUserOrNull();
+		$user = $this->getLoggedInUserOrNull();
 		if ($user === null) {
 			$this->redirectClean('login');
-			return;
 		}
 
 		$household = $this->getHouseholdManager()->getSelectedHouseholdForUserOrNull($user);

@@ -1,7 +1,10 @@
 security:
     # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
     providers:
-        users_in_memory: { memory: null }
+        app_user_provider:
+            entity:
+                class: App\Entity\User
+
     password_hashers:
         App\Entity\User:
             algorithm: auto
@@ -12,7 +15,22 @@ security:
             security: false
         main:
             lazy: true
-            provider: users_in_memory
+            provider: app_user_provider
+            remember_me:
+                secret: '%kernel.secret%'
+                lifetime: 2419200 # 4 weeks in seconds
+            login_throttling:
+                max_attempts: 5
+                interval: '5 minutes'
+            form_login:
+                login_path: login
+                check_path: login
+                default_target_path: homepage
+                enable_csrf: true
+            logout:
+                path: logout
+                target: login
+                enable_csrf: true
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#firewalls-authentication
@@ -20,8 +38,13 @@ security:
             # https://symfony.com/doc/current/security/impersonating_user.html
             # switch_user: true
 
-    # Easy way to control access for large sections of your site
-    # Note: Only the *first* access control that matches will be used
     access_control:
-        # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
+
+        # Allow access to the login page without any roles
+        - { path: ^/prihlaseni$, roles: PUBLIC_ACCESS }
+
+        # Allow access to the register page without any roles
+        - { path: ^/registrace$, roles: PUBLIC_ACCESS }
+
+        # Deny access to everything else unless the user has specified roles
+        - { path: ^/(?!prihlaseni$|registrace$).*, roles: [ROLE_USER, ROLE_USER_VERIFIED] }

@@ -14,7 +14,7 @@
 		{% endblock %}
 	</head>
 	<body>
-		{% if loggedUser is not null %}
+		{% if loggedInUser is not null %}
 			{% include 'menu.html.twig' %}
 		{% endif %}
 		{% for label, messages in app.flashes %}

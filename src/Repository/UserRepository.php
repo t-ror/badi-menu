@@ -9,14 +9,23 @@ use App\Utils\UserUrl;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Nette\Utils\Arrays;
+use Override;
+use Symfony\Bridge\Doctrine\Security\User\UserLoaderInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
-class UserRepository extends EntityRepository
+class UserRepository extends EntityRepository implements UserLoaderInterface
 {
 
 	public function __construct(EntityManagerInterface $entityManager)
 	{
 		$classMetadata = $entityManager->getClassMetadata(User::class);
 		parent::__construct($entityManager, $classMetadata);
+	}
+
+	#[Override]
+	public function loadUserByIdentifier(string $identifier): ?UserInterface
+	{
+		return $this->getByNameOrEmail($identifier);
 	}
 
 	public function getByNameOrEmail(string $nameOrEmail): ?User

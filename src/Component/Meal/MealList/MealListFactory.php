@@ -40,7 +40,7 @@ class MealListFactory
 	public function create(): MealList
 	{
 		return new MealList(
-			$this->userManager->getLoggedUser(),
+			$this->userManager->getLoggedInUser(),
 			$this->twig,
 			$this->entityManager,
 			$this->request,

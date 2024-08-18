@@ -30,10 +30,9 @@ class MealTagController extends BaseController
 
 	public function provideListData(): JsonResponse
 	{
-		$this->checkAccessLoggedIn();
 		$this->checkHouseholdSelected();
 
-		$user = $this->getUserManager()->getLoggedUser();
+		$user = $this->getLoggedInUser();
 		$household = $this->getHouseholdManager()->getSelectedHouseholdForUser($user);
 
 		$mealTagCreateForm = $this->createForm(MealTagType::class);
@@ -58,7 +57,6 @@ class MealTagController extends BaseController
 
 	public function list(): Response
 	{
-		$this->checkAccessLoggedIn();
 		$this->checkHouseholdSelected();
 		$this->setActiveMenuLink(self::MENU_MEAL_TAG);
 
@@ -67,7 +65,6 @@ class MealTagController extends BaseController
 
 	public function delete(int $id): JsonResponse
 	{
-		$this->checkAccessLoggedIn();
 		$this->checkHouseholdSelected();
 
 		$mealTag = $this->entityManager->find(MealTag::class, $id);
@@ -102,10 +99,9 @@ class MealTagController extends BaseController
 
 	public function create(Request $request): JsonResponse
 	{
-		$this->checkAccessLoggedIn();
 		$this->checkHouseholdSelected();
 
-		$user = $this->getUserManager()->getLoggedUser();
+		$user = $this->getLoggedInUser();
 		$household = $this->getHouseholdManager()->getSelectedHouseholdForUser($user);
 
 		$mealTagCreateForm = $this->createForm(MealTagType::class);
@@ -128,10 +124,9 @@ class MealTagController extends BaseController
 
 	public function edit(Request $request): JsonResponse
 	{
-		$this->checkAccessLoggedIn();
 		$this->checkHouseholdSelected();
 
-		$user = $this->getUserManager()->getLoggedUser();
+		$user = $this->getLoggedInUser();
 		$household = $this->getHouseholdManager()->getSelectedHouseholdForUser($user);
 
 		$mealTagEditForm = $this->createEditForm();

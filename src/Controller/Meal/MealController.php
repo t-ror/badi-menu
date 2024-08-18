@@ -36,11 +36,10 @@ class MealController extends BaseController
 
 	public function list(): Response
 	{
-		$this->checkAccessLoggedIn();
 		$this->checkHouseholdSelected();
 		$this->setActiveMenuLink(self::MENU_MEAL);
 
-		$user = $this->getUserManager()->getLoggedUser();
+		$user = $this->getLoggedInUser();
 		$household = $this->getHouseholdManager()->getSelectedHouseholdForUser($user);
 		$mealList = $this->mealListFactory->create()
 			->forHousehold($household)
@@ -57,7 +56,6 @@ class MealController extends BaseController
 
 	public function create(Request $request): Response
 	{
-		$this->checkAccessLoggedIn();
 		$this->checkHouseholdSelected();
 		$this->setActiveMenuLink(self::MENU_MEAL);
 
@@ -76,11 +74,10 @@ class MealController extends BaseController
 
 	public function edit(Request $request, string $url): Response
 	{
-		$this->checkAccessLoggedIn();
 		$this->checkHouseholdSelected();
 		$this->setActiveMenuLink(self::MENU_MEAL);
 
-		$user = $this->getUserManager()->getLoggedUser();
+		$user = $this->getLoggedInUser();
 		$household = $this->getHouseholdManager()->getSelectedHouseholdForUser($user);
 		$meal = $this->findMealForUrl($url, $household);
 		if ($meal === null) {
@@ -89,7 +86,7 @@ class MealController extends BaseController
 			return $this->redirectToRoute('mealList');
 		}
 
-		$user = $this->getUserManager()->getLoggedUser();
+		$user = $this->getLoggedInUser();
 		$mealForm = $this->createForm(MealType::class, [
 			'name' => $meal->getName(),
 			'description' => $meal->getDescription(),
@@ -115,11 +112,10 @@ class MealController extends BaseController
 
 	public function detail(string $url): Response
 	{
-		$this->checkAccessLoggedIn();
 		$this->checkHouseholdSelected();
 		$this->setActiveMenuLink(self::MENU_MEAL);
 
-		$user = $this->getUserManager()->getLoggedUser();
+		$user = $this->getLoggedInUser();
 		$household = $this->getHouseholdManager()->getSelectedHouseholdForUser($user);
 		$meal = $this->findMealForUrl($url, $household);
 		if ($meal === null) {
@@ -135,11 +131,10 @@ class MealController extends BaseController
 
 	public function toggleFavorite(string $url): RedirectResponse
 	{
-		$this->checkAccessLoggedIn();
 		$this->checkHouseholdSelected();
 		$this->setActiveMenuLink(self::MENU_MEAL);
 
-		$user = $this->getUserManager()->getLoggedUser();
+		$user = $this->getLoggedInUser();
 		$household = $this->getHouseholdManager()->getSelectedHouseholdForUser($user);
 		$meal = $this->findMealForUrl($url, $household);
 		if ($meal === null) {
@@ -156,11 +151,10 @@ class MealController extends BaseController
 
 	public function toggleAbleToPrepare(string $url): RedirectResponse
 	{
-		$this->checkAccessLoggedIn();
 		$this->checkHouseholdSelected();
 		$this->setActiveMenuLink(self::MENU_MEAL);
 
-		$user = $this->getUserManager()->getLoggedUser();
+		$user = $this->getLoggedInUser();
 		$household = $this->getHouseholdManager()->getSelectedHouseholdForUser($user);
 		$meal = $this->findMealForUrl($url, $household);
 		if ($meal === null) {
@@ -234,7 +228,7 @@ class MealController extends BaseController
 	{
 		$values = $form->getData();
 
-		$user = $this->getUserManager()->getLoggedUser();
+		$user = $this->getLoggedInUser();
 		$household = $this->getHouseholdManager()->getSelectedHouseholdForUser($user);
 
 		$meal = new Meal($values['name'], $this->generateUrlForMeal($values['name']), $user);

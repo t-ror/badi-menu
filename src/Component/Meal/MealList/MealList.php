@@ -66,7 +66,7 @@ class MealList extends Component
 			'meals' => $meals,
 			'filterForm' => $filterForm->createView(),
 			'filters' => $this->filters,
-			'loggedUser' => $this->user,
+			'loggedInUser' => $this->user,
 		]);
 	}
 

@@ -6,9 +6,9 @@ use App\Component\Household\UserHouseholdList\UserHouseholdListFactory;
 use App\Component\Meal\MealList\MealListFactory;
 use App\Controller\BaseController;
 use App\Entity\User;
+use App\Exception\UserNotVerifiedException;
 use App\Repository\UserRepository;
 use App\Service\File\ImageFacade;
-use App\Type\User\LoginType;
 use App\Type\User\RegisterType;
 use App\Type\User\UserChangePasswordType;
 use App\Type\User\UserEditType;
@@ -18,6 +18,9 @@ use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Security\Core\Exception\BadCredentialsException;
+use Symfony\Component\Security\Core\Exception\TooManyLoginAttemptsAuthenticationException;
+use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class UserController extends BaseController
 {
@@ -32,47 +35,33 @@ class UserController extends BaseController
 	{
 	}
 
-	public function login(Request $request): Response
+	public function login(AuthenticationUtils $authenticationUtils): Response
 	{
 		$this->checkAccessNotLoggedIn();
-		dump($this->entityManager->getConnection());
 
-		$loginForm = $this->createForm(LoginType::class);
-		$loginForm->handleRequest($request);
-		if ($loginForm->isSubmitted() && $loginForm->isValid()) {
-			$values = $loginForm->getData();
-			$user = $this->getUserManager()->authenticateAndGetUser($values['login'], $values['password']);
-			if ($user === null) {
-				$this->addFlash('warning', 'Nesprávné uživatelské jméno nebo heslo');
-
-				return $this->redirectToRoute('login');
-			}
-
-			if (!$user->isVerified()) {
-				$this->addFlash('warning', 'Zadaný uživatelský účet ještě nebyl aktivován');
-
-				return $this->redirectToRoute('login');
-			}
-
-			$response = $this->redirectToRoute('homepage');
-			$this->getUserManager()->loginUser($user, $values['remember'], $response);
-
-			return $response;
+		$error = $authenticationUtils->getLastAuthenticationError();
+		if ($error instanceof BadCredentialsException) {
+			$this->addFlash('warning', 'Nesprávné uživatelské jméno nebo heslo');
 		}
 
+		if ($error instanceof TooManyLoginAttemptsAuthenticationException) {
+			$this->addFlash('warning', 'Příliš mnoho pokusů o přihlášení. Zkuste to prosím za chvíli.');
+		}
+
+		if ($error instanceof UserNotVerifiedException) {
+			$this->addFlash('warning', 'Zadaný uživatelský účet ještě nebyl ověřen.');
+		}
+
+		$lastUsername = $authenticationUtils->getLastUsername();
+
 		return $this->renderByClass('login.html.twig', [
-			'loginForm' => $loginForm->createView(),
+			'last_username' => $lastUsername,
 		]);
 	}
 
 	public function logout(): Response
 	{
-		$this->checkAccessLoggedIn();
-
-		$response = $this->redirectToRoute('login');
-		$this->getUserManager()->logoutUser($response);
-
-		return $response;
+		return $this->redirectToRoute('login');
 	}
 
 	public function register(Request $request): Response
@@ -110,7 +99,6 @@ class UserController extends BaseController
 
 	public function detail(string $url): Response
 	{
-		$this->checkAccessLoggedIn();
 		$userUrl = UserUrl::createFromUrl($url);
 
 		$user = $this->userRepository->getByUserUrl($userUrl);
@@ -129,9 +117,7 @@ class UserController extends BaseController
 
 	public function edit(Request $request): Response
 	{
-		$this->checkAccessLoggedIn();
-
-		$user = $this->getUserManager()->getLoggedUser();
+		$user = $this->getLoggedInUser();
 		$userEditForm = $this->createForm(UserEditType::class, ['email' => $user->getEmail()]);
 		$userEditForm->handleRequest($request);
 		if ($userEditForm->isSubmitted() && $userEditForm->isValid()) {

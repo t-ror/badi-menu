@@ -10,22 +10,25 @@
 		<hr>
 		<h2>Přihlášení</h2>
 		<hr>
-		{{ form_start(loginForm) }}
-		<div class="mb-3">
-			{{ form_label(loginForm.login) }}
-			{{ form_widget(loginForm.login) }}
-		</div>
-		<div class="mb-3">
-			{{ form_label(loginForm.password) }}
-			{{ form_widget(loginForm.password) }}
-		</div>
-		<div class="mb-3">
-			{{ form_widget(loginForm.remember) }}
-		</div>
-		<div class="d-grid gap-2">
-			{{ form_widget(loginForm.submit) }}
-			<a href="{{ path('register')}}" class="btn btn-sm btn-outline-primary">Zaregistrovat</a>
-		</div>
-		{{ form_end(loginForm) }}
+		<form name="login" action="{{ path('login') }}" method="post">
+			<div class="mb-3">
+				<label for="login_login" class="form-label required">Email/Uživatelské jméno</label>
+				<input type="text" id="login_login" name="_username" required="required" maxlength="64" class="form-control">
+			</div>
+			<div class="mb-3">
+				<label for="login_password" class="form-label required">Heslo</label>
+				<input type="password" id="login_password" name="_password" required="required" class="form-control">
+			</div>
+			<div class="mb-3">
+				<div class="form-check"><input type="checkbox" id="login_remember" name="_remember_me" class="form-check-input" value="1" checked>
+					<label class="form-check-label" for="login_remember">Zapamatovat</label>
+				</div>
+			</div>
+			<input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+			<div class="d-grid gap-2">
+				<button type="submit" id="login_submit" name="submit" class="btn-primary btn">Přihlásit se</button>
+				<a href="{{ path('register')}}" class="btn btn-sm btn-outline-primary">Zaregistrovat</a>
+			</div>
+		</form>
 	</div>
 {% endblock %}

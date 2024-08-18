@@ -27,8 +27,7 @@ class HouseholdController extends BaseController
 
 	public function list(): Response
 	{
-		$this->checkAccessLoggedIn();
-		$user = $this->getUserManager()->getLoggedUser();
+		$user = $this->getLoggedInUser();
 		$this->setActiveMenuLink(self::MENU_HOUSEHOLD);
 
 		return $this->renderByClass('list.html.twig', [
@@ -38,8 +37,7 @@ class HouseholdController extends BaseController
 
 	public function select(int $id): Response
 	{
-		$this->checkAccessLoggedIn();
-		$user = $this->getUserManager()->getLoggedUser();
+		$user = $this->getLoggedInUser();
 		$this->setActiveMenuLink(self::MENU_HOUSEHOLD);
 
 		$userHousehold = $user->getUserHouseholdWithHouseholdId($id);
@@ -62,10 +60,9 @@ class HouseholdController extends BaseController
 
 	public function listAdd(): Response
 	{
-		$this->checkAccessLoggedIn();
 		$this->setActiveMenuLink(self::MENU_HOUSEHOLD);
 
-		$user = $this->getUserManager()->getLoggedUser();
+		$user = $this->getLoggedInUser();
 		$availableHouseholds = $this->householdRepository->findUnassignedForUser($user);
 
 		return $this->renderByClass('listAdd.html.twig', [
@@ -75,8 +72,7 @@ class HouseholdController extends BaseController
 
 	public function add(int $id): Response
 	{
-		$this->checkAccessLoggedIn();
-		$user = $this->getUserManager()->getLoggedUser();
+		$user = $this->getLoggedInUser();
 		$this->setActiveMenuLink(self::MENU_HOUSEHOLD);
 
 		$userHousehold = $user->getUserHouseholdWithHouseholdId($id);
