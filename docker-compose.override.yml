@@ -1,0 +1,15 @@
+# Local development overrides.
+# This file is loaded automatically by `docker compose up` alongside docker-compose.yml.
+# It is committed so all developers share the same dev experience.
+
+services:
+  app:
+    # Enables Xdebug to connect back to the host IDE.
+    extra_hosts:
+      - host.docker.internal:host-gateway
+
+  db:
+    # Expose the DB port to the host so local GUI clients (TablePlus, DBeaver, etc.)
+    # can connect directly. Not needed — and not safe — in production.
+    ports:
+      - '${DB_PORT:-3306}:3306'

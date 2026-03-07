@@ -17,6 +17,8 @@
 ###< symfony/phpunit-bridge ###
 
 diff.sql
+/public/assets/img/db/*
+!/public/assets/img/db/.gitkeep
 /node_modules/
 /public/build/
 /docker

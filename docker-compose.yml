@@ -4,26 +4,36 @@ services:
       context: 'git@github.com:t-ror/docker-badi-menu.git'
       ssh:
         - default
+    # To run as a non-root user, add:  user: "www-data"
+    # First verify the image supports it: docker compose run --rm app id
     volumes:
       - .:/var/www
     ports:
-      - '80:80'
+      - '${APP_PORT:-80}:80'
     depends_on:
       - db
-    extra_hosts:
-      - host.docker.internal:host-gateway
+    networks:
+      - app_net
 
   db:
     image: mariadb:11.5.2
+    # The official MariaDB image bootstraps as root then drops to the mysql user
+    # internally — do not override 'user' here as it will break the entrypoint.
     environment:
-      MYSQL_DATABASE: app
-      MYSQL_USER: root
-      MYSQL_PASSWORD: root
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ${DB_NAME:-app}
+      MYSQL_USER: ${DB_USER:-db_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-db_password}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-db_root_password}
     volumes:
       - db_data:/var/lib/mysql
-    ports:
-      - '3306:3306'
+    networks:
+      - app_net
+    # DB port is intentionally NOT published to the host.
+    # To connect from a local GUI client during development, add the override
+    # in docker-compose.override.yml (included automatically by `docker compose up`).
+
+networks:
+  app_net:
 
 volumes:
   db_data:

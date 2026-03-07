@@ -1,0 +1,24 @@
+# Production overrides.
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#
+# All secrets (DB_USER, DB_PASSWORD, DB_ROOT_PASSWORD, APP_SECRET, MAILER_DSN, etc.)
+# MUST be supplied via real environment variables or a gitignored .env.prod.local file.
+# Never hardcode credentials in this file.
+
+services:
+  app:
+    restart: unless-stopped
+    # In production the source code is baked into the image — do not mount the working
+    # directory. Override the volumes list to an empty set (or only named mounts).
+    volumes: []
+    # No Xdebug extra_hosts in production.
+    extra_hosts: []
+    environment:
+      APP_ENV: prod
+      APP_DEBUG: "0"
+
+  db:
+    restart: unless-stopped
+    # DB port is NOT published to the host (no ports override here).
+    # The app reaches the database over the internal app_net network only.
