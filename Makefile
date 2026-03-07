@@ -47,22 +47,44 @@ exec:
 install:
 	@if [ -f /.dockerenv ] || [ "$(RAW)" = "1" ] ; then \
 		composer install; \
+		bin/console doctrine:migrations:migrate --no-interaction; \
 		npm install; \
-		npm run encore production; \
+		npm run encore production --no-watch; \
 	else \
 		docker compose -f docker-compose.yml up -d; \
 		docker compose -f docker-compose.yml exec app composer install; \
+		docker compose -f docker-compose.yml exec app bin/console doctrine:migrations:migrate --no-interaction; \
 		docker compose -f docker-compose.yml exec app npm install; \
-		docker compose -f docker-compose.yml exec app npm run encore production; \
+		docker compose -f docker-compose.yml exec app npm run encore production --watch=false; \
 	fi; \
 
-## Create diff.sql file with database differences
-.PHONY: db-diff
-db-diff:
+## Generate a new Doctrine migration
+.PHONY: migration
+migration:
 	@if [ -f /.dockerenv ] || [ "$(RAW)" = "1" ] ; then \
-		bin/console doctrine:schema:update --dump-sql > diff.sql --complete; \
+		bin/console doctrine:migrations:diff; \
 	else \
-		docker compose -f docker-compose.yml exec app doctrine:schema:update --dump-sql > diff.sql --complete; \
+		mkdir -p migrations/$$(date +%Y)/$$(date +%m); \
+		docker compose -f docker-compose.yml exec app bin/console doctrine:migrations:diff; \
+	fi; \
+
+## Create an empty Doctrine migration
+.PHONY: migration-empty
+migration-empty:
+	@if [ -f /.dockerenv ] || [ "$(RAW)" = "1" ] ; then \
+		bin/console doctrine:migrations:generate; \
+	else \
+		mkdir -p migrations/$$(date +%Y)/$$(date +%m); \
+		docker compose -f docker-compose.yml exec app bin/console doctrine:migrations:generate; \
+	fi; \
+
+## Run Doctrine migrations
+.PHONY: db-migrate
+db-migrate:
+	@if [ -f /.dockerenv ] || [ "$(RAW)" = "1" ] ; then \
+		bin/console doctrine:migrations:migrate --no-interaction; \
+	else \
+		docker compose -f docker-compose.yml exec app bin/console doctrine:migrations:migrate --no-interaction; \
 	fi; \
 
 ## CI Stack
@@ -109,7 +131,7 @@ hot-reload:
 .PHONY: production
 production:
 	@if [ -f /.dockerenv ] || [ "$(RAW)" = "1" ] ; then \
-		npm run build; \
+		npm run encore production --watch=false; \
 	else \
-		docker compose -f docker-compose.yml exec app npm run build; \
+		docker compose -f docker-compose.yml exec app npm run encore production --watch=false; \
 	fi; \
