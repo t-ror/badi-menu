@@ -1,8 +1,9 @@
-version: '3.8'
-
 services:
   app:
-    build: 'https://github.com/t-ror/docker-badi-menu.git'
+    build:
+      context: 'git@github.com:t-ror/docker-badi-menu.git'
+      ssh:
+        - default
     volumes:
       - .:/var/www
     ports:

@@ -16,7 +16,7 @@ up:
 	@if [ -f /.dockerenv ] || [ "$(RAW)" = "1" ] ; then \
 		echo 'You are already in docker container'; \
 	else \
-		docker-compose -f docker-compose.yml up -d; \
+		docker compose -f docker-compose.yml up -d; \
 	fi; \
 
 
@@ -26,7 +26,7 @@ down:
 	@if [ -f /.dockerenv ] || [ "$(RAW)" = "1" ] ; then \
 		echo 'You must first leave the docker container'; \
 	else \
-		docker-compose -f docker-compose.yml down; \
+		docker compose -f docker-compose.yml down; \
 	fi; \
 
 ## Restart docker container
@@ -39,7 +39,7 @@ exec:
 	@if [ -f /.dockerenv ] || [ "$(RAW)" = "1" ] ; then \
 		echo 'You are already in docker container'; \
 	else \
-		docker-compose -f docker-compose.yml exec app /bin/bash; \
+		docker compose -f docker-compose.yml exec app /bin/bash; \
 	fi; \
 
 ## Create diff.sql file with database differences
@@ -48,7 +48,7 @@ db-diff:
 	@if [ -f /.dockerenv ] || [ "$(RAW)" = "1" ] ; then \
 		bin/console doctrine:schema:update --dump-sql > diff.sql --complete; \
 	else \
-		docker-compose -f docker-compose.yml exec app doctrine:schema:update --dump-sql > diff.sql --complete; \
+		docker compose -f docker-compose.yml exec app doctrine:schema:update --dump-sql > diff.sql --complete; \
 	fi; \
 
 ## CI Stack
@@ -61,7 +61,7 @@ cs:
 	@if [ -f /.dockerenv ] || [ "$(RAW)" = "1" ] ; then \
 		vendor/bin/phpcs --cache=var/phpcs.cache --standard=dev/ruleset.xml --extensions=php --encoding=utf-8 --colors --tab-width=4 -sp --colors src -s; \
 	else \
-		docker-compose -f docker-compose.yml exec app vendor/bin/phpcs --cache=var/phpcs.cache --standard=dev/ruleset.xml --extensions=php --encoding=utf-8 --colors --tab-width=4 -sp --colors src -s; \
+		docker compose -f docker-compose.yml exec app vendor/bin/phpcs --cache=var/phpcs.cache --standard=dev/ruleset.xml --extensions=php --encoding=utf-8 --colors --tab-width=4 -sp --colors src -s; \
 	fi; \
 
 ## PhpStan - PHP Static Analysis
@@ -70,7 +70,7 @@ phpstan:
 	@if [ -f /.dockerenv ] || [ "$(RAW)" = "1" ] ; then \
 		vendor/bin/phpstan analyse --memory-limit=1024M -c dev/phpstan.neon; \
 	else \
-		docker-compose -f docker-compose.yml exec app vendor/bin/phpstan analyse --memory-limit=1024M -c dev/phpstan.neon; \
+		docker compose -f docker-compose.yml exec app vendor/bin/phpstan analyse --memory-limit=1024M -c dev/phpstan.neon; \
 	fi; \
 
 ## Entity mapping test
@@ -79,7 +79,7 @@ test-entity:
 	@if [ -f /.dockerenv ] || [ "$(RAW)" = "1" ] ; then \
 		php bin/console doctrine:schema:validate --skip-sync --ansi; \
 	else \
-		docker-compose -f docker-compose.yml exec app php bin/console doctrine:schema:validate --skip-sync --ansi; \
+		docker compose -f docker-compose.yml exec app php bin/console doctrine:schema:validate --skip-sync --ansi; \
 	fi; \
 
 ## NPM - compile assets production mode and automatically recompile when files change
@@ -88,7 +88,7 @@ hot-reload:
 	@if [ -f /.dockerenv ] || [ "$(RAW)" = "1" ] ; then \
 		npm run encore production --watch; \
 	else \
-		docker-compose -f docker-compose.yml exec app npm run encore production --watch; \
+		docker compose -f docker-compose.yml exec app npm run encore production --watch; \
 	fi; \
 
 ## NPM - compile assets production mode
@@ -97,5 +97,5 @@ production:
 	@if [ -f /.dockerenv ] || [ "$(RAW)" = "1" ] ; then \
 		npm run build; \
 	else \
-		docker-compose -f docker-compose.yml exec app npm run build; \
+		docker compose -f docker-compose.yml exec app npm run build; \
 	fi; \
