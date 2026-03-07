@@ -42,6 +42,20 @@ exec:
 		docker compose -f docker-compose.yml exec app /bin/bash; \
 	fi; \
 
+## Install - start containers, install dependencies and build assets
+.PHONY: install
+install:
+	@if [ -f /.dockerenv ] || [ "$(RAW)" = "1" ] ; then \
+		composer install; \
+		npm install; \
+		npm run encore production; \
+	else \
+		docker compose -f docker-compose.yml up -d; \
+		docker compose -f docker-compose.yml exec app composer install; \
+		docker compose -f docker-compose.yml exec app npm install; \
+		docker compose -f docker-compose.yml exec app npm run encore production; \
+	fi; \
+
 ## Create diff.sql file with database differences
 .PHONY: db-diff
 db-diff:
