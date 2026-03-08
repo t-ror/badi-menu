@@ -16,7 +16,7 @@ up:
 	@if [ -f /.dockerenv ] || [ "$(RAW)" = "1" ] ; then \
 		echo 'You are already in docker container'; \
 	else \
-		docker compose -f docker-compose.yml up -d; \
+		docker compose up -d; \
 	fi; \
 
 
@@ -26,7 +26,7 @@ down:
 	@if [ -f /.dockerenv ] || [ "$(RAW)" = "1" ] ; then \
 		echo 'You must first leave the docker container'; \
 	else \
-		docker compose -f docker-compose.yml down; \
+		docker compose down; \
 	fi; \
 
 ## Restart docker container
@@ -39,10 +39,10 @@ exec:
 	@if [ -f /.dockerenv ] || [ "$(RAW)" = "1" ] ; then \
 		echo 'You are already in docker container'; \
 	else \
-		docker compose -f docker-compose.yml exec app /bin/bash; \
+		docker compose exec app /bin/bash; \
 	fi; \
 
-## Install - start containers, install dependencies and build assets
+## Install - start containers, install dev dependencies and build assets (development only)
 .PHONY: install
 install:
 	@if [ -f /.dockerenv ] || [ "$(RAW)" = "1" ] ; then \
@@ -51,11 +51,28 @@ install:
 		npm install; \
 		npm run encore production --no-watch; \
 	else \
-		docker compose -f docker-compose.yml up -d; \
-		docker compose -f docker-compose.yml exec app composer install; \
-		docker compose -f docker-compose.yml exec app bin/console doctrine:migrations:migrate --no-interaction; \
-		docker compose -f docker-compose.yml exec app npm install; \
-		docker compose -f docker-compose.yml exec app npm run encore production --watch=false; \
+		docker compose up -d; \
+		docker compose exec app composer install; \
+		docker compose exec app bin/console doctrine:migrations:migrate --no-interaction; \
+		docker compose exec app npm install; \
+		docker compose exec app npm run encore production --watch=false; \
+	fi; \
+
+## Prod-install - install production dependencies only (no dev packages, optimised autoloader)
+## Run this on the production server or inside the production container.
+.PHONY: prod-install
+prod-install:
+	@if [ -f /.dockerenv ] || [ "$(RAW)" = "1" ] ; then \
+		composer install --no-dev --optimize-autoloader --classmap-authoritative; \
+		bin/console doctrine:migrations:migrate --no-interaction; \
+		npm install; \
+		npm run encore production --no-watch; \
+	else \
+		docker compose up -d; \
+		docker compose exec app composer install --no-dev --optimize-autoloader --classmap-authoritative; \
+		docker compose exec app bin/console doctrine:migrations:migrate --no-interaction; \
+		docker compose exec app npm install; \
+		docker compose exec app npm run encore production --watch=false; \
 	fi; \
 
 ## Generate a new Doctrine migration
@@ -65,7 +82,7 @@ migration:
 		bin/console doctrine:migrations:diff; \
 	else \
 		mkdir -p migrations/$$(date +%Y)/$$(date +%m); \
-		docker compose -f docker-compose.yml exec app bin/console doctrine:migrations:diff; \
+		docker compose exec app bin/console doctrine:migrations:diff; \
 	fi; \
 
 ## Create an empty Doctrine migration
@@ -75,7 +92,7 @@ migration-empty:
 		bin/console doctrine:migrations:generate; \
 	else \
 		mkdir -p migrations/$$(date +%Y)/$$(date +%m); \
-		docker compose -f docker-compose.yml exec app bin/console doctrine:migrations:generate; \
+		docker compose exec app bin/console doctrine:migrations:generate; \
 	fi; \
 
 ## Run Doctrine migrations
@@ -84,7 +101,7 @@ db-migrate:
 	@if [ -f /.dockerenv ] || [ "$(RAW)" = "1" ] ; then \
 		bin/console doctrine:migrations:migrate --no-interaction; \
 	else \
-		docker compose -f docker-compose.yml exec app bin/console doctrine:migrations:migrate --no-interaction; \
+		docker compose exec app bin/console doctrine:migrations:migrate --no-interaction; \
 	fi; \
 
 ## CI Stack
@@ -97,7 +114,7 @@ cs:
 	@if [ -f /.dockerenv ] || [ "$(RAW)" = "1" ] ; then \
 		vendor/bin/phpcs --cache=var/phpcs.cache --standard=dev/ruleset.xml --extensions=php --encoding=utf-8 --colors --tab-width=4 -sp --colors src -s; \
 	else \
-		docker compose -f docker-compose.yml exec app vendor/bin/phpcs --cache=var/phpcs.cache --standard=dev/ruleset.xml --extensions=php --encoding=utf-8 --colors --tab-width=4 -sp --colors src -s; \
+		docker compose exec app vendor/bin/phpcs --cache=var/phpcs.cache --standard=dev/ruleset.xml --extensions=php --encoding=utf-8 --colors --tab-width=4 -sp --colors src -s; \
 	fi; \
 
 ## PhpStan - PHP Static Analysis
@@ -106,7 +123,7 @@ phpstan:
 	@if [ -f /.dockerenv ] || [ "$(RAW)" = "1" ] ; then \
 		vendor/bin/phpstan analyse --memory-limit=1024M -c dev/phpstan.neon; \
 	else \
-		docker compose -f docker-compose.yml exec app vendor/bin/phpstan analyse --memory-limit=1024M -c dev/phpstan.neon; \
+		docker compose exec app vendor/bin/phpstan analyse --memory-limit=1024M -c dev/phpstan.neon; \
 	fi; \
 
 ## Entity mapping test
@@ -115,7 +132,7 @@ test-entity:
 	@if [ -f /.dockerenv ] || [ "$(RAW)" = "1" ] ; then \
 		php bin/console doctrine:schema:validate --skip-sync --ansi; \
 	else \
-		docker compose -f docker-compose.yml exec app php bin/console doctrine:schema:validate --skip-sync --ansi; \
+		docker compose exec app php bin/console doctrine:schema:validate --skip-sync --ansi; \
 	fi; \
 
 ## NPM - compile assets production mode and automatically recompile when files change
@@ -124,7 +141,7 @@ hot-reload:
 	@if [ -f /.dockerenv ] || [ "$(RAW)" = "1" ] ; then \
 		npm run encore production --watch; \
 	else \
-		docker compose -f docker-compose.yml exec app npm run encore production --watch; \
+		docker compose exec app npm run encore production --watch; \
 	fi; \
 
 ## NPM - compile assets production mode
@@ -133,5 +150,5 @@ production:
 	@if [ -f /.dockerenv ] || [ "$(RAW)" = "1" ] ; then \
 		npm run encore production --watch=false; \
 	else \
-		docker compose -f docker-compose.yml exec app npm run encore production --watch=false; \
+		docker compose exec app npm run encore production --watch=false; \
 	fi; \
