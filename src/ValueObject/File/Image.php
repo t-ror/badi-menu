@@ -10,6 +10,8 @@ class Image
 {
 
 	public const IMAGE_DIR = '/assets/img/db';
+	/** Filesystem storage root, relative to the project root. Outside public/. */
+	public const STORAGE_DIR = 'var/uploads/db';
 	public const MIME_TYPE_JPEG = 'image/jpeg';
 	public const MIME_TYPE_PNG = 'image/png';
 
@@ -22,7 +24,6 @@ class Image
 		'jpg',
 		'jpeg',
 		'png',
-		'svg',
 	];
 
 	public function __construct(string $className, int $id, string $fileName)
@@ -55,9 +56,30 @@ class Image
 		]);
 	}
 
+	/**
+	 * Relative path (class/id) used by ImageFacade to build the filesystem storage path.
+	 * Does NOT include the storage root or the filename.
+	 */
+	public function getStorageRelativePath(): string
+	{
+		$className = (string) Arrays::last(explode('\\', $this->className));
+
+		return Strings::webalize($className) . '/' . $this->id;
+	}
+
+	/**
+	 * URL path served by ImageController. Security is enforced by security.yaml access_control.
+	 */
+	public function getWebPath(): string
+	{
+		$className = (string) Arrays::last(explode('\\', $this->className));
+
+		return '/image/' . Strings::webalize($className) . '/' . $this->id . '/' . $this->fileName;
+	}
+
 	public function __toString(): string
 	{
-		return $this->getFullFilename();
+		return $this->getWebPath();
 	}
 
 	private function checkAllowedExtension(string $fileName): void

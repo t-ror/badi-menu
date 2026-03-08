@@ -150,13 +150,7 @@ class UserController extends BaseController
 		/** @var UploadedFile|null $imageFile */
 		$imageFile = $values['image'];
 		if ($imageFile !== null) {
-			$image = $this->imageFacade->saveAndOverwrite(
-				$imageFile,
-				User::class,
-				$user->getId(),
-				$imageFile->getClientOriginalName()
-			);
-
+			$image = $this->imageFacade->saveAndOverwrite($imageFile, User::class, $user->getId());
 			$user->setImage($image);
 		}
 

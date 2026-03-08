@@ -1,3 +1,11 @@
+imageServe:
+    path: /image/{class}/{id}/{filename}
+    controller: App\Controller\File\ImageController::serve
+    requirements:
+        class: '[a-z0-9\-]+'
+        id: '\d+'
+        filename: '[a-f0-9]{32}\.(jpg|jpeg|png)'
+
 homepage:
     path: /
     controller: App\Controller\HomePage\HomePageController::default

@@ -209,13 +209,7 @@ class MealController extends BaseController
 		/** @var UploadedFile|null $imageFile */
 		$imageFile = $values['image'];
 		if ($imageFile !== null) {
-			$image = $this->imageFacade->saveAndOverwrite(
-				$imageFile,
-				Meal::class,
-				$meal->getId(),
-				$imageFile->getClientOriginalName()
-			);
-
+			$image = $this->imageFacade->saveAndOverwrite($imageFile, Meal::class, $meal->getId());
 			$meal->setImage($image);
 		}
 
@@ -266,13 +260,7 @@ class MealController extends BaseController
 		/** @var UploadedFile|null $imageFile */
 		$imageFile = $values['image'];
 		if ($imageFile !== null) {
-			$image = $this->imageFacade->saveAndOverwrite(
-				$imageFile,
-				Meal::class,
-				$meal->getId(),
-				$imageFile->getClientOriginalName()
-			);
-
+			$image = $this->imageFacade->saveAndOverwrite($imageFile, Meal::class, $meal->getId());
 			$meal->setImage($image);
 
 			$this->entityManager->flush();
