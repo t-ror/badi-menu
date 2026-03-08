@@ -15,6 +15,13 @@ framework:
         cookie_httponly: true
         cookie_samesite: lax
 
+    # Trusted proxies/hosts — override via .env.local or cloud environment variables.
+    # TRUSTED_PROXIES: comma-separated IPs/CIDRs; REMOTE_ADDR trusts the immediate upstream hop.
+    # TRUSTED_HOSTS:   regex matched against the Host header to block host-header injection.
+    trusted_proxies: '%env(TRUSTED_PROXIES)%'
+    trusted_headers: 'x-forwarded-for,x-forwarded-host,x-forwarded-port,x-forwarded-proto,x-forwarded-prefix'
+    trusted_hosts: ['%env(TRUSTED_HOSTS)%']
+
     #esi: true
     #fragments: true
     php_errors:

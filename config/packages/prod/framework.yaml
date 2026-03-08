@@ -1,5 +1,3 @@
 framework:
-    # Trust the load balancer / reverse proxy in production.
-    # REMOTE_ADDR trusts the last hop; set an explicit IP/CIDR if the proxy IP is known.
-    trusted_proxies: '%env(default:REMOTE_ADDR:TRUSTED_PROXIES)%'
-    trusted_headers: 'x-forwarded-for,x-forwarded-host,x-forwarded-port,x-forwarded-proto,x-forwarded-prefix'
+    router:
+        strict_requirements: null
