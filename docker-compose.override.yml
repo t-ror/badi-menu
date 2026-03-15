@@ -4,6 +4,9 @@
 
 services:
   app:
+    build:
+      args:
+        NGINX_CONFIG: nginx.dev.conf
     # Enables Xdebug to connect back to the host IDE.
     extra_hosts:
       - host.docker.internal:host-gateway
