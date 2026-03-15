@@ -38,16 +38,19 @@ security:
             # https://symfony.com/doc/current/security/impersonating_user.html
             # switch_user: true
 
-    access_control:
+when@dev:
+    security:
+        access_control:
+            - { path: ^/prihlaseni$, roles: PUBLIC_ACCESS }
+            - { path: ^/registrace$, roles: PUBLIC_ACCESS }
+            - { path: ^/(?!prihlaseni$|registrace$).*, roles: [ROLE_USER, ROLE_USER_VERIFIED] }
 
-        # Allow access to the login page without any roles
-        - { path: ^/prihlaseni$, roles: PUBLIC_ACCESS }
-
-        # Allow access to the register page without any roles
-        - { path: ^/registrace$, roles: PUBLIC_ACCESS }
-
-        # Deny access to everything else unless the user has specified roles
-        - { path: ^/(?!prihlaseni$|registrace$).*, roles: [ROLE_USER, ROLE_USER_VERIFIED] }
+when@test:
+    security:
+        access_control:
+            - { path: ^/prihlaseni$, roles: PUBLIC_ACCESS }
+            - { path: ^/registrace$, roles: PUBLIC_ACCESS }
+            - { path: ^/(?!prihlaseni$|registrace$).*, roles: [ROLE_USER, ROLE_USER_VERIFIED] }
 
 when@prod:
     security:
