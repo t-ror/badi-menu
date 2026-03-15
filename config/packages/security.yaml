@@ -48,3 +48,10 @@ security:
 
         # Deny access to everything else unless the user has specified roles
         - { path: ^/(?!prihlaseni$|registrace$).*, roles: [ROLE_USER, ROLE_USER_VERIFIED] }
+
+when@prod:
+    security:
+        access_control:
+            - { path: ^/prihlaseni$, roles: PUBLIC_ACCESS, requires_channel: https }
+            - { path: ^/registrace$, roles: PUBLIC_ACCESS, requires_channel: https }
+            - { path: ^/(?!prihlaseni$|registrace$).*, roles: [ROLE_USER, ROLE_USER_VERIFIED], requires_channel: https }

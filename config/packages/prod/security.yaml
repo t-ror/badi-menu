@@ -1,5 +1,0 @@
-security:
-    access_control:
-        # Redirect all HTTP traffic to HTTPS in production.
-        # Works correctly when trusted_proxies is configured (cloud / load balancer).
-        - { path: ^/, requires_channel: https }
