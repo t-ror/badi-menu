@@ -13,7 +13,26 @@ env:
   IMAGE: ghcr.io/t-ror/badi-menu
 
 jobs:
+  check-commits:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    outputs:
+      should_build: ${{ steps.check.outputs.should_build }}
+    steps:
+      - name: Check commit messages
+        id: check
+        env:
+          MESSAGES: ${{ toJson(github.event.commits) }}
+        run: |
+          if echo "$MESSAGES" | grep -qiP '"(feature|fix|refactor):'; then
+            echo "should_build=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_build=false" >> "$GITHUB_OUTPUT"
+          fi
+
   build:
+    needs: [check-commits]
+    if: always() && (github.event_name == 'workflow_dispatch' || needs.check-commits.outputs.should_build == 'true')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
