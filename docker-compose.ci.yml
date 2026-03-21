@@ -1,0 +1,16 @@
+# =============================================================================
+# badi-menu — CI build (used by GitHub Actions only)
+#
+# Builds the prod target with the app code as additional context.
+# Usage: docker compose -f docker-compose.ci.yml build
+# =============================================================================
+
+services:
+  app:
+    build:
+      context: ./docker
+      target: prod
+      additional_contexts:
+        app-src: .
+      args:
+        NGINX_CONFIG: nginx.conf

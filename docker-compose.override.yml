@@ -1,18 +1,9 @@
-# Local development overrides.
-# This file is loaded automatically by `docker compose up` alongside docker-compose.yml.
-# It is committed so all developers share the same dev experience.
+# =============================================================================
+# badi-menu — Dev overrides (auto-loaded by Docker Compose)
+# DO NOT push this to the server.
+# =============================================================================
 
 services:
-  app:
-    build:
-      args:
-        NGINX_CONFIG: nginx.dev.conf
-    # Enables Xdebug to connect back to the host IDE.
-    extra_hosts:
-      - host.docker.internal:host-gateway
-
   db:
-    # Expose the DB port to the host so local GUI clients (TablePlus, DBeaver, etc.)
-    # can connect directly. Not needed — and not safe — in production.
     ports:
-      - '${DB_PORT:-3306}:3306'
+      - "${DB_PORT:-3306}:3306"

@@ -21,7 +21,7 @@ diff.sql
 !/public/assets/img/db/.gitkeep
 /node_modules/
 /public/build/
-/docker
+docker-compose.override.yml
 Dockerfile
 
 ###> squizlabs/php_codesniffer ###

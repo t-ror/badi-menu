@@ -1,42 +1,36 @@
+# =============================================================================
+# badi-menu — Development compose file
+# Uses the 'dev' Dockerfile target (no baked deps). Code via volume mount.
+# Dev extras come from docker-compose.override.yml (auto-loaded).
+# =============================================================================
+
 services:
   app:
     build:
-      context: 'git@github.com:t-ror/docker-badi-menu.git'
-      ssh:
-        - default
-    # To run as a non-root user, add:  user: "www-data"
-    # First verify the image supports it: docker compose run --rm app id
+      context: ./docker
+      target: dev
+      args:
+        NGINX_CONFIG: nginx.dev.conf
+        INSTALL_XDEBUG: "true"
     volumes:
       - .:/var/www
     ports:
-      - '${APP_PORT:-80}:80'
+      - "${APP_PORT:-8080}:80"
     depends_on:
       - db
-    networks:
-      - app_net
+    restart: unless-stopped
 
   db:
     image: mariadb:11.5.2
-    # The official MariaDB image bootstraps as root then drops to the mysql user
-    # internally — do not override 'user' here as it will break the entrypoint.
     environment:
-      MYSQL_DATABASE: ${DB_NAME:-app}
-      MYSQL_USER: ${DB_USER:-db_user}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-db_password}
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-db_root_password}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME:-badi_menu}
+      MYSQL_USER: ${DB_USER:-badi_menu}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
     volumes:
       - db_data:/var/lib/mysql
-      # Init scripts run once on first container start (when the data volume is empty).
-      # 01-restrict-app-user.sh trims MYSQL_USER down to SELECT/INSERT/UPDATE/DELETE/CREATE/ALTER/INDEX/REFERENCES.
-      - ./docker/mariadb/init:/docker-entrypoint-initdb.d:ro
-    networks:
-      - app_net
-    # DB port is intentionally NOT published to the host.
-    # To connect from a local GUI client during development, add the override
-    # in docker-compose.override.yml (included automatically by `docker compose up`).
-
-networks:
-  app_net:
+    restart: unless-stopped
 
 volumes:
   db_data:
+ 
