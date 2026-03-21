@@ -50,7 +50,7 @@ jobs:
           target: prod
           build-contexts: app-src=.
           build-args: |
-            NGINX_CONFIG=nginx.conf
+            NGINX_CONFIG=nginx.prod.conf
             INSTALL_XDEBUG=false
           push: ${{ github.event_name == 'workflow_dispatch' }}
           tags: |
