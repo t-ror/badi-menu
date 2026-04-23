@@ -71,7 +71,7 @@ jobs:
           build-args: |
             NGINX_CONFIG=nginx.prod.conf
             INSTALL_XDEBUG=false
-          push: ${{ github.event_name == 'workflow_dispatch' }}
+          push: true
           tags: |
             ${{ env.IMAGE }}:${{ github.sha }}
             ${{ env.IMAGE }}:latest
