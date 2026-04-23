@@ -26,6 +26,8 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             cd ~/apps/badi-menu
+            export IMAGE_TAG=${{ github.sha }}
+            echo "Deploying IMAGE_TAG=$IMAGE_TAG"
             docker compose pull app
             docker compose up -d app
             docker image prune -f

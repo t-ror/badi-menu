@@ -8,6 +8,11 @@
 
 services:
   app:
+    # Pin the image by commit SHA so each deploy is a distinct image reference —
+    # compose then recreates the container automatically. Falls back to :latest
+    # if IMAGE_TAG isn't set (e.g. running prod compose manually).
+    image: ghcr.io/t-ror/badi-menu:${IMAGE_TAG:-latest}
+    build: !reset null
     restart: unless-stopped
     # In production the source code is baked into the image — do not mount the working
     # directory. Override the volumes list to an empty set (or only named mounts).
