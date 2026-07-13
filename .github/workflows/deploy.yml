@@ -30,4 +30,8 @@ jobs:
             echo "Deploying IMAGE_TAG=$IMAGE_TAG"
             docker compose pull app
             docker compose up -d app
+            # var/ persists across deploys, so the stale compiled Twig/container
+            # cache must be cleared after the new container starts. Run as
+            # www-data to keep var/ writable by php-fpm.
+            docker compose exec -T -u www-data app php bin/console cache:clear --env=prod --no-debug
             docker image prune -f
