@@ -9,11 +9,26 @@ This file is public: no secrets, server details, or private Docker-repo internal
 
 Overdue maintenance and quick wins.
 
-- **Move GitHub Actions off Node 20 runners** — **overdue** (deprecation deadline was June 2026).
-  `actions/checkout@v4` runs on Node 20 (v5+ runs on Node 24); audit `webfactory/ssh-agent@v0.9.0`,
-  `docker/login-action@v3`, `docker/setup-buildx-action@v3`, `appleboy/ssh-action@v1` against
-  current majors, and fix stale version comments (`docker/build-push-action@v7 # v6.18.0`).
-  Status: not started. Evidence: `.github/workflows/build.yml`, `.github/workflows/deploy.yml`. Effort: S.
+- **Move GitHub Actions off Node 20 runners** — **implemented 2026-07-30, awaiting verification.**
+  Corrected framing: runners have defaulted to Node 24 since **2026-06-16**, so the node20-declared
+  actions were already executing on Node 24; the hard failure is when Node 20 is **removed from the
+  runner image in autumn 2026**. Four actions declared `runs.using: node20`
+  (`actions/checkout@v4`, `webfactory/ssh-agent@v0.9.0`, `docker/login-action@v3`,
+  `docker/setup-buildx-action@v3`); `docker/build-push-action@v7` was already Node 24, and
+  `appleboy/ssh-action@v1` is a composite action with no Node runtime. All actions are now pinned
+  to full commit SHAs with version comments, plus `.github/dependabot.yml` to keep them current.
+  Also fixed: `build.yml`/`deploy.yml` shared a repo-wide concurrency group and cancelled each
+  other; `:latest` now only moves on master; `deploy.yml` gained an `image_tag` input, a
+  pre-flight image-existence check, and env-var passing instead of `${{ }}` interpolation into
+  the remote script.
+  **Verified so far:** static check only — all six pinned SHAs resolve and every Node action
+  declares `node24`. **Still to do (human):** dispatch Build on a branch and confirm the
+  deprecation warning count drops 8 → 0 (baseline: run `29268035747`, 8 warnings = 4 actions ×
+  main + post), the private submodule still checks out, and `:latest` does not move; then deploy.
+  **Not yet active:** `deploy.yml` references a `SERVER_FINGERPRINT` secret for SSH host-key
+  verification, but the secret does not exist — it resolves to empty and the action skips host-key
+  checking, i.e. unchanged from before. See the comment block in `deploy.yml` for how to populate
+  it from the server. Effort: S.
 
 - **Upgrade Symfony 7.1 → 7.4 LTS** — **overdue**: 7.1 security fixes ended July 2025.
   Status: on v7.1.3. Evidence: `composer.lock` (`symfony/framework-bundle`), `composer.json`. Effort: M.
@@ -55,6 +70,27 @@ Overdue maintenance and quick wins.
 - **Review GHCR package visibility** — the prod image is anonymously pullable; decide whether
   that is intended, given it is built from the private Docker config.
   Status: public as of 2026-07-16. Evidence: `ghcr.io/t-ror/badi-menu` (anonymous pull). Effort: S.
+
+- **`check-commits` misses commits past the push-payload cap** — `build.yml` greps
+  `toJson(github.event.commits)`, which GitHub caps at 20 commits per push event. Pushing 25
+  commits where only the first is `fix:` silently skips the build. Reading the commit range via
+  the API would be robust. Status: not started. Evidence: `.github/workflows/build.yml`. Effort: S.
+
+- **No post-deploy health check** — `deploy.yml` reports success once `cache:clear` returns; it
+  never confirms the app actually serves traffic. A curl against a health endpoint after
+  `compose up` would close the loop. Status: not started. Evidence: `.github/workflows/deploy.yml`.
+  Effort: S.
+
+- **Docker layer cache is ineffective at this build cadence** — `cache-to: type=gha` entries are
+  evicted after 7 days unused, and builds land months apart (April, then July 2026), so nearly
+  every build starts cold. Evaluate `type=registry` cache versus dropping caching entirely.
+  Status: not started. Evidence: `.github/workflows/build.yml`. Effort: S.
+
+- **`webfactory/ssh-agent` is likely redundant** — `actions/checkout`'s `ssh-key` input is what
+  stops `git@github.com:` submodule URLs being rewritten to HTTPS, so it appears to be the
+  load-bearing piece. Confirm and remove *on its own branch*, where a failure is diagnosable.
+  Status: deliberately left in place during the Node 24 migration. Evidence:
+  `.github/workflows/build.yml`. Effort: S.
 
 ## Later
 

@@ -2,10 +2,22 @@ name: Deploy
 
 on:
   workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "Image tag: FULL 40-char commit SHA, or 'latest'. Blank = this ref's HEAD SHA."
+        required: false
+        default: ""
 
+# Concurrency groups are scoped per REPOSITORY, not per workflow, so this group must be
+# prefixed with the workflow name. cancel-in-progress is deliberately false: cancelling a
+# build is free, but cancelling a deploy midway through `compose up` leaves the server in
+# an indeterminate state.
 concurrency:
-  group: deploy-${{ github.ref }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+# Default-deny: the job opts into exactly the GITHUB_TOKEN scopes it needs.
+permissions: {}
 
 env:
   IMAGE: ghcr.io/t-ror/badi-menu
@@ -13,20 +25,88 @@ env:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     permissions:
       contents: read
+      packages: read
 
     steps:
+      # Inputs are read through the environment, never interpolated into the shell.
+      # Splicing ${{ inputs.* }} directly into a run: block injects the value before the
+      # shell parses the line, which is the standard Actions script-injection hole.
+      - name: Resolve image tag
+        id: tag
+        env:
+          INPUT_TAG: ${{ inputs.image_tag }}
+        run: |
+          set -eu
+          TAG="${INPUT_TAG:-$GITHUB_SHA}"
+          if [ -z "$TAG" ]; then
+            echo "::error::Could not resolve an image tag (both image_tag input and GITHUB_SHA were empty)."
+            exit 1
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "Resolved image tag: $TAG"
+
+      - name: Log in to GHCR
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Fail on the runner rather than halfway through a container swap on the server.
+      # Builds only run on feature:/fix:/refactor: commits, so a tag for the current HEAD
+      # is not guaranteed to exist.
+      #
+      # Uses `buildx imagetools inspect` rather than `docker manifest inspect`: the latter
+      # depends on experimental CLI mode. The inspect output is captured and printed on
+      # failure so that a broken check (auth, network, CLI) is distinguishable from the
+      # thing being checked (missing tag) — otherwise this gate blocks every deploy,
+      # including rollbacks, while reporting a misleading cause.
+      - name: Verify image exists before touching the server
+        env:
+          TAG: ${{ steps.tag.outputs.tag }}
+        run: |
+          set -eu
+          if out=$(docker buildx imagetools inspect "$IMAGE:$TAG" 2>&1); then
+            echo "Verified $IMAGE:$TAG exists."
+          else
+            echo "::error::Could not verify $IMAGE:$TAG in GHCR — deploy aborted before touching the server."
+            echo "::error::'not found' => no build ran for this commit; note tags are the FULL 40-char SHA."
+            echo "::error::Anything else => this check itself failed, not the image."
+            echo "--- imagetools inspect output ---"
+            echo "$out"
+            exit 1
+          fi
+
       - name: Deploy to server
-        uses: appleboy/ssh-action@v1 # v1.2.2
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
+        env:
+          IMAGE_TAG: ${{ steps.tag.outputs.tag }}
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
+          # SSH host-key verification. CURRENTLY INERT: the SERVER_FINGERPRINT secret does
+          # not exist yet, so this resolves to an empty string and the action falls back to
+          # ssh.InsecureIgnoreHostKey() — i.e. exactly today's behaviour, no host-key check.
+          # It fails OPEN and silently, so leaving this line in is harmless.
+          #
+          # To activate: read the fingerprint ON the server (authoritative, no MITM window):
+          #     for f in /etc/ssh/ssh_host_*_key.pub; do ssh-keygen -lf "$f"; done
+          # and store the SHA256:... value from the (RSA) line as the SERVER_FINGERPRINT
+          # secret. RSA because Go's SSH client prefers rsa-sha2-* over ECDSA and ed25519.
+          # A WRONG value fails CLOSED and the error does not reveal the expected value, so
+          # never guess it — leave the secret unset until you have read it off the server.
+          fingerprint: ${{ secrets.SERVER_FINGERPRINT }}
+          envs: IMAGE_TAG
+          # set -eu, not `set -euo pipefail`: pipefail is a bash builtin and aborts the
+          # script immediately under sh/dash. v1.2.5 has no script_stop input, so error
+          # handling is made explicit here rather than left to the action's default.
           script: |
+            set -eu
             cd ~/apps/badi-menu
-            export IMAGE_TAG=${{ github.sha }}
             echo "Deploying IMAGE_TAG=$IMAGE_TAG"
             docker compose pull app
             docker compose up -d app
