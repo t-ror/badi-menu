@@ -1,0 +1,18 @@
+# Keeps the SHA-pinned actions in .github/workflows/ from going stale.
+# Dependabot rewrites both the commit SHA and its trailing "# vX.Y.Z" comment.
+#
+# The "chore" prefix is deliberate: build.yml only builds on commits prefixed
+# feature:/fix:/refactor:, so a merged Dependabot PR will not rebuild and republish
+# :latest on its own. Validate these PRs by dispatching Build against the Dependabot
+# branch before merging.
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    commit-message:
+      prefix: "chore"
+    groups:
+      actions:
+        patterns: ["*"]
