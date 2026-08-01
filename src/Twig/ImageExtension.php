@@ -6,7 +6,6 @@ use App\Entity\EntityOrm;
 use App\Entity\Household;
 use App\Entity\Meal;
 use App\Entity\User;
-use App\Utils\Strings;
 use App\ValueObject\File\Image;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;

@@ -10,7 +10,10 @@ class Image
 {
 
 	public const IMAGE_DIR = '/assets/img/db';
-	/** Filesystem storage root, relative to the project root. Outside public/. */
+
+	/**
+	 * Filesystem storage root, relative to the project root.
+	 */
 	public const STORAGE_DIR = 'var/uploads/db';
 	public const MIME_TYPE_JPEG = 'image/jpeg';
 	public const MIME_TYPE_PNG = 'image/png';

@@ -106,7 +106,7 @@ db-migrate:
 
 ## CI Stack
 .PHONY: ci
-ci: cs phpstan test-entity
+ci: csfix phpstan test-entity
 
 ## CodeSniffer - checks codestyle and typehints
 .PHONY: cs
@@ -116,6 +116,15 @@ cs:
 	else \
 		docker compose exec app vendor/bin/phpcs --cache=var/phpcs.cache --standard=dev/ruleset.xml --extensions=php --encoding=utf-8 --colors --tab-width=4 -sp --colors src -s; \
 	fi; \
+
+## CodeSniffer - automatically fix codestyle issues
+.PHONY: csfix
+csfix:
+	@if [ -f /.dockerenv ] || [ "$(RAW)" = "1" ]; then \
+		vendor/bin/phpcbf --cache=var/phpcs.cache --standard=dev/ruleset.xml --extensions=php --encoding=utf-8 --colors --tab-width=4 src; \
+	else \
+		docker compose exec app vendor/bin/phpcbf --cache=var/phpcs.cache --standard=dev/ruleset.xml --extensions=php --encoding=utf-8 --colors --tab-width=4 src; \
+	fi;
 
 ## PhpStan - PHP Static Analysis
 .PHONY: phpstan
