@@ -26,6 +26,36 @@ Overdue maintenance and quick wins.
   Status: 3 of 5 entries remain. Evidence: `composer.json`, `composer audit`,
   `composer why phpseclib/phpseclib`. Effort: S.
 
+- **`var/` is not owned by the php-fpm user on the server — caused a production outage
+  2026-08-01.** **Blocks the PHP 8.3 → 8.4/8.5 bump under Next; do that one only after this is
+  fixed.** After the Symfony 7.4 deploy every request returned 500 with
+  `RuntimeException: Unable to create the cache directory (var/cache/prod/twig/47)` and
+  `Unable to write in the cache directory (var/cache/prod/twig/1a)`, both from
+  `Twig\Cache\FilesystemCache::write()` (lines 53 and 57). Line 57 is the
+  `elseif (!is_writable($dir))` branch — the directory existed and php-fpm simply could not write
+  to it. Fixed live by removing `var/cache/prod` as root, `chown -R www-data:www-data var`, then
+  re-running the warmup as www-data.
+
+  **The upgrade was the trigger, not the cause.** `Twig\Environment::updateOptionsHash()` builds
+  the template cache key from `extensionSet signature : PHP_MAJOR_VERSION : PHP_MINOR_VERSION :
+  Twig VERSION : debug : strictVariables`. Twig 3.11 → 3.28 changed that hash, so every template
+  moved to a new path and the two-character subdirectories had to be **created** instead of read —
+  which is the first time the ownership ever mattered. The root-owned `var/` predates the upgrade.
+
+  Anything that perturbs that hash trips the same wire: a **PHP minor bump**, any Twig upgrade
+  (including a patch release), adding a Twig extension, or toggling `strict_variables`. This is
+  why it must land before the PHP upgrade.
+
+  Compounding it: `deploy.yml:117` runs `cache:clear` as `www-data` specifically to prevent this,
+  but as www-data it also cannot delete the root-owned files — so the same defect disabled the
+  mitigation. And because that step runs *after* `docker compose up -d app` under `set -eu`, the
+  job goes red only once the broken container is already serving traffic (see the missing
+  post-deploy health check under Next).
+
+  The durable fix is to guarantee `var/` is owned by the php-fpm user — either in the image or as
+  a step in the deploy script before the warmup. The image side lives in the private Docker config
+  repo. Status: worked around live 2026-08-01, **not yet fixed permanently**. Effort: S.
+
 - **`make ci` does not pass on master** — **pre-existing; not caused by the Symfony 7.4 upgrade,
   which left both tools exactly as red as it found them.** The quality gate is red on a clean
   checkout: **phpcs** fails on 4 files (`src/EventSubscriber/SecurityHeadersSubscriber.php`
@@ -67,6 +97,9 @@ Overdue maintenance and quick wins.
 
 - **PHP 8.3 → 8.4/8.5** — PHP 8.3 is security-only since January 2026. Requires a runtime-image
   rebuild in the private Docker config repo (details live there).
+  **Blocked on the `var/` ownership fix under Now.** `PHP_MAJOR_VERSION` and `PHP_MINOR_VERSION`
+  are inputs to Twig's template cache key, so a minor bump relocates every compiled template and
+  reproduces the 2026-08-01 outage exactly. Fix the ownership first, then bump.
   Status: `"php": ">=8.3"`. Evidence: `composer.json`. Effort: M.
 
 - **Review GHCR package visibility** — the prod image is anonymously pullable; decide whether
@@ -136,7 +169,11 @@ Overdue maintenance and quick wins.
 
 ## Done
 
-- **Upgraded Symfony 7.1 → 7.4 LTS** — done locally 2026-08-01, **not yet committed or deployed**.
+- **Upgraded Symfony 7.1 → 7.4 LTS** — deployed to production 2026-08-01. **The deploy caused a
+  brief outage** — every request 500'd on an unwritable Twig cache directory. Not a defect in the
+  upgrade: it exposed pre-existing root-owned `var/` on the server, and is tracked as its own item
+  under Now (which also blocks the PHP bump). Resolved live by clearing `var/cache/prod` and
+  correcting ownership.
   `v7.1.3` → `v7.4.15`; 51 `symfony/*` packages on 7.4.x, **0 left on 7.1.x**, no `dev-` versions
   despite `minimum-stability: dev`. `bin/console about` now reports *Long-Term Support: Yes*,
   end of maintenance 11/2028, EOL 11/2029 — previously EOL 01/2025 (expired).
@@ -175,7 +212,9 @@ Overdue maintenance and quick wins.
 
   Not exercised: no authenticated page was rendered, so the household templates that use
   `source('@public_path'~icon_chef)` were not hit over HTTP (the DI wiring above is the evidence
-  instead); no test suite exists; mailer/notifier paths untouched; nothing deployed.
+  instead); no test suite exists; mailer/notifier paths untouched. Local verification was all in
+  dev/prod env on the developer machine — nothing caught the server-side ownership problem, which
+  only appears where php-fpm runs as a non-root user against a persistent `var/`.
   Note: the compose `app` container has **no external DNS** (Docker's embedded resolver reports
   *NO EXTERNAL NAMESERVERS DEFINED*), so `composer` cannot reach packagist from `docker compose
   exec`. The update was run via a one-off `docker run --dns 1.1.1.1` on the same app image.
