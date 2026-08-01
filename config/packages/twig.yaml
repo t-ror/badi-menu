@@ -1,6 +1,9 @@
 twig:
     default_path: '%kernel.project_dir%/src/Controller/'
     form_themes: ['bootstrap_5_layout.html.twig']
+    # Without this, the cache warmer treats every file under the public_path
+    # namespace as a template and compiles the webpack bundles in public/build/.
+    file_name_pattern: '*.twig'
     paths:
         '%kernel.project_dir%/src/Component/' : ~
         '%kernel.project_dir%/src/Service/Template/' : ~

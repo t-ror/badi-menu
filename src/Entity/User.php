@@ -15,6 +15,7 @@ use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\OneToMany;
 use Doctrine\ORM\Mapping\Table;
 use Doctrine\ORM\Mapping\UniqueConstraint;
+use LogicException;
 use Override;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -243,6 +244,10 @@ class User extends EntityOrm implements UserInterface, PasswordAuthenticatedUser
 	#[Override]
 	public function getUserIdentifier(): string
 	{
+		if ($this->name === '') {
+			throw new LogicException('User name must not be empty.');
+		}
+
 		return $this->name;
 	}
 

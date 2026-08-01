@@ -1,6 +1,7 @@
 # Roadmap
 
-Planned changes for badi-menu, each verified against the codebase on **2026-07-16**.
+Planned changes for badi-menu, each verified against the codebase on the date given in its own
+**Status:** line (the bulk were checked on 2026-07-16; the most recent pass was 2026-08-01).
 These items document intent — they are not a work queue; do not start them unprompted
 (see the Roadmap section in CLAUDE.md). Effort: **S** < 1 h, **M** = hours, **L** = days+.
 This file is public: no secrets, server details, or private Docker-repo internals belong here.
@@ -9,18 +10,32 @@ This file is public: no secrets, server details, or private Docker-repo internal
 
 Overdue maintenance and quick wins.
 
-- **Upgrade Symfony 7.1 → 7.4 LTS** — **overdue**: 7.1 security fixes ended July 2025.
-  Status: on v7.1.3. Evidence: `composer.lock` (`symfony/framework-bundle`), `composer.json`. Effort: M.
-
 - **Upgrade MariaDB 11.5 → 11.8 LTS** — **overdue**: 11.5 is a short-term release, out of
   support since ~Aug 2025. Status: pinned to `mariadb:11.5.2`. Evidence: `docker-compose.yml`. Effort: M.
 
-- **composer.json cleanup** — remove or fix stale entries: `extra.symfony.require` stuck at
-  `"5.2.*"` (installed Symfony is 7.1.x); `dg/ftp-deployment` (dead — deploys are SSH/Docker via
-  `deploy.yml`); `symfony/proxy-manager-bridge ^6.4` (abandoned, no Symfony 7 release);
-  `composer/package-versions-deprecated` (Composer 1 shim); `doctrine/annotations` (entities use
-  attributes — `type: attribute` in `config/packages/doctrine.yaml`, no annotation imports in `src/`).
-  Status: all still present. Evidence: `composer.json`, `composer.lock`. Effort: S.
+- **composer.json cleanup** — remove or fix stale entries: `dg/ftp-deployment` (dead — deploys are
+  SSH/Docker via `deploy.yml`); `composer/package-versions-deprecated` (Composer 1 shim);
+  `doctrine/annotations` (entities use attributes — `type: attribute` in
+  `config/packages/doctrine.yaml`, no annotation imports in `src/`).
+  `dg/ftp-deployment` is now the priority of the three: it is the sole reason
+  `phpseclib/phpseclib` is installed, and that package carries all 4 remaining security advisories
+  (2 high, 1 medium, 1 low). Dev-only, so it never reaches the prod image (`make prod-install`
+  uses `--no-dev`) — but removing it clears the audit outright.
+  Resolved by the Symfony 7.4 upgrade: `extra.symfony.require` (was stuck at `"5.2.*"`, now
+  `"7.4.*"`) and `symfony/proxy-manager-bridge` (removed).
+  Status: 3 of 5 entries remain. Evidence: `composer.json`, `composer audit`,
+  `composer why phpseclib/phpseclib`. Effort: S.
+
+- **`make ci` does not pass on master** — **pre-existing; not caused by the Symfony 7.4 upgrade,
+  which left both tools exactly as red as it found them.** The quality gate is red on a clean
+  checkout: **phpcs** fails on 4 files (`src/EventSubscriber/SecurityHeadersSubscriber.php`
+  is space-indented and uses `strict_types=1` without the required spaces;
+  `src/Controller/File/ImageController.php` and `src/ValueObject/File/Image.php` have formatting
+  errors; `src/Twig/ImageExtension.php` has an unused import) and **PHPStan** reports 2 errors in
+  `ImageController.php:31,35` (`Only booleans are allowed in a negated boolean, int|false given`).
+  Introduced by `a8756d3` and `a1b23d3` (both 2026-03-08) — i.e. the gate has been bypassed since
+  then. Most of the phpcs errors are auto-fixable with `phpcbf`. `doctrine:schema:validate` passes.
+  Status: confirmed 2026-08-01. Effort: S.
 
 - **Untrack committed runtime/dev artifacts** — `supervisord.pid` is tracked and not gitignored
   (only `supervisord.log` is); `docker-compose.override.yml` is tracked *and* matched by
@@ -37,6 +52,14 @@ Overdue maintenance and quick wins.
   `bootstrap.php`; PHPUnit ships via `symfony/phpunit-bridge`. Start with unit tests for
   `Service/` and `ValueObject/` under `tests/` (`App\Tests\` namespace).
   Status: no tests exist. Evidence: `tests/`, `phpunit.xml.dist`. Effort: L.
+
+- **`doctrine/doctrine-bundle` triggers a Symfony 7.4 deprecation** — `Since symfony/doctrine-bridge
+  7.4: The "Symfony\Bridge\Doctrine\DependencyInjection\AbstractDoctrineExtension" class is
+  deprecated`. Emitted by doctrine-bundle 2.12.0, which still extends it. A newer 2.x should clear
+  it and the existing `^2.12` constraint already allows one, so this is a lockfile-only update — it
+  was left out of the Symfony upgrade to keep that diff to `symfony/*`. The second deprecation seen
+  at request time (`connection_override_options`, doctrine-bundle 2.4) predates the upgrade.
+  Status: observed 2026-08-01. Effort: S.
 
 - **PHPStan 1.x → 2.x** — phpstan 1.11.10 plus 1.x extensions (doctrine, symfony, strict-rules);
   bump `slevomat/coding-standard ^7` (current major is 8) alongside.
@@ -112,6 +135,50 @@ Overdue maintenance and quick wins.
   Status: all in use. Evidence: `package.json`. Effort: M.
 
 ## Done
+
+- **Upgraded Symfony 7.1 → 7.4 LTS** — done locally 2026-08-01, **not yet committed or deployed**.
+  `v7.1.3` → `v7.4.15`; 51 `symfony/*` packages on 7.4.x, **0 left on 7.1.x**, no `dev-` versions
+  despite `minimum-stability: dev`. `bin/console about` now reports *Long-Term Support: Yes*,
+  end of maintenance 11/2028, EOL 11/2029 — previously EOL 01/2025 (expired).
+  Security advisories dropped **42 across 14 packages → 4 across 1** (`phpseclib`, dev-only; see
+  the composer.json cleanup item under Now).
+
+  Three things this surfaced that were not obvious up front:
+  - **`extra.symfony.require` was load-bearing, not cosmetic.** Flex applies it as a version filter
+    on every `symfony/*` package, so the update was a no-op until it was moved `5.2.*` → `7.4.*`.
+    It has to change *before* `composer update`, not as later cleanup.
+  - **`config/packages/twig.yaml` registered `public/` as the `public_path` namespace with no
+    filename filter**, so the Twig cache warmer compiled every file under `public/` as a template —
+    including the 4 MB webpack bundle `public/build/238.js`, which became an 8.2 MB PHP class and
+    exhausted the 128 M memory limit. This made `cache:clear` fail, which breaks both
+    `composer install` (via `post-install-cmd`) and the post-deploy `cache:clear` in `deploy.yml`.
+    Fixed with `file_name_pattern: '*.twig'`. Latent misconfiguration, not created by the upgrade —
+    the upgrade pushed it past the memory limit. Twig cache 17 MB → 3.4 MB (dev), 0 bundles
+    compiled; verified in **both dev and prod** env at the default 128 M limit.
+    `file_name_pattern` reaches only `twig.template_iterator` and `twig.command.lint`
+    (`TwigExtension.php:136,139`) — never the runtime loader, so `source('@public_path'~icon_chef)`
+    in the household templates is unaffected.
+  - **`User::getUserIdentifier()`** needed a non-empty guard: Symfony 7.4 tightened
+    `UserInterface::getUserIdentifier()` to `@return non-empty-string`.
+
+  Also removed with `symfony/proxy-manager-bridge`: `friendsofphp/proxy-manager-lts` and
+  `laminas/laminas-code` (lazy services use `symfony/var-exporter` natively since 7.0).
+  Flex normalised one stray tab in `config/bundles.php`.
+
+  Verified: `doctrine:schema:validate` OK; PHPStan **2 errors, identical to the pre-upgrade
+  baseline** (the 7.4-introduced third was fixed, the 2 remaining are pre-existing — see the
+  `make ci` item under Now); phpcs identical to baseline (same 4 files). `composer install` runs
+  both auto-scripts clean. `/prihlaseni` returns 200 with a rendered login form and CSRF token,
+  `/` returns 302; `symfony/webpack-encore-bundle` v2.1.1 → v2.4.1 still resolves the
+  March-built `entrypoints.json` (`runtime.js`, `app.js`, `238.js`).
+  Two deprecations at request time, both inside vendor code, none from `src/`.
+
+  Not exercised: no authenticated page was rendered, so the household templates that use
+  `source('@public_path'~icon_chef)` were not hit over HTTP (the DI wiring above is the evidence
+  instead); no test suite exists; mailer/notifier paths untouched; nothing deployed.
+  Note: the compose `app` container has **no external DNS** (Docker's embedded resolver reports
+  *NO EXTERNAL NAMESERVERS DEFINED*), so `composer` cannot reach packagist from `docker compose
+  exec`. The update was run via a one-off `docker run --dns 1.1.1.1` on the same app image.
 
 - **Moved GitHub Actions off Node 20 runners** — completed and verified in production 2026-07-30
   (`d7dbf5c`). Corrected framing: runners had defaulted to Node 24 since **2026-06-16**, so the
