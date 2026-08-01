@@ -19,6 +19,62 @@ env:
   IMAGE: ghcr.io/t-ror/badi-menu
 
 jobs:
+  # The `make ci` stack, with `cs` in place of `csfix`: phpcbf rewrites files, and a CI run
+  # must never modify the tree — it reports, it does not fix.
+  #
+  # One job, not three. Measured on run 30718930065: setup (checkout + PHP + composer install)
+  # takes ~21 s of the job's 30 s, the three checks ~5 s combined. Splitting them would pay that
+  # setup three times over to parallelise five seconds of work.
+  ci:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+
+    steps:
+      # No submodules: the checks only need `src/`, `dev/` and composer dev dependencies,
+      # so this job needs neither the private docker repo nor its deploy key.
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # Pinned to the container's PHP minor. PHPStan results are version-sensitive, and a
+      # gate that disagrees with local `make ci` is worse than no gate.
+      - name: Set up PHP
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
+        with:
+          php-version: '8.3'
+          extensions: ctype, gd, iconv, intl, mbstring, pdo_mysql, zip
+          coverage: none
+
+      # var/ is required, not defensive: `make cs` passes --cache=var/phpcs.cache, and phpcs
+      # exits 3 with "points to a non-existent directory" when it is missing — which it is on a
+      # fresh checkout, since var/ is gitignored. dev/temp (PHPStan's tmpDir, set in
+      # dev/phpstan.neon) is belt-and-braces; PHPStan creates it itself.
+      - name: Create tool cache directories
+        run: mkdir -p var dev/temp
+
+      # No composer cache on purpose. GHA cache entries are evicted after 7 unused days and
+      # this repo's pushes land weeks to months apart, so the cache would be cold nearly
+      # every run — the same reason the Docker layer cache underperforms here.
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: CodeSniffer
+        run: make cs RAW=1
+
+      # `!cancelled()` rather than plain sequencing: a phpcs failure must not hide the
+      # PHPStan and schema results, but a cancelled run should still stop.
+      - name: PHPStan
+        if: ${{ !cancelled() }}
+        run: make phpstan RAW=1
+
+      # No database service: `doctrine:schema:validate --skip-sync` only validates the
+      # mapping, and `server_version` is pinned in config/packages/doctrine.yaml, so DBAL
+      # never opens a connection.
+      - name: Doctrine schema validation
+        if: ${{ !cancelled() }}
+        run: make test-entity RAW=1
+
   check-commits:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
@@ -38,8 +94,13 @@ jobs:
           fi
 
   build:
-    needs: [check-commits]
-    if: always() && (github.event_name == 'workflow_dispatch' || needs.check-commits.outputs.should_build == 'true')
+    needs: [check-commits, ci]
+    # `always()` is load-bearing: check-commits is skipped on workflow_dispatch, and a skipped
+    # dependency would otherwise skip this job too. But it also cancels out the default
+    # "skip when a needed job failed", so listing `ci` in `needs` gates nothing on its own —
+    # the explicit result check below is what makes a red quality gate stop the image. It also
+    # covers cancellation, where needs.ci.result is 'cancelled' rather than 'success'.
+    if: always() && needs.ci.result == 'success' && (github.event_name == 'workflow_dispatch' || needs.check-commits.outputs.should_build == 'true')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
