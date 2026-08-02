@@ -1,7 +1,7 @@
 # Roadmap
 
 Planned changes for badi-menu, each verified against the codebase on the date given in its own
-**Status:** line (the bulk were checked on 2026-07-16; the most recent pass was 2026-08-01).
+**Status:** line (the bulk were checked on 2026-07-16; the most recent pass was 2026-08-02).
 These items document intent — they are not a work queue; do not start them unprompted
 (see the Roadmap section in CLAUDE.md). Effort: **S** < 1 h, **M** = hours, **L** = days+.
 This file is public: no secrets, server details, or private Docker-repo internals belong here.
@@ -9,19 +9,6 @@ This file is public: no secrets, server details, or private Docker-repo internal
 ## Now
 
 Overdue maintenance and quick wins.
-
-- **composer.json cleanup** — remove or fix stale entries: `dg/ftp-deployment` (dead — deploys are
-  SSH/Docker via `deploy.yml`); `composer/package-versions-deprecated` (Composer 1 shim);
-  `doctrine/annotations` (entities use attributes — `type: attribute` in
-  `config/packages/doctrine.yaml`, no annotation imports in `src/`).
-  `dg/ftp-deployment` is now the priority of the three: it is the sole reason
-  `phpseclib/phpseclib` is installed, and that package carries all 4 remaining security advisories
-  (2 high, 1 medium, 1 low). Dev-only, so it never reaches the prod image (`make prod-install`
-  uses `--no-dev`) — but removing it clears the audit outright.
-  Resolved by the Symfony 7.4 upgrade: `extra.symfony.require` (was stuck at `"5.2.*"`, now
-  `"7.4.*"`) and `symfony/proxy-manager-bridge` (removed).
-  Status: 3 of 5 entries remain. Evidence: `composer.json`, `composer audit`,
-  `composer why phpseclib/phpseclib`. Effort: S.
 
 - **`var/` is not owned by the php-fpm user on the server — caused a production outage
   2026-08-01.** **Blocks the PHP 8.3 → 8.4/8.5 bump under Next; do that one only after this is
@@ -113,11 +100,6 @@ Overdue maintenance and quick wins.
   `--env-file`, or exporting the vars in the deploy script). Status: observed 2026-07-30.
   Evidence: deploy run `30579773767`. Effort: S.
 
-- **Delete the orphaned `FTP_PASSWORD` repository secret** — dating from 2021-05-08, left over from
-  the removed `dg/ftp-deployment` workflow (see composer.json cleanup above). Nothing reads it, but
-  any workflow in the repo still can. Delete it, and rotate the password on the FTP account if that
-  account still exists. Status: observed 2026-07-30. Evidence: `gh secret list`. Effort: S.
-
 - **`check-commits` misses commits past the push-payload cap** — `build.yml` greps
   `toJson(github.event.commits)`, which GitHub caps at 20 commits per push event. Pushing 25
   commits where only the first is `fix:` silently skips the build. Reading the commit range via
@@ -165,6 +147,59 @@ Overdue maintenance and quick wins.
   Status: all in use. Evidence: `package.json`. Effort: M.
 
 ## Done
+
+- **composer.json cleanup — all 5 entries resolved.** Committed 2026-08-02 as `8bf0f54`
+  (`composer.json`, `composer.lock`, `symfony.lock`; no source changes). `dg/ftp-deployment`
+  v3.5.2, `composer/package-versions-deprecated` 1.11.99.1 and `doctrine/annotations` ^2.0 are
+  gone; `extra.symfony.require` and `symfony/proxy-manager-bridge` had already been cleared by the
+  Symfony 7.4 upgrade. Removing `dg/ftp-deployment` took `phpseclib/phpseclib` 3.0.41 and its two
+  `paragonie/*` dependencies with it, so `composer audit` now reports *No security vulnerability
+  advisories found* — **4 advisories (2 high, 1 medium, 1 low) → 0**. The lock went 113 packages →
+  107 (93 → 91 prod, 20 → 16 dev), and `composer validate` lost its only general warning (the exact
+  version constraint on the Composer 1 shim).
+
+  Three things this surfaced that were not obvious up front:
+  - **`composer audit` without `--locked` does not read `composer.lock`.** It audits the installed
+    set from `vendor/composer/installed.json`, which carries each package's abandoned flag as it
+    stood at install time. `doctrine/cache` 2.2.0 is marked abandoned in the lock both before and
+    after this change, and neither audit run surfaced it — only `composer audit --locked` does. The
+    clean audit is therefore true of the default command, not of the dependency tree: one abandoned
+    package remains, transitively via doctrine-bundle 2.12, which the doctrine-bundle item under
+    Next should clear.
+  - **`doctrine/annotations` was held open only by the root `require`.** Three locked packages
+    reference it — `doctrine/doctrine-bundle`, `phpstan/phpdoc-parser`, `phpstan/phpstan-doctrine`
+    — but all three list it under their *own* `require-dev`, which Composer never installs for
+    dependencies. The reverse-dependency grep looks alarming and means nothing; deleting the root
+    line genuinely uninstalled the package.
+  - **Flex removed 6 `symfony.lock` entries, not 3** — it tracks transitive packages too, so
+    `phpseclib/phpseclib` and both `paragonie/*` went with `dg/ftp-deployment` (113 → 107 entries).
+    The `doctrine/annotations` recipe registers `./config/routes/annotations.yaml`, deleted long
+    ago, so unconfigure was a no-op.
+
+  Two of the three lived in `require`, not `require-dev`, so **the production image does change** —
+  the next build drops `composer/package-versions-deprecated` and `doctrine/annotations`. Only
+  `dg/ftp-deployment`, and with it the entire phpseclib advisory set, was dev-only and already
+  absent from the image via `--no-dev`.
+
+  Composer still cannot run under `docker compose exec` — the app container has no external DNS
+  (see the Symfony 7.4 entry below). The removals were run in a one-off `docker run --dns 1.1.1.1`
+  on the same app image, as before.
+
+  Verified after the change: the lock diff is **removal-only** — nothing added, no retained package
+  changed version, with `doctrine/lexer` 3.0.1 and `psr/cache` 3.0.0 correctly surviving on
+  `doctrine/orm` and `symfony/cache`; `composer install --dry-run` reports *Nothing to install,
+  update or remove*; `composer install --no-dev --dry-run` resolves; phpcs 66/66 with 0 errors,
+  PHPStan `[OK] No errors`, `doctrine:schema:validate --skip-sync` OK; `/` → 302 and `/prihlaseni`
+  → 200 with a rendered form and CSRF token; `bin/console about` boots in **prod** env (Symfony
+  7.4.15, PHP 8.3.30); `autoload_classmap.php`, `autoload_psr4.php` and `autoload_static.php` carry
+  zero dangling references.
+
+  Also cleared: the orphaned **`FTP_PASSWORD` repository secret is deleted** — `gh secret list`
+  returns 5 secrets, none FTP-related (checked 2026-08-02). Whether the underlying FTP account
+  still exists, and whether its password was rotated, is not recorded here.
+
+  Not exercised: no authenticated page was rendered, no test suite exists, and the production image
+  has not yet been rebuilt against the reduced `require` set.
 
 - **Upgraded MariaDB 11.5.2 → 11.8.8 LTS** — deployed to production 2026-08-02, no outage.
   Rehearsed locally first against a tarball snapshot of the dev `db_data` volume, restored
@@ -238,8 +273,8 @@ Overdue maintenance and quick wins.
   `v7.1.3` → `v7.4.15`; 51 `symfony/*` packages on 7.4.x, **0 left on 7.1.x**, no `dev-` versions
   despite `minimum-stability: dev`. `bin/console about` now reports *Long-Term Support: Yes*,
   end of maintenance 11/2028, EOL 11/2029 — previously EOL 01/2025 (expired).
-  Security advisories dropped **42 across 14 packages → 4 across 1** (`phpseclib`, dev-only; see
-  the composer.json cleanup item under Now).
+  Security advisories dropped **42 across 14 packages → 4 across 1** (`phpseclib`, dev-only; those
+  last 4 went with the composer.json cleanup — see the entry above).
 
   Three things this surfaced that were not obvious up front:
   - **`extra.symfony.require` was load-bearing, not cosmetic.** Flex applies it as a version filter
