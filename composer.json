@@ -7,8 +7,6 @@
         "php": ">=8.3",
         "ext-ctype": "*",
         "ext-iconv": "*",
-        "composer/package-versions-deprecated": "1.11.99.1",
-        "doctrine/annotations": "^2.0",
         "doctrine/doctrine-bundle": "^2.12",
         "doctrine/doctrine-migrations-bundle": "^3.3",
         "doctrine/orm": "^3.2",
@@ -59,7 +57,6 @@
         "twig/twig": "^2.12|^3.0"
     },
     "require-dev": {
-        "dg/ftp-deployment": "v3.5.2",
         "phpstan/phpstan": "^1.11.10",
         "phpstan/phpstan-doctrine": "^1.5.0",
         "phpstan/phpstan-strict-rules": "^1.6.0",
