@@ -37,3 +37,6 @@ yarn-error.log
 supervisord.log
 /opencode.json
 /.opencode/
+
+# Local-only notes (operational instructions, scratch analysis).
+/docs/local/

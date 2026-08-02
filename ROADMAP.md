@@ -10,9 +10,6 @@ This file is public: no secrets, server details, or private Docker-repo internal
 
 Overdue maintenance and quick wins.
 
-- **Upgrade MariaDB 11.5 → 11.8 LTS** — **overdue**: 11.5 is a short-term release, out of
-  support since ~Aug 2025. Status: pinned to `mariadb:11.5.2`. Evidence: `docker-compose.yml`. Effort: M.
-
 - **composer.json cleanup** — remove or fix stale entries: `dg/ftp-deployment` (dead — deploys are
   SSH/Docker via `deploy.yml`); `composer/package-versions-deprecated` (Composer 1 shim);
   `doctrine/annotations` (entities use attributes — `type: attribute` in
@@ -168,6 +165,70 @@ Overdue maintenance and quick wins.
   Status: all in use. Evidence: `package.json`. Effort: M.
 
 ## Done
+
+- **Upgraded MariaDB 11.5.2 → 11.8.8 LTS** — deployed to production 2026-08-02, no outage.
+  Rehearsed locally first against a tarball snapshot of the dev `db_data` volume, restored
+  between runs; the server was then recreated by hand, since `deploy.yml` only touches the
+  `app` service.
+  Corrected framing: 11.5.2's EOL was **2024-11-21**, not "~Aug 2025" — it had been
+  unsupported for ~21 months. 11.8 LTS: GA 2025-06-04, EOL 2028-06-04. 12.3 LTS (GA
+  2026-05-28) was deliberately skipped — two months post-GA at `.2` against 11.8's eight
+  maintenance releases.
+
+  Four things this surfaced that were not obvious up front:
+  - **`doctrine.yaml`'s `server_version` is dead config whenever `DATABASE_URL` carries
+    `serverVersion=`.** `ConnectionFactory::parseDatabaseUrl()` ends in
+    `array_merge($params, $parsedParams)`, so the URL wins; `override_url: true` is unrelated
+    (it only covers `dbname`/`host`/`port`/`user`/`password`). Proven by setting
+    `server_version: 'mariadb-DELIBERATELY-INVALID'` — `dbal:run-sql`,
+    `doctrine:schema:validate` and `schema:update --dump-sql` all still worked. The version
+    that matters lives in `.env`, `.env.local` and `.env.prod.local`.
+  - **The MariaDB entrypoint does not run `mariadb-upgrade` unless `MARIADB_AUTO_UPGRADE`
+    is set.** Bumping the image alone logs `upgrade … required, but skipped due to
+    $MARIADB_AUTO_UPGRADE setting`, then serves traffic normally while
+    `/var/lib/mysql/mariadb_upgrade_info` still reads `11.5.2-MariaDB` — a half-upgraded
+    database with no failure signal. The flag is now set on the `db` service.
+    `MARIADB_DISABLE_UPGRADE_BACKUP` is deliberately left unset: the
+    `system_mysql_backup_*.sql.zst` it suppresses is the only downgrade path.
+  - **`innodb_snapshot_isolation` has defaulted ON since 11.6.2**, so this jump crosses it.
+    Under REPEATABLE READ an `UPDATE`/`DELETE` on a stale snapshot now rolls the whole
+    transaction back with `ERROR 1020 (Record has changed since last read)`. Measured both
+    shapes against the upgraded server: reading *inside* the transaction reproduces 1020;
+    Doctrine's `flush()` shape (reads in autocommit, transaction opened at write time) does
+    not. `src/` has no `beginTransaction`, no `wrapInTransaction`, no `LockMode` and no
+    optimistic locking — only 14 `flush()` calls — so the default stays ON. Any future code
+    that wraps reads and writes in one explicit transaction becomes exposed; the escape hatch
+    (`--innodb-snapshot-isolation=OFF`) would need a config mount that does not exist today.
+  - **`make ci` would not have caught schema drift** — `Makefile:142` runs
+    `doctrine:schema:validate --skip-sync`, which never compares against the live database.
+    The un-skipped comparison was captured before and after and is byte-identical: mapping OK,
+    database "not in sync", drift `DROP TABLE doctrine_migration_versions;` — the pre-existing
+    baseline, since that table belongs to the migrations bundle and not the ORM mapping.
+
+  Also verified: both `11.5.2` and `11.8.8` build the same DBAL platform
+  (`MariaDB1010Platform`, `>= 10.10.0`) — measured by constructing a connection with each
+  value, not just read off the driver — so no generated SQL changed. That equivalence is
+  load-bearing: the developer machine's gitignored `.env.local` still declares `11.5.2`, so
+  every check below ran with `11.5.2` declared against a genuine `11.8.8` server.
+  The mixed collations
+  (`utf8mb4_unicode_ci` on app tables, `utf8mb4_uca1400_ai_ci` on
+  `doctrine_migration_versions`) are unchanged and not version-sensitive — doctrine-bundle
+  hard-codes `utf8mb4_unicode_ci` regardless of server version, and `collation_server` was
+  already `utf8mb4_uca1400_ai_ci` under 11.5. MariaDB's own upgrade guide lists exactly one
+  incompatible change on this path, `wsrep_load_data_splitting` (Galera-only, N/A).
+  On the upgraded local stack: `make cs` 0 errors, `make phpstan` 0 errors (result cache
+  cleared), `make test-entity` OK, `/` → 302, `/prihlaseni` → 200 with a CSRF token, all 11
+  tables present as InnoDB.
+
+  Caveats: every figure above is from the local stack — the production run was carried out
+  separately and reported successful, but its `mariadb_upgrade_info` / `mariadb --version`
+  output is not recorded here. No authenticated page was rendered locally, so no household
+  template was hit over HTTP against the upgraded database. The container entrypoint runs
+  `mariadb-upgrade --upgrade-system-tables`, which skips the user-table check that step 7.2
+  of MariaDB's upgrade guide describes — so the image bump is not a full `mariadb-upgrade`.
+
+  Procedure for future database version bumps is kept out of this repo, as a local-only
+  note under `docs/local/` (gitignored).
 
 - **Upgraded Symfony 7.1 → 7.4 LTS** — deployed to production 2026-08-01. **The deploy caused a
   brief outage** — every request 500'd on an unwritable Twig cache directory. Not a defect in the

@@ -15,7 +15,7 @@ Planned and deferred changes are tracked in `ROADMAP.md` (sections Now / Next / 
 ## Tech Stack
 
 - **Backend:** PHP 8.3, Symfony 7.1, Doctrine ORM 3, Doctrine Migrations
-- **Database:** MariaDB 11.5.2
+- **Database:** MariaDB 11.8.8 (LTS)
 - **Frontend:** Twig templates with Vue 2 components (`assets/`), built by Webpack Encore (single entry: `assets/app.js`), Bootstrap 5, Font Awesome, jQuery/Select2/Quill (legacy)
 - **Infrastructure:** Docker (single app container running nginx + PHP-FPM via supervisord), MariaDB in a separate container
 - **CI/CD:** GitHub Actions building images to GHCR (`ghcr.io/t-ror/badi-menu`)

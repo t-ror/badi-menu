@@ -3,8 +3,11 @@ doctrine:
         override_url: true
         url: '%env(resolve:DATABASE_URL)%'
 
-        # Must match the MariaDB image version in docker-compose.yml.
-        server_version: 'mariadb-11.5.2'
+        # Fallback only: doctrine-bundle merges the parsed DATABASE_URL over these
+        # options (ConnectionFactory::parseDatabaseUrl), so a serverVersion= in the
+        # URL wins over this value. Keep it matching the MariaDB image version in
+        # docker-compose.yml anyway, for connections built without that parameter.
+        server_version: 'mariadb-11.8.8'
     orm:
         auto_generate_proxy_classes: true
         naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware

@@ -21,8 +21,14 @@ services:
     restart: unless-stopped
 
   db:
-    image: mariadb:11.5.2
+    image: mariadb:11.8.8
     environment:
+      # Run mariadb-upgrade on start when the data directory was created by an
+      # older server. Without this the entrypoint logs "upgrade required, but
+      # skipped" and serves traffic with un-upgraded system tables.
+      # Leaves a system-table backup in the data directory (do NOT set
+      # MARIADB_DISABLE_UPGRADE_BACKUP — it is the only downgrade path).
+      MARIADB_AUTO_UPGRADE: "1"
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
       MYSQL_DATABASE: ${DB_NAME:-badi_menu}
       MYSQL_USER: ${DB_USER:-badi_menu}
