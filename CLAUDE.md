@@ -70,8 +70,11 @@ make install       # full dev setup: composer, migrations, npm, Encore build
 make migration     # doctrine:migrations:diff (creates migrations/YYYY/MM/)
 make migration-empty
 make db-migrate    # run migrations
-make ci            # QUALITY GATE: phpcs + PHPStan + doctrine:schema:validate
-make cs            # phpcs only (dev/ruleset.xml)
+make ci            # QUALITY GATE: csfix + PHPStan + doctrine:schema:validate
+                   # NOTE: csfix runs phpcbf, which REWRITES files under src/ in place.
+                   # Use `make cs` when you need a check that leaves the tree alone.
+make cs            # phpcs only, read-only (dev/ruleset.xml)
+make csfix         # phpcbf — auto-fixes codestyle, modifies src/
 make phpstan       # PHPStan only (dev/phpstan.neon)
 make test-entity   # doctrine:schema:validate --skip-sync
 make hot-reload    # Encore watch mode
@@ -84,9 +87,16 @@ The app is served at `http://localhost:${APP_PORT:-8080}` in dev.
 
 **Run `make ci` after any PHP change.** It must pass before work is considered done:
 
-1. **phpcs** — coding standard from `dev/ruleset.xml`
+1. **csfix** — runs **phpcbf** against the `dev/ruleset.xml` standard. This step **auto-fixes
+   codestyle and rewrites files under `src/` in place**; it does not merely report. Expect
+   `make ci` to leave modified files in your working tree, and review that diff along with your
+   own changes. Use **`make cs`** (phpcs) when you want a read-only check — that is what the
+   `ci` job in `.github/workflows/build.yml` runs (`make cs RAW=1`), deliberately not `make ci`,
+   because a CI run must never modify the tree.
 2. **PHPStan level 8** with `phpstan-strict-rules`, Doctrine and Symfony extensions (`dev/phpstan.neon`)
 3. **Doctrine schema validation** — entity mappings must stay consistent
+
+Note: `dev/ruleset.xml` excludes `Kernel.php`, so neither `make cs` nor `make ci` checks it.
 
 PHPUnit is configured (`phpunit.xml.dist`) but there is no test suite yet; do not claim tests were run. If asked to add tests, put them under `tests/` in the `App\Tests\` namespace.
 
@@ -149,7 +159,9 @@ Submodule flow: changes to Docker config happen in the private `docker-badi-menu
 
 - **Never commit or push unless explicitly asked.** Default to leaving changes staged/unstaged for review.
 - Prefer small, incremental, reviewable changes over large rewrites.
-- After PHP changes, run `make ci` and fix everything it reports.
+- After PHP changes, run `make ci` and fix everything it reports. Remember its first step
+  (`csfix`/phpcbf) rewrites `src/` in place — check `git diff` afterwards so those automatic
+  edits do not ride along unnoticed. `make cs` is the read-only equivalent.
 - Do not modify `.env*` files, GitHub workflow secrets references, or the `docker/` submodule contents from this repo.
 - Do not add server addresses, usernames, or credentials anywhere — this repo is public.
 - Respect the architectural decisions above (single container, separate docker repo, Vue 2 status quo) instead of "modernizing" them unprompted.

@@ -35,8 +35,10 @@ yarn-error.log
 ###< symfony/webpack-encore-bundle ###
 
 supervisord.log
+supervisord.pid
 /opencode.json
 /.opencode/
+/.claude/settings.json
 
 # Local-only notes (operational instructions, scratch analysis).
 /docs/local/

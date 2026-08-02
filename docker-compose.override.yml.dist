@@ -1,6 +1,7 @@
 # =============================================================================
 # badi-menu — Dev overrides (auto-loaded by Docker Compose)
-# DO NOT push this to the server.
+# Copy to docker-compose.override.yml for local development.
+# DO NOT push to the server.
 # =============================================================================
 
 services:

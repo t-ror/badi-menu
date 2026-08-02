@@ -28,11 +28,11 @@ class ImageController extends AbstractController
 	 */
 	public function serve(string $class, int $id, string $filename): Response
 	{
-		if (preg_match('/^[a-z0-9\-]+$/', $class) === false) {
+		if (preg_match('/^[a-z0-9\-]+$/', $class) !== 1) {
 			throw $this->createNotFoundException();
 		}
 
-		if (preg_match('/^[a-f0-9]{32}\.(jpg|jpeg|png)$/', $filename) === false) {
+		if (preg_match('/^[a-f0-9]{32}\.(jpg|jpeg|png)$/', $filename) !== 1) {
 			throw $this->createNotFoundException();
 		}
 

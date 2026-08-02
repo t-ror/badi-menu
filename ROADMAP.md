@@ -10,25 +10,8 @@ This file is public: no secrets, server details, or private Docker-repo internal
 
 Overdue maintenance and quick wins.
 
-- **`make ci` does not pass on master** — **pre-existing; not caused by the Symfony 7.4 upgrade,
-  which left both tools exactly as red as it found them.** The quality gate is red on a clean
-  checkout: **phpcs** fails on 4 files (`src/EventSubscriber/SecurityHeadersSubscriber.php`
-  is space-indented and uses `strict_types=1` without the required spaces;
-  `src/Controller/File/ImageController.php` and `src/ValueObject/File/Image.php` have formatting
-  errors; `src/Twig/ImageExtension.php` has an unused import) and **PHPStan** reports 2 errors in
-  `ImageController.php:31,35` (`Only booleans are allowed in a negated boolean, int|false given`).
-  Introduced by `a8756d3` and `a1b23d3` (both 2026-03-08) — i.e. the gate has been bypassed since
-  then. Most of the phpcs errors are auto-fixable with `phpcbf`. `doctrine:schema:validate` passes.
-  Status: confirmed 2026-08-01. Effort: S.
-
-- **Untrack committed runtime/dev artifacts** — `supervisord.pid` is tracked and not gitignored
-  (only `supervisord.log` is); `docker-compose.override.yml` is tracked *and* matched by
-  `.gitignore:24`, making the ignore rule dead. Untrack both, gitignore the pid file, and commit
-  a `docker-compose.override.yml.dist` template instead.
-  Status: not started. Evidence: `git ls-files`, `.gitignore`. Effort: S.
-
-- **Add `declare(strict_types = 1)` to `src/Kernel.php`** — still the only PHP file in `src/`
-  missing it. Status: confirmed 2026-07-16. Evidence: `src/Kernel.php:1`. Effort: S.
+Empty as of 2026-08-02 — the last three items were cleared together; see the first entry under
+Done. Promote from Next when starting new work.
 
 ## Next
 
@@ -118,6 +101,55 @@ Overdue maintenance and quick wins.
   Status: all in use. Evidence: `package.json`. Effort: M.
 
 ## Done
+
+- **The last three Now items, cleared together 2026-08-02.** *Uncommitted at the time of writing —
+  if these land in separate commits, split this entry to match.*
+
+  - **`ImageController::serve()`'s guards work again.** `03afa44` had cleared its PHPStan errors by
+    rewriting `!preg_match(...)` as `preg_match(...) === false` (`ImageController.php:31,35`), which
+    made both `createNotFoundException()` branches unreachable: `preg_match()` returns `1` on a
+    match and `0` on no match, and `false` only on a compilation or backtrack-limit error. Now
+    `!== 1`, which restores the check and keeps PHPStan quiet. Measured before the change:
+    `../etc` and `evil/../..` both yield `preg_match = 0`, so `=== false` was `false` — the guard
+    let them through — while `!== 1` is `true`; a valid `abc` yields `1` and still passes.
+    Never a live path-traversal hole: `serve()` has exactly one entry point, the `imageServe`
+    route, whose `requirements` (`config/routes.yaml:4-7`) carry the same two patterns and are
+    anchored by Symfony's compiled route regex — grep found no other caller in `src/`, `config/`,
+    `assets/` or `templates/`. It was lost defence-in-depth against a docblock
+    (`ImageController.php:20-28`) that claimed the parameters were validated.
+
+  - **Runtime/dev artifacts untracked.** `supervisord.pid` is out of version control and added to
+    `.gitignore` beside `supervisord.log`; `docker-compose.override.yml` is untracked, which makes
+    the long-dead `.gitignore:24` rule effective at last, and is replaced in the repo by
+    `docker-compose.override.yml.dist`. Both files remain in the working tree — `git rm --cached`
+    only stages the removal, so `git status` showing them as `deleted:` is expected.
+    The `.dist` is verified to parse: `docker compose -f docker-compose.yml -f
+    docker-compose.override.yml.dist config` exits 0 and resolves the same `3306` publish as the
+    live override.
+
+  - **`declare(strict_types = 1)` added to `src/Kernel.php`**, the last file in `src/` without it.
+    Note that `dev/ruleset.xml:273` excludes `Kernel.php`, so no phpcs run covers this file — which
+    is why it was missed for so long, and why it is still 4-space indented against the project's
+    tabs standard. Verified by boot instead: `bin/console about` runs in both dev and prod.
+
+  Gate after all three: phpcs **66/66, 0 errors**, PHPStan `[OK] No errors`,
+  `doctrine:schema:validate --skip-sync` OK. Smoke: `/` → 302, `/prihlaseni` → 200,
+  `/image/meal/1/deadbeef` → 404.
+
+- **`make ci` passes on master again** — closed by `03afa44` (2026-08-01, the 4 phpcs files plus
+  the 2 PHPStan errors) and `1df707d`, which added the gate to `build.yml` so it can no longer be
+  bypassed silently. Re-verified on master 2026-08-02: phpcs **66/66, 0 errors**, PHPStan
+  `[OK] No errors`, `doctrine:schema:validate --skip-sync` OK, and the tree unmodified afterwards.
+
+  Two things worth keeping close:
+  - **`make ci` is not a read-only check.** `Makefile:124` is `ci: csfix phpstan test-entity`, and
+    `csfix` runs **phpcbf**, which rewrites files under `src/` in place rather than reporting on
+    them. Use `make cs` (phpcs) for a check that leaves the tree alone. `build.yml` already does
+    exactly that — its `ci` job runs `make cs RAW=1`, deliberately not `make ci`. `CLAUDE.md`
+    described the gate as "phpcs + PHPStan + doctrine:schema:validate" and was corrected
+    2026-08-02 to say `csfix` and spell out that it rewrites `src/`.
+  - **The fix traded a lint error for a dead guard.** Silencing PHPStan in `ImageController` made
+    both of its validation branches unreachable — tracked as its own item under Now.
 
 - **`var/` ownership on the server — repaired from the deploy script.** Committed 2026-08-02 as
   `106bdb3`, deployed the same day; production serves normally. Closes the 2026-08-01 outage,
