@@ -60,6 +60,8 @@ install:
 
 ## Prod-install - install production dependencies only (no dev packages, optimised autoloader)
 ## Run this on the production server or inside the production container.
+## composer and npm run as root because they write vendor/ and node_modules/, so var/ is
+## handed back to www-data at the end.
 .PHONY: prod-install
 prod-install:
 	@if [ -f /.dockerenv ] || [ "$(RAW)" = "1" ] ; then \
@@ -67,12 +69,24 @@ prod-install:
 		bin/console doctrine:migrations:migrate --no-interaction; \
 		npm install; \
 		npm run encore production --no-watch; \
+		chown -R www-data:www-data var; \
 	else \
 		docker compose up -d; \
 		docker compose exec app composer install --no-dev --optimize-autoloader --classmap-authoritative; \
 		docker compose exec app bin/console doctrine:migrations:migrate --no-interaction; \
 		docker compose exec app npm install; \
 		docker compose exec app npm run encore production --watch=false; \
+		docker compose exec app chown -R www-data:www-data var; \
+	fi; \
+
+## Give var/ back to www-data, the php-fpm user. Run after any console or composer
+## command executed as root, otherwise php-fpm cannot write its cache.
+.PHONY: fix-var-owner
+fix-var-owner:
+	@if [ -f /.dockerenv ] || [ "$(RAW)" = "1" ] ; then \
+		chown -R www-data:www-data var; \
+	else \
+		docker compose exec app chown -R www-data:www-data var; \
 	fi; \
 
 ## Generate a new Doctrine migration
@@ -96,12 +110,13 @@ migration-empty:
 	fi; \
 
 ## Run Doctrine migrations
+## Runs as www-data so the cache files the console writes stay owned by php-fpm.
 .PHONY: db-migrate
 db-migrate:
 	@if [ -f /.dockerenv ] || [ "$(RAW)" = "1" ] ; then \
 		bin/console doctrine:migrations:migrate --no-interaction; \
 	else \
-		docker compose exec app bin/console doctrine:migrations:migrate --no-interaction; \
+		docker compose exec -u www-data app bin/console doctrine:migrations:migrate --no-interaction; \
 	fi; \
 
 ## CI Stack

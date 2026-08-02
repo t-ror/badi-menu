@@ -10,36 +10,6 @@ This file is public: no secrets, server details, or private Docker-repo internal
 
 Overdue maintenance and quick wins.
 
-- **`var/` is not owned by the php-fpm user on the server — caused a production outage
-  2026-08-01.** **Blocks the PHP 8.3 → 8.4/8.5 bump under Next; do that one only after this is
-  fixed.** After the Symfony 7.4 deploy every request returned 500 with
-  `RuntimeException: Unable to create the cache directory (var/cache/prod/twig/47)` and
-  `Unable to write in the cache directory (var/cache/prod/twig/1a)`, both from
-  `Twig\Cache\FilesystemCache::write()` (lines 53 and 57). Line 57 is the
-  `elseif (!is_writable($dir))` branch — the directory existed and php-fpm simply could not write
-  to it. Fixed live by removing `var/cache/prod` as root, `chown -R www-data:www-data var`, then
-  re-running the warmup as www-data.
-
-  **The upgrade was the trigger, not the cause.** `Twig\Environment::updateOptionsHash()` builds
-  the template cache key from `extensionSet signature : PHP_MAJOR_VERSION : PHP_MINOR_VERSION :
-  Twig VERSION : debug : strictVariables`. Twig 3.11 → 3.28 changed that hash, so every template
-  moved to a new path and the two-character subdirectories had to be **created** instead of read —
-  which is the first time the ownership ever mattered. The root-owned `var/` predates the upgrade.
-
-  Anything that perturbs that hash trips the same wire: a **PHP minor bump**, any Twig upgrade
-  (including a patch release), adding a Twig extension, or toggling `strict_variables`. This is
-  why it must land before the PHP upgrade.
-
-  Compounding it: `deploy.yml:117` runs `cache:clear` as `www-data` specifically to prevent this,
-  but as www-data it also cannot delete the root-owned files — so the same defect disabled the
-  mitigation. And because that step runs *after* `docker compose up -d app` under `set -eu`, the
-  job goes red only once the broken container is already serving traffic (see the missing
-  post-deploy health check under Next).
-
-  The durable fix is to guarantee `var/` is owned by the php-fpm user — either in the image or as
-  a step in the deploy script before the warmup. The image side lives in the private Docker config
-  repo. Status: worked around live 2026-08-01, **not yet fixed permanently**. Effort: S.
-
 - **`make ci` does not pass on master** — **pre-existing; not caused by the Symfony 7.4 upgrade,
   which left both tools exactly as red as it found them.** The quality gate is red on a clean
   checkout: **phpcs** fails on 4 files (`src/EventSubscriber/SecurityHeadersSubscriber.php`
@@ -81,9 +51,10 @@ Overdue maintenance and quick wins.
 
 - **PHP 8.3 → 8.4/8.5** — PHP 8.3 is security-only since January 2026. Requires a runtime-image
   rebuild in the private Docker config repo (details live there).
-  **Blocked on the `var/` ownership fix under Now.** `PHP_MAJOR_VERSION` and `PHP_MINOR_VERSION`
-  are inputs to Twig's template cache key, so a minor bump relocates every compiled template and
-  reproduces the 2026-08-01 outage exactly. Fix the ownership first, then bump.
+  **No longer blocked** — the `var/` ownership fix shipped 2026-08-02 (`106bdb3`, see Done).
+  `PHP_MAJOR_VERSION` and `PHP_MINOR_VERSION` are inputs to Twig's template cache key, so a minor
+  bump relocates every compiled template — which makes this the **first deploy that genuinely
+  exercises that fix**. Send it on its own and watch the deploy log.
   Status: `"php": ">=8.3"`. Evidence: `composer.json`. Effort: M.
 
 - **Review GHCR package visibility** — the prod image is anonymously pullable; decide whether
@@ -147,6 +118,70 @@ Overdue maintenance and quick wins.
   Status: all in use. Evidence: `package.json`. Effort: M.
 
 ## Done
+
+- **`var/` ownership on the server — repaired from the deploy script.** Committed 2026-08-02 as
+  `106bdb3`, deployed the same day; production serves normally. Closes the 2026-08-01 outage,
+  where every request 500'd on `Unable to create the cache directory (var/cache/prod/twig/47)`
+  from `Twig\Cache\FilesystemCache::write()` — php-fpm runs as `www-data` and could not create
+  directories under a root-owned `var/`.
+
+  `deploy.yml` now chowns `/var/www/var` to `www-data` twice: best-effort through the old
+  container before `docker compose up -d app`, so the new container starts against a writable
+  `var/`, then unguarded against the new container. `cache:clear` stays as `www-data` — as root it
+  would recreate root-owned cache files. Each deploy closes with two evidence lines: a
+  `mkdir`/`rmdir` probe under `var/cache/prod/twig/` run as `www-data`, and
+  `find /var/www/var ! -user www-data -print`.
+
+  Three things this surfaced that were not obvious up front:
+  - **The image's own `chown` is inert on this server.** The `prod` target ends with
+    `chown -R www-data:www-data /var/www/var`, so every prod image built since the multi-stage
+    build landed (2026-03-21) is correct — but on the server `/var/www/var` is the named volume
+    `app_var`. Docker seeds an *empty* named volume from the image directory once, preserving
+    ownership, and never re-seeds a populated one. The build-time `chown` has therefore had no
+    effect since the day that volume was created, and **no rebuild can repair it**. That is what
+    makes the deploy-script repair the fix rather than a stopgap.
+  - **Twig's cache key was the trigger, not the upgrade.**
+    `Twig\Environment::updateOptionsHash()` keys the template cache on `extensionSet signature :
+    PHP_MAJOR_VERSION : PHP_MINOR_VERSION : Twig VERSION : debug : strictVariables`. Twig
+    3.11 → 3.28 moved every template to a new path, so the two-character subdirectories had to be
+    **created** instead of read — the first time ownership ever mattered. A PHP minor bump, any
+    Twig upgrade, a new Twig extension or toggling `strict_variables` trips the same wire.
+  - **The existing mitigation was disabled by the defect it was meant to prevent.** `cache:clear`
+    has run as `www-data` since `c6d1cc8` (2026-07-13) precisely to keep `var/` writable, but as
+    `www-data` it also could not delete the root-owned files.
+
+  How `app_var` became root-owned is **not established** — either it was seeded that way or
+  polluted later. Ruled out: the deploy's own warmup, per the dates above. The most likely route,
+  a console or composer command run by hand as root, is closed below.
+
+  Verified by deploy run `30756175163`, though not by the check that was written for it. The
+  script runs under `set -eu` and the step is green, so every unguarded command in it exited 0 —
+  including `cache:clear --env=prod` run **as www-data**. That is the discriminating result:
+  clearing the cache as www-data is exactly what a root-owned `var/` breaks, since www-data
+  cannot delete the root-owned files, and the failure would have turned the step red.
+
+  The `mkdir`/`rmdir` probe and `find` line that shipped in `106bdb3` have since been removed:
+  their `|| true` discarded the exit status, and the run shows **no remote stdout at all** — not
+  compose progress, which is stderr, but the script's own `echo "Deploying IMAGE_TAG=…"` and
+  `cache:clear`'s `[OK]` line are both absent. A failed probe was indistinguishable from a passing
+  one. Worth remembering when debugging any future deploy: only exit codes cross back from the
+  ssh step, so evidence has to be an unguarded command, not an `echo`.
+
+  **The routes that could re-poison the volume are closed too.** Every `docker compose exec app …`
+  defaults to root, so any console or composer command run by hand writes root-owned files into
+  `var/`. `make db-migrate` now runs as `www-data`; `make prod-install` keeps composer and npm as
+  root — they write `vendor/` and `node_modules/` — and hands `var/` back at the end; and
+  `make fix-var-owner` is the standalone repair for anything else executed as root.
+
+  Confirmed directly on the server afterwards: `find /var/www/var ! -user www-data -print` returns
+  nothing, so the whole volume — uploads included — belongs to www-data, and `bin/console about
+  --env=prod` boots as www-data (Symfony 7.4.15, PHP 8.3.33, prod cache 5.9 MiB). Both commands
+  print normally when run by hand; the missing stdout is specific to the ssh-action's relay into
+  the Actions log, not to the commands.
+
+  Still untested: no deploy since has moved Twig's cache key, so the create-a-new-directory path
+  that caused the outage is first exercised by the PHP 8.3 → 8.4 bump. `make prod-install` is also
+  unexercised — its change is reasoned, not verified.
 
 - **composer.json cleanup — all 5 entries resolved.** Committed 2026-08-02 as `8bf0f54`
   (`composer.json`, `composer.lock`, `symfony.lock`; no source changes). `dg/ftp-deployment`
@@ -267,9 +302,9 @@ Overdue maintenance and quick wins.
 
 - **Upgraded Symfony 7.1 → 7.4 LTS** — deployed to production 2026-08-01. **The deploy caused a
   brief outage** — every request 500'd on an unwritable Twig cache directory. Not a defect in the
-  upgrade: it exposed pre-existing root-owned `var/` on the server, and is tracked as its own item
-  under Now (which also blocks the PHP bump). Resolved live by clearing `var/cache/prod` and
-  correcting ownership.
+  upgrade: it exposed pre-existing root-owned `var/` on the server, tracked as its own item and
+  fixed permanently 2026-08-02 (`106bdb3`, above). Resolved live at the time by clearing
+  `var/cache/prod` and correcting ownership.
   `v7.1.3` → `v7.4.15`; 51 `symfony/*` packages on 7.4.x, **0 left on 7.1.x**, no `dev-` versions
   despite `minimum-stability: dev`. `bin/console about` now reports *Long-Term Support: Yes*,
   end of maintenance 11/2028, EOL 11/2029 — previously EOL 01/2025 (expired).

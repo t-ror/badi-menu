@@ -109,9 +109,14 @@ jobs:
             cd ~/apps/badi-menu
             echo "Deploying IMAGE_TAG=$IMAGE_TAG"
             docker compose pull app
+            # php-fpm runs as www-data and needs to create directories under
+            # var/cache/prod/twig. Fix ownership of the app_var volume through the old
+            # container, so the new one starts against a writable var/.
+            docker compose exec -T app chown -R www-data:www-data /var/www/var || echo "No running app container; ownership is fixed after startup instead."
             docker compose up -d app
-            # var/ persists across deploys, so the stale compiled Twig/container
-            # cache must be cleared after the new container starts. Run as
-            # www-data to keep var/ writable by php-fpm.
+            docker compose exec -T app chown -R www-data:www-data /var/www/var
+            # Drop the cache compiled against the previous image. Runs as www-data so the new
+            # cache files stay writable by php-fpm, and unguarded under set -eu so an
+            # unwritable var/ fails the deploy here.
             docker compose exec -T -u www-data app php bin/console cache:clear --env=prod --no-debug
             docker image prune -f
