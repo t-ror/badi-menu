@@ -119,4 +119,26 @@ jobs:
             # cache files stay writable by php-fpm, and unguarded under set -eu so an
             # unwritable var/ fails the deploy here.
             docker compose exec -T -u www-data app php bin/console cache:clear --env=prod --no-debug
+            # Confirm the app actually serves traffic rather than reporting success as soon
+            # as cache:clear returns. nginx defines only badimenu.com server blocks and
+            # returns 301 on port 80, so the request must be https and carry the Host
+            # header; -k because the mounted certificate is not valid for localhost.
+            # `|| code=000` keeps a failed curl from aborting the script under set -eu, so
+            # the status is always reported. Runs before the prune, leaving the previous
+            # image on the server when the new one does not come up.
+            i=1
+            while [ "$i" -le 10 ]; do
+              code=$(docker compose exec -T app curl -s -o /dev/null -w '%{http_code}' -k -H 'Host: badimenu.com' https://localhost/health) || code=000
+              if [ "$code" = "200" ]; then
+                echo "Health check passed on attempt $i (HTTP $code)."
+                break
+              fi
+              if [ "$i" -eq 10 ]; then
+                echo "::error::Health check failed after $i attempts; last status HTTP $code."
+                exit 1
+              fi
+              echo "Health check attempt $i returned HTTP $code; retrying in 3s."
+              sleep 3
+              i=$((i + 1))
+            done
             docker image prune -f

@@ -69,3 +69,6 @@ mealTagEdit:
 mealTagProvideListData:
   path:  /meal-tag/list
   controller: App\Controller\MealTag\MealTagController::provideListData
+health:
+    path: /health
+    controller: App\Controller\Health\HealthController::check

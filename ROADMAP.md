@@ -59,11 +59,6 @@ Done. Promote from Next when starting new work.
   commits where only the first is `fix:` silently skips the build. Reading the commit range via
   the API would be robust. Status: not started. Evidence: `.github/workflows/build.yml`. Effort: S.
 
-- **No post-deploy health check** — `deploy.yml` reports success once `cache:clear` returns; it
-  never confirms the app actually serves traffic. A curl against a health endpoint after
-  `compose up` would close the loop. Status: not started. Evidence: `.github/workflows/deploy.yml`.
-  Effort: S.
-
 - **Docker layer cache is ineffective at this build cadence** — `cache-to: type=gha` entries are
   evicted after 7 days unused, and builds land months apart (April, then July 2026), so nearly
   every build starts cold. Evaluate `type=registry` cache versus dropping caching entirely.
@@ -101,6 +96,39 @@ Done. Promote from Next when starting new work.
   Status: all in use. Evidence: `package.json`. Effort: M.
 
 ## Done
+
+- **Post-deploy health check, 2026-08-03.** *Uncommitted at the time of writing.*
+  `deploy.yml` no longer reports success as soon as `cache:clear` returns. A public
+  `GET /health` (`src/Controller/Health/HealthController.php`, route `health` in
+  `config/routes.yaml`) returns `200 {"status":"ok"}`, and the deploy script polls it from
+  inside the app container — up to 10 attempts, 3 s apart — before `docker image prune -f`.
+
+  `HealthController` deliberately extends nothing. `BaseController::render()` loads the
+  logged-in user and selected household, which would tie liveness to the session and the
+  database. The endpoint is liveness only; it does not check DB connectivity, and its body
+  carries no environment, version or hostname because it is unauthenticated.
+
+  The poll is `https` with an explicit `Host` header and `-k`: port 80 redirects to https and
+  the origin certificate is not valid for `localhost`. `|| code=000` is what keeps a failed
+  curl from aborting the script under `set -eu`, so a status is always printed.
+
+  `access_control` needed the path in all three `when@` blocks — the catch-all
+  `^/(?!prihlaseni$|registrace$).*` already matched `/health` and demanded `ROLE_USER`.
+
+  **Rollbacks now fail this gate.** An image built before this change has no `/health`, so all
+  ten attempts 404 and the deploy aborts. The prune runs only on success, so the previous image
+  is still there to roll back *to* — but the rollback deploy itself will not pass as written.
+
+  Verified: the loop was exercised under the container's `/bin/sh` (dash, as the SSH action
+  uses) against a stubbed curl — success on attempts 1 and 3 both log, reach the prune and exit
+  0; a curl that always fails logs 9 retries, then `::error::` and exit 1 without pruning.
+  `GET /health` → `200 {"status":"ok"}`. phpcs **67/67, 0 errors**, PHPStan `[OK] No errors`,
+  `lint:yaml` clean on `routes.yaml`, `security.yaml` and `deploy.yml`.
+
+  Worth keeping close: **Symfony routing never validates that a controller method exists.** A
+  route pointed at a missing method passes phpcs, PHPStan and `lint:yaml`, and only fails when a
+  request actually reaches it — behind auth, that can be long after the deploy went green.
+  `php bin/console router:match <path>` is the cheap check after editing `routes.yaml`.
 
 - **The last three Now items, cleared together 2026-08-02.** *Uncommitted at the time of writing —
   if these land in separate commits, split this entry to match.*
